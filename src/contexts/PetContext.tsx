@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import {
     Pet,
     VetVisit,
@@ -11,8 +11,8 @@ import {
     PetType,
     ActivityLevel
 } from '../types';
-import { config } from '../config';
-import { logger } from '../utils';
+import { OfflinePetStorageService, type PetStorageService } from '../storage/services';
+import { info, warn, error, debug, getLogger } from '../utils/logging';
 
 interface PetState {
     pets: Pet[];
@@ -119,9 +119,10 @@ function petReducer(state: PetState, action: PetAction): PetState {
 }
 
 interface PetContextType extends PetState {
-    addPet: (pet: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>) => void;
-    updatePet: (pet: Pet) => void;
-    deletePet: (petId: string) => void;
+    addPet: (pet: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+    updatePet: (pet: Pet) => Promise<void>;
+    deletePet: (petId: string) => Promise<void>;
+    loadPetsFromStorage: () => Promise<void>;
     addVetVisit: (vetVisit: Omit<VetVisit, 'id'>) => void;
     addVaccination: (vaccination: Omit<Vaccination, 'id'>) => void;
     addActivity: (activity: Omit<Activity, 'id'>) => void;
@@ -143,30 +144,83 @@ const PetContext = createContext<PetContextType | undefined>(undefined);
 
 export function PetProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(petReducer, initialState);
+    const logger = getLogger();
+    const petStorageService = new OfflinePetStorageService();
 
-    const addPet = (petData: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>) => {
-        logger.info('Adding new pet:', petData.name);
+    // Load pets from storage on mount
+    useEffect(() => {
+        loadPetsFromStorage();
+    }, []);
 
-        const newPet: Pet = {
-            ...petData,
-            id: Date.now().toString(), // Simple ID generation - replace with UUID in production
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
-        dispatch({ type: 'ADD_PET', payload: newPet });
-
-        if (config.enableDebugMode) {
-            logger.debug('Pet added successfully:', newPet);
+    const loadPetsFromStorage = async () => {
+        try {
+            dispatch({ type: 'SET_LOADING', payload: true });
+            
+            const pets = await petStorageService.getAllPets();
+            dispatch({ type: 'SET_PETS', payload: pets });
+            
+            info('Loaded pets from storage', { count: pets.length });
+        } catch (err) {
+            error('Failed to load pets from storage', err);
+            dispatch({ type: 'SET_ERROR', payload: 'Failed to load pets' });
         }
     };
 
-    const updatePet = (pet: Pet) => {
-        const updatedPet = { ...pet, updatedAt: new Date() };
-        dispatch({ type: 'UPDATE_PET', payload: updatedPet });
+    const addPet = async (petData: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>) => {
+        try {
+            dispatch({ type: 'SET_LOADING', payload: true });
+            
+            info('Adding new pet:', petData.name);
+            
+            const newPet = await petStorageService.addPet({
+                ...petData,
+                ownerId: 'current-user', // TODO: Get from auth context
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+            
+            dispatch({ type: 'ADD_PET', payload: newPet });
+            dispatch({ type: 'SET_LOADING', payload: false });
+            
+            debug('Pet added successfully:', newPet);
+        } catch (err) {
+            error('Failed to add pet', err);
+            dispatch({ type: 'SET_ERROR', payload: 'Failed to add pet' });
+        }
     };
 
-    const deletePet = (petId: string) => {
-        dispatch({ type: 'DELETE_PET', payload: petId });
+    const updatePet = async (pet: Pet) => {
+        try {
+            dispatch({ type: 'SET_LOADING', payload: true });
+            
+            const updatedPet = await petStorageService.updatePet(pet.id, {
+                ...pet,
+                updatedAt: new Date()
+            });
+            
+            dispatch({ type: 'UPDATE_PET', payload: updatedPet });
+            dispatch({ type: 'SET_LOADING', payload: false });
+            
+            debug('Pet updated successfully:', updatedPet);
+        } catch (err) {
+            error('Failed to update pet', err);
+            dispatch({ type: 'SET_ERROR', payload: 'Failed to update pet' });
+        }
+    };
+
+    const deletePet = async (petId: string) => {
+        try {
+            dispatch({ type: 'SET_LOADING', payload: true });
+            
+            await petStorageService.deletePet(petId);
+            dispatch({ type: 'DELETE_PET', payload: petId });
+            dispatch({ type: 'SET_LOADING', payload: false });
+            
+            info('Pet deleted successfully', { petId });
+        } catch (err) {
+            error('Failed to delete pet', err);
+            dispatch({ type: 'SET_ERROR', payload: 'Failed to delete pet' });
+        }
     };
 
     const addVetVisit = (vetVisitData: Omit<VetVisit, 'id'>) => {
@@ -246,7 +300,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
     };
 
     // Development helper - add sample pets for testing
-    const addSamplePets = () => {
+    const addSamplePets = async () => {
         const samplePets = [
             {
                 name: 'Buddy',
@@ -256,6 +310,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
                 weight: 28.5,
                 gender: 'male' as const,
                 color: 'Golden',
+                ownerId: 'current-user', // TODO: Get from auth context
             },
             {
                 name: 'Luna',
@@ -265,6 +320,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
                 weight: 18.2,
                 gender: 'female' as const,
                 color: 'Black and White',
+                ownerId: 'current-user', // TODO: Get from auth context
             },
             {
                 name: 'Whiskers',
@@ -274,10 +330,14 @@ export function PetProvider({ children }: { children: ReactNode }) {
                 weight: 6.8,
                 gender: 'male' as const,
                 color: 'Tabby',
+                ownerId: 'current-user', // TODO: Get from auth context
             },
         ];
 
-        samplePets.forEach(petData => addPet(petData));
+        // Add pets using async method
+        for (const petData of samplePets) {
+            await addPet(petData);
+        }
 
         // Add sample nutrition profiles for dogs
         setTimeout(() => {
@@ -299,6 +359,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
         addPet,
         updatePet,
         deletePet,
+        loadPetsFromStorage,
         addVetVisit,
         addVaccination,
         addActivity,

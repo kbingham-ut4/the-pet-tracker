@@ -63,6 +63,7 @@ export default defineConfig({
                 items: [
                     { text: 'Development Workflow', link: '/development/workflow' },
                     { text: 'Logging System', link: '/development/logging' },
+                    { text: 'Storage System', link: '/development/storage' },
                     { text: 'Code Style', link: '/development/code-style' },
                     { text: 'Testing', link: '/development/testing' },
                     { text: 'Debugging', link: '/development/debugging' },

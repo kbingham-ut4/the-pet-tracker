@@ -5,14 +5,17 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RootNavigator from './src/navigation/RootNavigator';
 import { PetProvider } from './src/contexts/PetContext';
 import { initializeLogger, info } from './src/utils/logging';
+import { StorageFactory } from './src/storage';
 
 export default function App() {
   const [isLoggerInitialized, setIsLoggerInitialized] = useState(false);
+  const [isStorageInitialized, setIsStorageInitialized] = useState(false);
 
   useEffect(() => {
-    // Initialize logging system on app startup
-    const initLogging = async () => {
+    // Initialize systems on app startup
+    const initSystems = async () => {
       try {
+        // Initialize logging first
         await initializeLogger({
           enableConsole: true,
           enableBetterStack: !__DEV__, // Only enable in production/staging
@@ -25,26 +28,34 @@ export default function App() {
           }
         });
 
-        info('Pet Tracker app started successfully', {
+        setIsLoggerInitialized(true);
+
+        // Initialize storage system
+        await StorageFactory.createStorageManager();
+
+        info('Pet Tracker systems initialized successfully', {
           context: {
             isDevelopment: __DEV__,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            localStorage: process.env.EXPO_PUBLIC_ENABLE_LOCAL_STORAGE === 'true',
+            cloudSync: process.env.EXPO_PUBLIC_ENABLE_CLOUD_SYNC === 'true'
           }
         });
 
-        setIsLoggerInitialized(true);
+        setIsStorageInitialized(true);
       } catch (err) {
-        console.error('Failed to initialize logging system:', err);
-        // App can still function without logging
-        setIsLoggerInitialized(true); // Allow app to continue
+        console.error('Failed to initialize app systems:', err);
+        // Allow app to continue with limited functionality
+        setIsLoggerInitialized(true);
+        setIsStorageInitialized(true);
       }
     };
 
-    initLogging();
+    initSystems();
   }, []);
 
-  // Show loading screen while logger is initializing
-  if (!isLoggerInitialized) {
+  // Show loading screen while systems are initializing
+  if (!isLoggerInitialized || !isStorageInitialized) {
     return (
       <GestureHandlerRootView style={styles.container}>
         <View style={styles.loadingContainer}>

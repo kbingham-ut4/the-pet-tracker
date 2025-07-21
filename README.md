@@ -8,6 +8,7 @@ A modern mobile application built with React Native, Expo, and TypeScript to hel
 - **Activity Tracking**: Log walks, play sessions, training, and other activities
 - **Health Records**: Keep track of vet visits, vaccinations, and medical history
 - **Nutrition & Weight Management**: Track feeding schedules and weight for dogs
+- **Offline Storage**: Robust offline-first data storage with cloud synchronization
 - **Logging System**: Comprehensive logging with pluggable providers (Console, BetterStack, File)
 - **Environment Configuration**: Multi-environment setup (dev, test, staging, production)
 - **Dashboard**: Overview of your pets' health and activities
@@ -59,10 +60,25 @@ src/
 ├── navigation/        # Navigation configuration
 ├── screens/           # Screen components
 ├── services/          # API services and data management
+├── storage/           # Offline-first storage system
+│   ├── providers/     # Storage providers (AsyncStorage, GraphQL)
+│   └── services/      # High-level storage services
 ├── types/             # TypeScript type definitions
 └── utils/             # Utility functions
     └── logging/       # Pluggable logging system
 ```
+
+### Storage System
+
+The app features a robust offline-first storage system:
+
+- **Local Storage**: Always stores data locally first using AsyncStorage
+- **Cloud Sync**: Optional synchronization with GraphQL endpoints
+- **Network Resilience**: Automatic fallback to local storage when offline
+- **Configurable**: Enable/disable storage features per environment
+- **Event System**: Real-time notifications for storage operations
+
+See [storage documentation](./docs/development/storage.md) for detailed usage.
 
 ### Environment Configuration
 
