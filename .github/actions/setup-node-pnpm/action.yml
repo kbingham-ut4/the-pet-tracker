@@ -1,0 +1,70 @@
+name: 'Setup Node.js and pnpm'
+description: 'Setup Node.js, pnpm, cache dependencies, and install packages'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use (defaults to version in .npmrc)'
+    required: false
+  pnpm-version:
+    description: 'pnpm version to use (defaults to version in .npmrc)'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Read versions from .npmrc
+      shell: bash
+      run: |
+        # Read node version from .npmrc or use input
+        if [[ -n "${{ inputs.node-version }}" ]]; then
+          NODE_VERSION="${{ inputs.node-version }}"
+        else
+          NODE_VERSION=$(grep '^node-version=' .npmrc | cut -d'=' -f2 || echo '24')
+        fi
+        
+        # Read pnpm version from .npmrc or use input
+        if [[ -n "${{ inputs.pnpm-version }}" ]]; then
+          PNPM_VERSION="${{ inputs.pnpm-version }}"
+        else
+          PNPM_VERSION=$(grep '^pnpm-version=' .npmrc | cut -d'=' -f2 || echo '10')
+        fi
+        
+        echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
+        echo "PNPM_VERSION=$PNPM_VERSION" >> $GITHUB_ENV
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ env.PNPM_VERSION }}
+        run_install: false
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: Cache pnpm store
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-node-modules-
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
