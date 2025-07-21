@@ -67,4 +67,19 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: pnpm install --frozen-lockfile
+      run: |
+        # Install with shamefully-hoist to help with binary resolution
+        pnpm install --frozen-lockfile --shamefully-hoist
+        
+        # Ensure platform-specific binaries are available
+        pnpm rebuild esbuild 2>/dev/null || true
+
+    - name: Verify esbuild installation
+      shell: bash
+      run: |
+        # Check if esbuild is working
+        if ! pnpm exec esbuild --version 2>/dev/null; then
+          echo "esbuild validation failed, attempting to reinstall..."
+          pnpm remove esbuild
+          pnpm add -D esbuild
+        fi
