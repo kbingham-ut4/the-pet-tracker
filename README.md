@@ -22,31 +22,31 @@ A modern mobile application built with React Native, Expo, and TypeScript to hel
 ### Installation
 
 1. Clone the repository:
-   \`\`\`bash
+   ```bash
    git clone <repository-url>
    cd the-pet-tracker
-   \`\`\`
+   ```
 
 2. Install dependencies:
-   \`\`\`bash
+   ```bash
    pnpm install
-   \`\`\`
+   ```
 
 3. Start the development server:
-   \`\`\`bash
+   ```bash
    pnpm start
-   \`\`\`
+   ```
 
 4. Run on your preferred platform:
-   - **iOS**: \`pnpm ios\`
-   - **Android**: \`pnpm android\`
-   - **Web**: \`pnpm web\`
+   - **iOS**: `pnpm ios`
+   - **Android**: `pnpm android`
+   - **Web**: `pnpm web`
 
 ## 📱 Development
 
 ### Project Structure
 
-\`\`\`
+```
 src/
 ├── components/          # Reusable UI components
 ├── contexts/           # React contexts for state management
@@ -57,18 +57,18 @@ src/
 ├── services/          # API services and data management
 ├── types/             # TypeScript type definitions
 └── utils/             # Utility functions
-\`\`\`
+```
 
 ### Scripts
 
-- \`pnpm start\` - Start Expo development server
-- \`pnpm android\` - Run on Android
-- \`pnpm ios\` - Run on iOS
-- \`pnpm web\` - Run on web
-- \`pnpm lint\` - Run ESLint
-- \`pnpm lint:fix\` - Fix ESLint issues
-- \`pnpm format\` - Format code with Prettier
-- \`pnpm type-check\` - Run TypeScript type checking
+- `pnpm start` - Start Expo development server
+- `pnpm android` - Run on Android
+- `pnpm ios` - Run on iOS
+- `pnpm web` - Run on web
+- `pnpm lint` - Run ESLint
+- `pnpm lint:fix` - Fix ESLint issues
+- `pnpm format` - Format code with Prettier
+- `pnpm type-check` - Run TypeScript type checking
 
 ## 🛠 Tech Stack
 
