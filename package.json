@@ -4,14 +4,32 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
+    "start:dev": "cp .env.development .env && expo start",
+    "start:test": "cp .env.testing .env && expo start",
+    "start:staging": "cp .env.staging .env && expo start",
+    "start:prod": "cp .env.production .env && expo start",
     "android": "expo start --android",
+    "android:dev": "cp .env.development .env && expo start --android",
+    "android:test": "cp .env.testing .env && expo start --android",
+    "android:staging": "cp .env.staging .env && expo start --android",
     "ios": "expo start --ios",
+    "ios:dev": "cp .env.development .env && expo start --ios",
+    "ios:test": "cp .env.testing .env && expo start --ios",
+    "ios:staging": "cp .env.staging .env && expo start --ios",
     "web": "expo start --web",
+    "build:dev": "eas build --profile development",
+    "build:test": "eas build --profile testing",
+    "build:staging": "eas build --profile staging",
+    "build:prod": "eas build --profile production",
+    "submit:prod": "eas submit --profile production",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -41,7 +59,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
     "prettier": "^3.6.2",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "vitepress": "^1.5.0"
   },
   "private": true
 }

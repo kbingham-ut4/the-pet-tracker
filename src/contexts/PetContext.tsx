@@ -11,6 +11,8 @@ import {
     PetType,
     ActivityLevel
 } from '../types';
+import { config } from '../config';
+import { logger } from '../utils';
 
 interface PetState {
     pets: Pet[];
@@ -143,6 +145,8 @@ export function PetProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(petReducer, initialState);
 
     const addPet = (petData: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>) => {
+        logger.info('Adding new pet:', petData.name);
+
         const newPet: Pet = {
             ...petData,
             id: Date.now().toString(), // Simple ID generation - replace with UUID in production
@@ -150,6 +154,10 @@ export function PetProvider({ children }: { children: ReactNode }) {
             updatedAt: new Date(),
         };
         dispatch({ type: 'ADD_PET', payload: newPet });
+
+        if (config.enableDebugMode) {
+            logger.debug('Pet added successfully:', newPet);
+        }
     };
 
     const updatePet = (pet: Pet) => {

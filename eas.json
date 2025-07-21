@@ -1,0 +1,74 @@
+{
+    "cli": {
+        "version": ">= 8.0.0"
+    },
+    "build": {
+        "development": {
+            "developmentClient": true,
+            "distribution": "internal",
+            "env": {
+                "APP_VARIANT": "development",
+                "EXPO_PUBLIC_ENV": "development"
+            },
+            "ios": {
+                "resourceClass": "m-medium"
+            },
+            "android": {
+                "gradleCommand": ":app:assembleDebug",
+                "resourceClass": "medium"
+            }
+        },
+        "testing": {
+            "env": {
+                "APP_VARIANT": "testing",
+                "EXPO_PUBLIC_ENV": "testing"
+            },
+            "distribution": "internal",
+            "ios": {
+                "resourceClass": "m-medium"
+            },
+            "android": {
+                "resourceClass": "medium"
+            }
+        },
+        "staging": {
+            "env": {
+                "APP_VARIANT": "staging",
+                "EXPO_PUBLIC_ENV": "staging"
+            },
+            "distribution": "internal",
+            "ios": {
+                "resourceClass": "m-medium"
+            },
+            "android": {
+                "resourceClass": "medium"
+            }
+        },
+        "production": {
+            "env": {
+                "APP_VARIANT": "production",
+                "EXPO_PUBLIC_ENV": "production"
+            },
+            "distribution": "store",
+            "ios": {
+                "resourceClass": "m-medium"
+            },
+            "android": {
+                "resourceClass": "medium"
+            }
+        }
+    },
+    "submit": {
+        "production": {
+            "ios": {
+                "appleId": "your-apple-id@example.com",
+                "ascAppId": "your-app-store-connect-app-id",
+                "appleTeamId": "your-apple-team-id"
+            },
+            "android": {
+                "serviceAccountKeyPath": "./google-service-account.json",
+                "track": "internal"
+            }
+        }
+    }
+}

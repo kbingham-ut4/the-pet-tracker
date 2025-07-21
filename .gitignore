@@ -32,6 +32,18 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
+.env.development
+.env.testing
+.env.staging
+.env.production
+
+# Keep example env file
+!.env.example
 
 # typescript
 *.tsbuildinfo
+
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
