@@ -7,10 +7,14 @@ This directory contains the VitePress documentation site for Pet Tracker.
 ```
 docs/
 ├── .vitepress/           # VitePress configuration
-│   └── config.ts         # Site configuration
+│   └── config.mjs        # Site configuration
 ├── public/               # Static assets
 ├── getting-started/      # Setup and installation guides
 ├── introduction/         # What is Pet Tracker
+├── development/          # Development guides
+│   ├── logging.md        # Logging system
+│   ├── storage.md        # Storage system
+│   └── testing.md        # Testing guide
 ├── api/                  # API reference
 ├── configuration/        # Service setup guides
 ├── contributing/         # Contributing guidelines

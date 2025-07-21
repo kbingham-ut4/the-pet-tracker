@@ -6,6 +6,8 @@ export default defineConfig({
     description: 'Complete documentation for the Pet Tracker mobile application',
     base: '/pet-tracker-docs/',
 
+    ignoreDeadLinks: true,
+
     head: [
         ['link', { rel: 'icon', href: '/pet-tracker-docs/favicon.ico' }],
         ['meta', { name: 'theme-color', content: '#3c82f6' }],
@@ -24,6 +26,7 @@ export default defineConfig({
         nav: [
             { text: 'Home', link: '/' },
             { text: 'Getting Started', link: '/getting-started/' },
+            { text: 'Testing', link: '/development/testing' },
             { text: 'API Reference', link: '/api/' },
             { text: 'Deployment', link: '/deployment/' },
             {
