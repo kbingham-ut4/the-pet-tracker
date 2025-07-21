@@ -1,7 +1,13 @@
 import { FoodEntry, WeightRecord, CalorieTarget, DailyNutritionSummary, MealType } from '../types';
 import { generateId, formatDate } from '../utils';
+import { info, warn, error, debug, getLogger } from '../utils/logging';
 
 export class NutritionService {
+    // Use getter to avoid initialization issues
+    private static get logger() {
+        return getLogger();
+    }
+
     // Common food database with calorie information (per 100g)
     private static readonly COMMON_FOODS = {
         // Dog foods (dry kibble)
@@ -50,6 +56,17 @@ export class NutritionService {
         customCalories?: number,
         customNutrition?: { protein?: number; fat?: number; carbs?: number }
     ): FoodEntry {
+        this.logger.info('Creating food entry', {
+            context: {
+                petId,
+                foodName,
+                quantity,
+                mealType,
+                hasCustomCalories: !!customCalories,
+                hasCustomNutrition: !!customNutrition
+            }
+        });
+
         let calories = customCalories || 0;
         let protein = customNutrition?.protein || 0;
         let fat = customNutrition?.fat || 0;
@@ -67,10 +84,23 @@ export class NutritionService {
                 protein = Math.round(nutrition.protein * multiplier);
                 fat = Math.round(nutrition.fat * multiplier);
                 carbs = Math.round(nutrition.carbs * multiplier);
+
+                this.logger.debug('Food nutrition calculated from database', {
+                    context: {
+                        foodKey,
+                        multiplier,
+                        calculatedCalories: calories,
+                        originalNutrition: nutrition
+                    }
+                });
+            } else {
+                this.logger.warn('Food not found in database, using zeros', {
+                    context: { foodName, foodKey }
+                });
             }
         }
 
-        return {
+        const foodEntry = {
             id: generateId(),
             petId,
             foodName,
@@ -82,6 +112,16 @@ export class NutritionService {
             date: new Date(),
             mealType,
         };
+
+        this.logger.info('Food entry created successfully', {
+            context: {
+                entryId: foodEntry.id,
+                totalCalories: calories,
+                petId
+            }
+        });
+
+        return foodEntry;
     }
 
     static calculateDailySummary(

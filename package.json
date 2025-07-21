@@ -4,7 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "start:dev": "cp .env.development .env && expo start",
+    "start:dev": "cp .env.development .env && expo start --tunnel",
     "start:test": "cp .env.testing .env && expo start",
     "start:staging": "cp .env.staging .env && expo start",
     "start:prod": "cp .env.production .env && expo start",
@@ -27,6 +27,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
+    "test:logging": "node scripts/test-logging.js",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
@@ -41,6 +42,7 @@
     "expo-image-picker": "^16.1.4",
     "expo-linear-gradient": "^14.1.5",
     "expo-location": "^18.1.6",
+    "expo-notifications": "^0.31.4",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
     "react-native": "0.79.5",
