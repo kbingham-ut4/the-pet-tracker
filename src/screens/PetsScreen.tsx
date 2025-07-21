@@ -7,58 +7,96 @@ import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants';
 import { usePets } from '../contexts';
 import { Pet, PetType } from '../types';
 import { RootStackNavigationProp } from '../types/Navigation';
+import { info, debug, error } from '../utils/logging';
 
 export default function PetsScreen() {
     const { pets } = usePets();
     const navigation = useNavigation<RootStackNavigationProp>();
 
-    const renderPetItem = ({ item }: { item: Pet }) => (
-        <View style={styles.petCard}>
-            <View style={[
-                styles.petTypeIcon,
-                { backgroundColor: COLORS.petColors[item.type] || COLORS.petColors.other }
-            ]}>
+    // Log screen view
+    React.useEffect(() => {
+        info('Pets screen viewed', {
+            context: {
+                screen: 'PetsScreen',
+                petCount: pets.length,
+                timestamp: new Date().toISOString()
+            }
+        });
+    }, [pets.length]);
+
+    const handleNavigateToWeight = (petId: string) => {
+        info('Navigation to Weight Management', {
+            context: {
+                screen: 'PetsScreen',
+                targetScreen: 'WeightManagement',
+                petId
+            }
+        });
+        navigation.navigate('WeightManagement', { petId });
+    };
+
+    const handleNavigateToFoodLog = (petId: string) => {
+        info('Navigation to Food Log', {
+            context: {
+                screen: 'PetsScreen',
+                targetScreen: 'FoodLog',
+                petId
+            }
+        });
+        navigation.navigate('FoodLog', { petId });
+    };
+
+    const renderPetItem = ({ item }: { item: Pet }) => {
+        debug('Rendering pet item', { context: { petId: item.id, petName: item.name } });
+
+        return (
+            <View style={styles.petCard}>
+                <View style={[
+                    styles.petTypeIcon,
+                    { backgroundColor: COLORS.petColors[item.type] || COLORS.petColors.other }
+                ]}>
+                    <Ionicons
+                        name="paw"
+                        size={24}
+                        color={COLORS.surface}
+                    />
+                </View>
+                <View style={styles.petInfo}>
+                    <Text style={styles.petName}>{item.name}</Text>
+                    <Text style={styles.petDetails}>
+                        {item.breed} • {item.age ? `${item.age} years old` : 'Age unknown'}
+                    </Text>
+                    <Text style={styles.petType}>{item.type}</Text>
+
+                    {/* Weight Management and Food Log buttons for dogs */}
+                    {item.type === PetType.DOG && (
+                        <View style={styles.actionButtons}>
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => handleNavigateToWeight(item.id)}
+                            >
+                                <Ionicons name="fitness" size={16} color={COLORS.primary} />
+                                <Text style={styles.actionButtonText}>Weight</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => handleNavigateToFoodLog(item.id)}
+                            >
+                                <Ionicons name="restaurant" size={16} color={COLORS.primary} />
+                                <Text style={styles.actionButtonText}>Food Log</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
                 <Ionicons
-                    name="paw"
-                    size={24}
-                    color={COLORS.surface}
+                    name="chevron-forward"
+                    size={20}
+                    color={COLORS.textSecondary}
                 />
             </View>
-            <View style={styles.petInfo}>
-                <Text style={styles.petName}>{item.name}</Text>
-                <Text style={styles.petDetails}>
-                    {item.breed} • {item.age ? `${item.age} years old` : 'Age unknown'}
-                </Text>
-                <Text style={styles.petType}>{item.type}</Text>
-
-                {/* Weight Management and Food Log buttons for dogs */}
-                {item.type === PetType.DOG && (
-                    <View style={styles.actionButtons}>
-                        <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => navigation.navigate('WeightManagement', { petId: item.id })}
-                        >
-                            <Ionicons name="fitness" size={16} color={COLORS.primary} />
-                            <Text style={styles.actionButtonText}>Weight</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => navigation.navigate('FoodLog', { petId: item.id })}
-                        >
-                            <Ionicons name="restaurant" size={16} color={COLORS.primary} />
-                            <Text style={styles.actionButtonText}>Food Log</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
-            <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={COLORS.textSecondary}
-            />
-        </View>
-    );
+        );
+    };
 
     const renderEmptyState = () => (
         <View style={styles.emptyState}>

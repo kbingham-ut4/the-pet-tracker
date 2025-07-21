@@ -7,6 +7,9 @@ A modern mobile application built with React Native, Expo, and TypeScript to hel
 - **Pet Management**: Add, edit, and organize information about your pets
 - **Activity Tracking**: Log walks, play sessions, training, and other activities
 - **Health Records**: Keep track of vet visits, vaccinations, and medical history
+- **Nutrition & Weight Management**: Track feeding schedules and weight for dogs
+- **Logging System**: Comprehensive logging with pluggable providers (Console, BetterStack, File)
+- **Environment Configuration**: Multi-environment setup (dev, test, staging, production)
 - **Dashboard**: Overview of your pets' health and activities
 - **Modern UI**: Beautiful, intuitive interface with custom themes
 
@@ -49,6 +52,7 @@ A modern mobile application built with React Native, Expo, and TypeScript to hel
 ```
 src/
 ├── components/          # Reusable UI components
+├── config/             # Environment and app configuration
 ├── contexts/           # React contexts for state management
 ├── constants/          # App constants and themes
 ├── hooks/             # Custom React hooks
@@ -57,7 +61,29 @@ src/
 ├── services/          # API services and data management
 ├── types/             # TypeScript type definitions
 └── utils/             # Utility functions
+    └── logging/       # Pluggable logging system
 ```
+
+### Environment Configuration
+
+The app supports multiple environments with specific configurations:
+
+- **Development**: Local development with console + file logging
+- **Testing**: Minimal logging for automated tests
+- **Staging**: Full logging with BetterStack for pre-production testing  
+- **Production**: Remote logging only with BetterStack
+
+Copy `.env.example` to `.env.development` and configure your environment variables.
+
+### Logging System
+
+The app includes a comprehensive logging system with multiple providers:
+
+- **ConsoleProvider**: Development debugging
+- **BetterStackProvider**: Remote logging and monitoring
+- **FileProvider**: Local file logging
+
+See [logging documentation](./docs/development/logging.md) for detailed usage.
 
 ### Scripts
 

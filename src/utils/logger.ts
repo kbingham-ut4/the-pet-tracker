@@ -1,16 +1,41 @@
-import { config } from '../config';
+// Legacy logger - redirects to new logging system
+// @deprecated Use the new logging system from './logging' instead
+import { getLogger } from './logging';
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+// Backward compatibility functions - now use the robust getLogger()
+export const debug = (...args: any[]) => {
+    const logger = getLogger();
+    logger.debug(args[0], ...args.slice(1));
+};
 
+export const info = (...args: any[]) => {
+    const logger = getLogger();
+    logger.info(args[0], ...args.slice(1));
+};
+
+export const warn = (...args: any[]) => {
+    const logger = getLogger();
+    logger.warn(args[0], ...args.slice(1));
+};
+
+export const error = (...args: any[]) => {
+    const logger = getLogger();
+    logger.error(args[0], ...args.slice(1));
+};
+
+export const group = (label: string) => {
+    const logger = getLogger();
+    logger.group(label);
+};
+
+export const groupEnd = () => {
+    const logger = getLogger();
+    logger.groupEnd();
+};
+
+// Legacy singleton class for backward compatibility
 class Logger {
     private static instance: Logger;
-    private enableLogging: boolean;
-    private enableDebugMode: boolean;
-
-    private constructor() {
-        this.enableLogging = config.enableLogging;
-        this.enableDebugMode = config.enableDebugMode;
-    }
 
     public static getInstance(): Logger {
         if (!Logger.instance) {
@@ -19,65 +44,29 @@ class Logger {
         return Logger.instance;
     }
 
-    private shouldLog(level: LogLevel): boolean {
-        if (!this.enableLogging) return false;
-        if (level === 'debug' && !this.enableDebugMode) return false;
-        return true;
+    public debug(...args: any[]): void {
+        debug(...args);
     }
 
-    private formatMessage(level: LogLevel, message: string, ...args: any[]): void {
-        if (!this.shouldLog(level)) return;
-
-        const timestamp = new Date().toISOString();
-        const prefix = `[${timestamp}] [${level.toUpperCase()}] [PetTracker]`;
-
-        switch (level) {
-            case 'debug':
-                console.debug(prefix, message, ...args);
-                break;
-            case 'info':
-                console.info(prefix, message, ...args);
-                break;
-            case 'warn':
-                console.warn(prefix, message, ...args);
-                break;
-            case 'error':
-                console.error(prefix, message, ...args);
-                break;
-        }
+    public info(...args: any[]): void {
+        info(...args);
     }
 
-    public debug(message: string, ...args: any[]): void {
-        this.formatMessage('debug', message, ...args);
+    public warn(...args: any[]): void {
+        warn(...args);
     }
 
-    public info(message: string, ...args: any[]): void {
-        this.formatMessage('info', message, ...args);
-    }
-
-    public warn(message: string, ...args: any[]): void {
-        this.formatMessage('warn', message, ...args);
-    }
-
-    public error(message: string, ...args: any[]): void {
-        this.formatMessage('error', message, ...args);
+    public error(...args: any[]): void {
+        error(...args);
     }
 
     public group(label: string): void {
-        if (this.enableLogging) {
-            console.group(`[PetTracker] ${label}`);
-        }
+        group(label);
     }
 
     public groupEnd(): void {
-        if (this.enableLogging) {
-            console.groupEnd();
-        }
+        groupEnd();
     }
 }
 
-// Export singleton instance
 export const logger = Logger.getInstance();
-
-// Export convenience functions
-export const { debug, info, warn, error, group, groupEnd } = logger;
