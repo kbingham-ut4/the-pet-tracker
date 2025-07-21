@@ -155,10 +155,10 @@ export function PetProvider({ children }: { children: ReactNode }) {
     const loadPetsFromStorage = async () => {
         try {
             dispatch({ type: 'SET_LOADING', payload: true });
-            
+
             const pets = await petStorageService.getAllPets();
             dispatch({ type: 'SET_PETS', payload: pets });
-            
+
             info('Loaded pets from storage', { count: pets.length });
         } catch (err) {
             error('Failed to load pets from storage', err);
@@ -169,19 +169,19 @@ export function PetProvider({ children }: { children: ReactNode }) {
     const addPet = async (petData: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>) => {
         try {
             dispatch({ type: 'SET_LOADING', payload: true });
-            
+
             info('Adding new pet:', petData.name);
-            
+
             const newPet = await petStorageService.addPet({
                 ...petData,
                 ownerId: 'current-user', // TODO: Get from auth context
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
-            
+
             dispatch({ type: 'ADD_PET', payload: newPet });
             dispatch({ type: 'SET_LOADING', payload: false });
-            
+
             debug('Pet added successfully:', newPet);
         } catch (err) {
             error('Failed to add pet', err);
@@ -192,15 +192,15 @@ export function PetProvider({ children }: { children: ReactNode }) {
     const updatePet = async (pet: Pet) => {
         try {
             dispatch({ type: 'SET_LOADING', payload: true });
-            
+
             const updatedPet = await petStorageService.updatePet(pet.id, {
                 ...pet,
                 updatedAt: new Date()
             });
-            
+
             dispatch({ type: 'UPDATE_PET', payload: updatedPet });
             dispatch({ type: 'SET_LOADING', payload: false });
-            
+
             debug('Pet updated successfully:', updatedPet);
         } catch (err) {
             error('Failed to update pet', err);
@@ -211,11 +211,11 @@ export function PetProvider({ children }: { children: ReactNode }) {
     const deletePet = async (petId: string) => {
         try {
             dispatch({ type: 'SET_LOADING', payload: true });
-            
+
             await petStorageService.deletePet(petId);
             dispatch({ type: 'DELETE_PET', payload: petId });
             dispatch({ type: 'SET_LOADING', payload: false });
-            
+
             info('Pet deleted successfully', { petId });
         } catch (err) {
             error('Failed to delete pet', err);

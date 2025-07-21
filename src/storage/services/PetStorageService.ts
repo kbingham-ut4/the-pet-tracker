@@ -10,333 +10,333 @@ import { info, warn, error, debug, getLogger } from '../../utils/logging';
 import { generateId } from '../../utils';
 
 export interface PetStorageService {
-  // Pet management
-  getAllPets(userId?: string): Promise<Pet[]>;
-  getPet(petId: string): Promise<Pet | null>;
-  addPet(pet: Omit<Pet, 'id'>): Promise<Pet>;
-  updatePet(petId: string, updates: Partial<Pet>): Promise<Pet>;
-  deletePet(petId: string): Promise<void>;
-  
-  // Sync operations
-  syncPets(): Promise<void>;
-  getPetSyncStatus(petId: string): Promise<string>;
-  
-  // Utility
-  exportPets(): Promise<Pet[]>;
-  importPets(pets: Pet[]): Promise<void>;
+    // Pet management
+    getAllPets(userId?: string): Promise<Pet[]>;
+    getPet(petId: string): Promise<Pet | null>;
+    addPet(pet: Omit<Pet, 'id'>): Promise<Pet>;
+    updatePet(petId: string, updates: Partial<Pet>): Promise<Pet>;
+    deletePet(petId: string): Promise<void>;
+
+    // Sync operations
+    syncPets(): Promise<void>;
+    getPetSyncStatus(petId: string): Promise<string>;
+
+    // Utility
+    exportPets(): Promise<Pet[]>;
+    importPets(pets: Pet[]): Promise<void>;
 }
 
 export class OfflinePetStorageService implements PetStorageService {
-  private logger = getLogger();
-  private readonly PETS_KEY = 'pets';
-  
-  private async getStorageManager() {
-    return StorageFactory.getInstance();
-  }
+    private logger = getLogger();
+    private readonly PETS_KEY = 'pets';
 
-  async getAllPets(userId?: string): Promise<Pet[]> {
-    try {
-      const storage = await this.getStorageManager();
-      const pets = await storage.get<Pet[]>(this.PETS_KEY);
-      
-      if (!pets || !Array.isArray(pets)) {
-        debug('No pets found in storage');
-        return [];
-      }
+    private async getStorageManager() {
+        return StorageFactory.getInstance();
+    }
 
-      // Filter by user if specified
-      const filteredPets = userId 
-        ? pets.filter(pet => pet.ownerId === userId)
-        : pets;
+    async getAllPets(userId?: string): Promise<Pet[]> {
+        try {
+            const storage = await this.getStorageManager();
+            const pets = await storage.get<Pet[]>(this.PETS_KEY);
 
-      info('Pets retrieved from storage', {
-        context: { 
-          totalCount: pets.length,
-          filteredCount: filteredPets.length,
-          userId 
+            if (!pets || !Array.isArray(pets)) {
+                debug('No pets found in storage');
+                return [];
+            }
+
+            // Filter by user if specified
+            const filteredPets = userId
+                ? pets.filter(pet => pet.ownerId === userId)
+                : pets;
+
+            info('Pets retrieved from storage', {
+                context: {
+                    totalCount: pets.length,
+                    filteredCount: filteredPets.length,
+                    userId
+                }
+            });
+
+            return filteredPets;
+        } catch (err) {
+            error('Failed to get pets from storage', {
+                error: err instanceof Error ? err : new Error('Unknown error'),
+                context: { userId }
+            });
+            return [];
         }
-      });
-
-      return filteredPets;
-    } catch (err) {
-      error('Failed to get pets from storage', {
-        error: err instanceof Error ? err : new Error('Unknown error'),
-        context: { userId }
-      });
-      return [];
     }
-  }
 
-  async getPet(petId: string): Promise<Pet | null> {
-    try {
-      const pets = await this.getAllPets();
-      const pet = pets.find(p => p.id === petId);
-      
-      if (pet) {
-        debug('Pet found', { context: { petId, petName: pet.name } });
-      } else {
-        debug('Pet not found', { context: { petId } });
-      }
+    async getPet(petId: string): Promise<Pet | null> {
+        try {
+            const pets = await this.getAllPets();
+            const pet = pets.find(p => p.id === petId);
 
-      return pet || null;
-    } catch (err) {
-      error('Failed to get pet', {
-        error: err instanceof Error ? err : new Error('Unknown error'),
-        context: { petId }
-      });
-      return null;
-    }
-  }
+            if (pet) {
+                debug('Pet found', { context: { petId, petName: pet.name } });
+            } else {
+                debug('Pet not found', { context: { petId } });
+            }
 
-  async addPet(petData: Omit<Pet, 'id'>): Promise<Pet> {
-    try {
-      const newPet: Pet = {
-        id: generateId(),
-        ...petData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const storage = await this.getStorageManager();
-      const existingPets = await this.getAllPets();
-      const updatedPets = [...existingPets, newPet];
-
-      await storage.set(this.PETS_KEY, updatedPets, petData.ownerId);
-
-      info('Pet added successfully', {
-        context: {
-          petId: newPet.id,
-          petName: newPet.name,
-          petType: newPet.type,
-          ownerId: petData.ownerId
+            return pet || null;
+        } catch (err) {
+            error('Failed to get pet', {
+                error: err instanceof Error ? err : new Error('Unknown error'),
+                context: { petId }
+            });
+            return null;
         }
-      });
-
-      return newPet;
-    } catch (err) {
-      error('Failed to add pet', {
-        error: err instanceof Error ? err : new Error('Unknown error'),
-        context: { petName: petData.name, petType: petData.type }
-      });
-      throw err;
     }
-  }
 
-  async updatePet(petId: string, updates: Partial<Pet>): Promise<Pet> {
-    try {
-      const storage = await this.getStorageManager();
-      const existingPets = await this.getAllPets();
-      const petIndex = existingPets.findIndex(p => p.id === petId);
+    async addPet(petData: Omit<Pet, 'id'>): Promise<Pet> {
+        try {
+            const newPet: Pet = {
+                id: generateId(),
+                ...petData,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
 
-      if (petIndex === -1) {
-        throw new Error(`Pet with ID ${petId} not found`);
-      }
+            const storage = await this.getStorageManager();
+            const existingPets = await this.getAllPets();
+            const updatedPets = [...existingPets, newPet];
 
-      const existingPet = existingPets[petIndex];
-      const updatedPet: Pet = {
-        ...existingPet,
-        ...updates,
-        id: petId, // Ensure ID cannot be changed
-        updatedAt: new Date(),
-      };
+            await storage.set(this.PETS_KEY, updatedPets, petData.ownerId);
 
-      const updatedPets = [...existingPets];
-      updatedPets[petIndex] = updatedPet;
+            info('Pet added successfully', {
+                context: {
+                    petId: newPet.id,
+                    petName: newPet.name,
+                    petType: newPet.type,
+                    ownerId: petData.ownerId
+                }
+            });
 
-      await storage.set(this.PETS_KEY, updatedPets, existingPet.ownerId);
-
-      info('Pet updated successfully', {
-        context: {
-          petId,
-          petName: updatedPet.name,
-          updatedFields: Object.keys(updates)
+            return newPet;
+        } catch (err) {
+            error('Failed to add pet', {
+                error: err instanceof Error ? err : new Error('Unknown error'),
+                context: { petName: petData.name, petType: petData.type }
+            });
+            throw err;
         }
-      });
-
-      return updatedPet;
-    } catch (err) {
-      error('Failed to update pet', {
-        error: err instanceof Error ? err : new Error('Unknown error'),
-        context: { petId, updates: Object.keys(updates) }
-      });
-      throw err;
     }
-  }
 
-  async deletePet(petId: string): Promise<void> {
-    try {
-      const storage = await this.getStorageManager();
-      const existingPets = await this.getAllPets();
-      const petToDelete = existingPets.find(p => p.id === petId);
+    async updatePet(petId: string, updates: Partial<Pet>): Promise<Pet> {
+        try {
+            const storage = await this.getStorageManager();
+            const existingPets = await this.getAllPets();
+            const petIndex = existingPets.findIndex(p => p.id === petId);
 
-      if (!petToDelete) {
-        warn('Attempted to delete non-existent pet', { context: { petId } });
-        return;
-      }
+            if (petIndex === -1) {
+                throw new Error(`Pet with ID ${petId} not found`);
+            }
 
-      const updatedPets = existingPets.filter(p => p.id !== petId);
-      await storage.set(this.PETS_KEY, updatedPets, petToDelete.ownerId);
+            const existingPet = existingPets[petIndex];
+            const updatedPet: Pet = {
+                ...existingPet,
+                ...updates,
+                id: petId, // Ensure ID cannot be changed
+                updatedAt: new Date(),
+            };
 
-      // TODO: Clean up related data (activities, health records, etc.)
-      await this.cleanupRelatedData(petId);
+            const updatedPets = [...existingPets];
+            updatedPets[petIndex] = updatedPet;
 
-      info('Pet deleted successfully', {
-        context: {
-          petId,
-          petName: petToDelete.name,
-          relatedDataCleanup: true
+            await storage.set(this.PETS_KEY, updatedPets, existingPet.ownerId);
+
+            info('Pet updated successfully', {
+                context: {
+                    petId,
+                    petName: updatedPet.name,
+                    updatedFields: Object.keys(updates)
+                }
+            });
+
+            return updatedPet;
+        } catch (err) {
+            error('Failed to update pet', {
+                error: err instanceof Error ? err : new Error('Unknown error'),
+                context: { petId, updates: Object.keys(updates) }
+            });
+            throw err;
         }
-      });
-    } catch (err) {
-      error('Failed to delete pet', {
-        error: err instanceof Error ? err : new Error('Unknown error'),
-        context: { petId }
-      });
-      throw err;
     }
-  }
 
-  async syncPets(): Promise<void> {
-    try {
-      const storage = await this.getStorageManager();
-      const result = await storage.sync();
+    async deletePet(petId: string): Promise<void> {
+        try {
+            const storage = await this.getStorageManager();
+            const existingPets = await this.getAllPets();
+            const petToDelete = existingPets.find(p => p.id === petId);
 
-      if (result.success) {
-        info('Pet sync completed successfully', {
-          context: {
-            itemsProcessed: result.itemsProcessed,
-            itemsSynced: result.itemsSynced,
-            errors: result.errors.length
-          }
-        });
-      } else {
-        warn('Pet sync completed with errors', {
-          context: {
-            itemsProcessed: result.itemsProcessed,
-            errors: result.errors.length
-          }
-        });
-      }
-    } catch (err) {
-      error('Pet sync failed', {
-        error: err instanceof Error ? err : new Error('Unknown error')
-      });
-      throw err;
-    }
-  }
+            if (!petToDelete) {
+                warn('Attempted to delete non-existent pet', { context: { petId } });
+                return;
+            }
 
-  async getPetSyncStatus(petId: string): Promise<string> {
-    try {
-      const storage = await this.getStorageManager();
-      const status = await storage.getSyncStatus(this.PETS_KEY);
-      return status;
-    } catch (err) {
-      error('Failed to get pet sync status', {
-        error: err instanceof Error ? err : new Error('Unknown error'),
-        context: { petId }
-      });
-      return 'error';
-    }
-  }
+            const updatedPets = existingPets.filter(p => p.id !== petId);
+            await storage.set(this.PETS_KEY, updatedPets, petToDelete.ownerId);
 
-  async exportPets(): Promise<Pet[]> {
-    try {
-      const pets = await this.getAllPets();
-      
-      info('Pets exported', {
-        context: { petCount: pets.length }
-      });
+            // TODO: Clean up related data (activities, health records, etc.)
+            await this.cleanupRelatedData(petId);
 
-      return pets;
-    } catch (err) {
-      error('Failed to export pets', {
-        error: err instanceof Error ? err : new Error('Unknown error')
-      });
-      return [];
-    }
-  }
-
-  async importPets(pets: Pet[]): Promise<void> {
-    try {
-      const storage = await this.getStorageManager();
-      const existingPets = await this.getAllPets();
-      
-      // Merge imported pets with existing ones, avoiding duplicates
-      const petMap = new Map(existingPets.map(pet => [pet.id, pet]));
-      
-      for (const importedPet of pets) {
-        // Update timestamp to mark as imported
-        const petToImport: Pet = {
-          ...importedPet,
-          updatedAt: new Date(),
-        };
-        petMap.set(importedPet.id, petToImport);
-      }
-
-      const mergedPets = Array.from(petMap.values());
-      await storage.set(this.PETS_KEY, mergedPets);
-
-      info('Pets imported successfully', {
-        context: {
-          importedCount: pets.length,
-          totalCount: mergedPets.length
+            info('Pet deleted successfully', {
+                context: {
+                    petId,
+                    petName: petToDelete.name,
+                    relatedDataCleanup: true
+                }
+            });
+        } catch (err) {
+            error('Failed to delete pet', {
+                error: err instanceof Error ? err : new Error('Unknown error'),
+                context: { petId }
+            });
+            throw err;
         }
-      });
-    } catch (err) {
-      error('Failed to import pets', {
-        error: err instanceof Error ? err : new Error('Unknown error'),
-        context: { importCount: pets.length }
-      });
-      throw err;
     }
-  }
 
-  private async cleanupRelatedData(petId: string): Promise<void> {
-    try {
-      const storage = await this.getStorageManager();
-      
-      // Clean up activities
-      const activities = await storage.get<any[]>('activities') || [];
-      const filteredActivities = activities.filter(activity => activity.petId !== petId);
-      if (filteredActivities.length !== activities.length) {
-        await storage.set('activities', filteredActivities);
-      }
+    async syncPets(): Promise<void> {
+        try {
+            const storage = await this.getStorageManager();
+            const result = await storage.sync();
 
-      // Clean up health records
-      const healthRecords = await storage.get<any[]>('health_records') || [];
-      const filteredHealthRecords = healthRecords.filter(record => record.petId !== petId);
-      if (filteredHealthRecords.length !== healthRecords.length) {
-        await storage.set('health_records', filteredHealthRecords);
-      }
-
-      // Clean up food logs
-      const foodLogs = await storage.get<any[]>('food_logs') || [];
-      const filteredFoodLogs = foodLogs.filter(log => log.petId !== petId);
-      if (filteredFoodLogs.length !== foodLogs.length) {
-        await storage.set('food_logs', filteredFoodLogs);
-      }
-
-      // Clean up weight records
-      const weightRecords = await storage.get<any[]>('weight_records') || [];
-      const filteredWeightRecords = weightRecords.filter(record => record.petId !== petId);
-      if (filteredWeightRecords.length !== weightRecords.length) {
-        await storage.set('weight_records', filteredWeightRecords);
-      }
-
-      debug('Related data cleanup completed', {
-        context: {
-          petId,
-          activitiesRemoved: activities.length - filteredActivities.length,
-          healthRecordsRemoved: healthRecords.length - filteredHealthRecords.length,
-          foodLogsRemoved: foodLogs.length - filteredFoodLogs.length,
-          weightRecordsRemoved: weightRecords.length - filteredWeightRecords.length
+            if (result.success) {
+                info('Pet sync completed successfully', {
+                    context: {
+                        itemsProcessed: result.itemsProcessed,
+                        itemsSynced: result.itemsSynced,
+                        errors: result.errors.length
+                    }
+                });
+            } else {
+                warn('Pet sync completed with errors', {
+                    context: {
+                        itemsProcessed: result.itemsProcessed,
+                        errors: result.errors.length
+                    }
+                });
+            }
+        } catch (err) {
+            error('Pet sync failed', {
+                error: err instanceof Error ? err : new Error('Unknown error')
+            });
+            throw err;
         }
-      });
-    } catch (err) {
-      warn('Failed to cleanup related data', {
-        error: err instanceof Error ? err : new Error('Unknown error'),
-        context: { petId }
-      });
     }
-  }
+
+    async getPetSyncStatus(petId: string): Promise<string> {
+        try {
+            const storage = await this.getStorageManager();
+            const status = await storage.getSyncStatus(this.PETS_KEY);
+            return status;
+        } catch (err) {
+            error('Failed to get pet sync status', {
+                error: err instanceof Error ? err : new Error('Unknown error'),
+                context: { petId }
+            });
+            return 'error';
+        }
+    }
+
+    async exportPets(): Promise<Pet[]> {
+        try {
+            const pets = await this.getAllPets();
+
+            info('Pets exported', {
+                context: { petCount: pets.length }
+            });
+
+            return pets;
+        } catch (err) {
+            error('Failed to export pets', {
+                error: err instanceof Error ? err : new Error('Unknown error')
+            });
+            return [];
+        }
+    }
+
+    async importPets(pets: Pet[]): Promise<void> {
+        try {
+            const storage = await this.getStorageManager();
+            const existingPets = await this.getAllPets();
+
+            // Merge imported pets with existing ones, avoiding duplicates
+            const petMap = new Map(existingPets.map(pet => [pet.id, pet]));
+
+            for (const importedPet of pets) {
+                // Update timestamp to mark as imported
+                const petToImport: Pet = {
+                    ...importedPet,
+                    updatedAt: new Date(),
+                };
+                petMap.set(importedPet.id, petToImport);
+            }
+
+            const mergedPets = Array.from(petMap.values());
+            await storage.set(this.PETS_KEY, mergedPets);
+
+            info('Pets imported successfully', {
+                context: {
+                    importedCount: pets.length,
+                    totalCount: mergedPets.length
+                }
+            });
+        } catch (err) {
+            error('Failed to import pets', {
+                error: err instanceof Error ? err : new Error('Unknown error'),
+                context: { importCount: pets.length }
+            });
+            throw err;
+        }
+    }
+
+    private async cleanupRelatedData(petId: string): Promise<void> {
+        try {
+            const storage = await this.getStorageManager();
+
+            // Clean up activities
+            const activities = await storage.get<any[]>('activities') || [];
+            const filteredActivities = activities.filter(activity => activity.petId !== petId);
+            if (filteredActivities.length !== activities.length) {
+                await storage.set('activities', filteredActivities);
+            }
+
+            // Clean up health records
+            const healthRecords = await storage.get<any[]>('health_records') || [];
+            const filteredHealthRecords = healthRecords.filter(record => record.petId !== petId);
+            if (filteredHealthRecords.length !== healthRecords.length) {
+                await storage.set('health_records', filteredHealthRecords);
+            }
+
+            // Clean up food logs
+            const foodLogs = await storage.get<any[]>('food_logs') || [];
+            const filteredFoodLogs = foodLogs.filter(log => log.petId !== petId);
+            if (filteredFoodLogs.length !== foodLogs.length) {
+                await storage.set('food_logs', filteredFoodLogs);
+            }
+
+            // Clean up weight records
+            const weightRecords = await storage.get<any[]>('weight_records') || [];
+            const filteredWeightRecords = weightRecords.filter(record => record.petId !== petId);
+            if (filteredWeightRecords.length !== weightRecords.length) {
+                await storage.set('weight_records', filteredWeightRecords);
+            }
+
+            debug('Related data cleanup completed', {
+                context: {
+                    petId,
+                    activitiesRemoved: activities.length - filteredActivities.length,
+                    healthRecordsRemoved: healthRecords.length - filteredHealthRecords.length,
+                    foodLogsRemoved: foodLogs.length - filteredFoodLogs.length,
+                    weightRecordsRemoved: weightRecords.length - filteredWeightRecords.length
+                }
+            });
+        } catch (err) {
+            warn('Failed to cleanup related data', {
+                error: err instanceof Error ? err : new Error('Unknown error'),
+                context: { petId }
+            });
+        }
+    }
 }

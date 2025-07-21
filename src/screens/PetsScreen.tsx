@@ -138,7 +138,7 @@ export default function PetsScreen() {
             <View style={styles.header}>
                 {/* Development helper button */}
                 {__DEV__ && (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={[styles.addButton, { backgroundColor: COLORS.warning, marginRight: SPACING.sm }]}
                         onPress={handleAddSamplePets}
                         disabled={loading}
@@ -146,9 +146,9 @@ export default function PetsScreen() {
                         <Ionicons name="flask" size={24} color={COLORS.surface} />
                     </TouchableOpacity>
                 )}
-                
+
                 {/* Refresh button */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={[styles.addButton, { backgroundColor: COLORS.secondary, marginRight: SPACING.sm }]}
                     onPress={handleRefreshPets}
                     disabled={loading}
@@ -157,7 +157,7 @@ export default function PetsScreen() {
                 </TouchableOpacity>
 
                 {/* Add pet button */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.addButton}
                     disabled={loading}
                 >
