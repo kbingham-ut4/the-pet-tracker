@@ -10,6 +10,7 @@ export interface Pet {
     microchipId?: string;
     photoUri?: string;
     ownerNotes?: string;
+    ownerId?: string; // User ID who owns this pet
     createdAt: Date;
     updatedAt: Date;
 }
