@@ -181,15 +181,17 @@ describe('FileProvider', () => {
     });
 
     describe('auto-flush timer', () => {
-        it('should set up flush timer on initialization', (done) => {
+        it('should set up flush timer on initialization', async () => {
             const fastProvider = new FileProvider();
             fastProvider.initialize();
 
             // Wait a bit to see if timer is working
-            setTimeout(() => {
-                expect(() => fastProvider.destroy()).not.toThrow();
-                done();
-            }, 100);
+            await new Promise<void>((resolve) => {
+                setTimeout(() => {
+                    expect(() => fastProvider.destroy()).not.toThrow();
+                    resolve();
+                }, 100);
+            });
         });
 
         it('should clear timer on destroy', () => {
@@ -258,8 +260,8 @@ describe('BetterStackProvider', () => {
             await provider.initialize();
         });
 
-        it('should accept log entries', async () => {
-            await expect(provider.log(mockLogEntry)).resolves.not.toThrow();
+        it('should accept log entries', () => {
+            expect(() => provider.log(mockLogEntry)).not.toThrow();
         });
 
         it('should batch logs before sending', async () => {
@@ -326,11 +328,11 @@ describe('BetterStackProvider', () => {
             });
             await smallBatchProvider.initialize();
 
-            await smallBatchProvider.log(mockLogEntry);
-            await smallBatchProvider.log({ ...mockLogEntry, message: 'Second' });
+            smallBatchProvider.log(mockLogEntry);
+            smallBatchProvider.log({ ...mockLogEntry, message: 'Second' });
 
             // Should auto-flush on third entry
-            await expect(smallBatchProvider.log({ ...mockLogEntry, message: 'Third' })).resolves.not.toThrow();
+            expect(() => smallBatchProvider.log({ ...mockLogEntry, message: 'Third' })).not.toThrow();
         });
 
         it('should flush all pending logs on manual flush', async () => {
