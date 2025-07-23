@@ -25,15 +25,18 @@ docs/
 ## 🚀 Development
 
 ### Prerequisites
+
 - Node.js 18+
 - pnpm (recommended)
 
 ### Install Dependencies
+
 ```bash
 pnpm install
 ```
 
 ### Start Development Server
+
 ```bash
 pnpm docs:dev
 ```
@@ -41,11 +44,13 @@ pnpm docs:dev
 The documentation site will be available at `http://localhost:5173`.
 
 ### Build for Production
+
 ```bash
 pnpm docs:build
 ```
 
 ### Preview Production Build
+
 ```bash
 pnpm docs:preview
 ```
@@ -57,6 +62,7 @@ pnpm docs:preview
 VitePress supports enhanced Markdown features:
 
 #### Code Blocks with Syntax Highlighting
+
 ```typescript
 interface Pet {
   id: string;
@@ -66,6 +72,7 @@ interface Pet {
 ```
 
 #### Custom Containers
+
 ::: tip
 This is a tip
 :::
@@ -83,6 +90,7 @@ This is an info notice
 :::
 
 #### File Tree
+
 ```
 src/
 ├── components/
@@ -104,6 +112,7 @@ description: Custom page description
 ### Navigation
 
 Update `.vitepress/config.ts` to modify:
+
 - Navigation menu
 - Sidebar structure
 - Site metadata
@@ -122,6 +131,7 @@ The site uses the default VitePress theme with custom configuration in `config.t
 ### Assets
 
 Place static assets in the `public/` directory:
+
 - Images: `public/images/`
 - Icons: `public/icons/`
 - Favicons: `public/favicon.ico`
@@ -129,6 +139,7 @@ Place static assets in the `public/` directory:
 ## 📱 Responsive Design
 
 The documentation is automatically responsive and works well on:
+
 - Desktop computers
 - Tablets
 - Mobile devices
@@ -140,6 +151,7 @@ VitePress includes built-in search functionality that indexes all documentation 
 ## 🌐 Deployment
 
 ### GitHub Pages
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy Documentation
@@ -167,12 +179,14 @@ jobs:
 ```
 
 ### Netlify
+
 1. Connect your repository to Netlify
 2. Set build command: `pnpm docs:build`
 3. Set publish directory: `docs/.vitepress/dist`
 4. Deploy
 
 ### Vercel
+
 1. Import your repository in Vercel
 2. Set framework preset: "Other"
 3. Set build command: `pnpm docs:build`

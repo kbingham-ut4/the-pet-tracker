@@ -9,26 +9,26 @@ import FoodLogScreen from '../screens/FoodLogScreen';
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
-    return (
-        <NavigationContainer>
-            <Stack.Navigator
-                initialRouteName="Main"
-                screenOptions={{
-                    headerShown: false,
-                }}
-            >
-                <Stack.Screen name="Main" component={TabNavigator} />
-                <Stack.Screen
-                    name="WeightManagement"
-                    component={WeightManagementScreen}
-                    options={{ headerShown: true, title: 'Weight Management' }}
-                />
-                <Stack.Screen
-                    name="FoodLog"
-                    component={FoodLogScreen}
-                    options={{ headerShown: true, title: 'Food Log' }}
-                />
-            </Stack.Navigator>
-        </NavigationContainer>
-    );
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Main"
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="Main" component={TabNavigator} />
+        <Stack.Screen
+          name="WeightManagement"
+          component={WeightManagementScreen}
+          options={{ headerShown: true, title: 'Weight Management' }}
+        />
+        <Stack.Screen
+          name="FoodLog"
+          component={FoodLogScreen}
+          options={{ headerShown: true, title: 'Food Log' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }

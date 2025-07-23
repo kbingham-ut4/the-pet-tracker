@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged to check and fix staged files
+pnpm exec lint-staged
+
+# Run type checking
+pnpm type-check
+
+# Run tests related to staged files (if any)
+pnpm test:run --passWithNoTests

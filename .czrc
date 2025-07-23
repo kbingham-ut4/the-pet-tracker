@@ -1,0 +1,67 @@
+{
+  "path": "cz-conventional-changelog",
+  "types": {
+    "feat": {
+      "description": "A new feature for the user, not a new feature for build script",
+      "title": "Features"
+    },
+    "fix": {
+      "description": "A bug fix for the user, not a fix to a build script",
+      "title": "Bug Fixes"
+    },
+    "docs": {
+      "description": "Changes to the documentation",
+      "title": "Documentation"
+    },
+    "style": {
+      "description": "Formatting, missing semicolons, etc; no production code change",
+      "title": "Styles"
+    },
+    "refactor": {
+      "description": "Refactoring production code, e.g. renaming a variable",
+      "title": "Code Refactoring"
+    },
+    "test": {
+      "description": "Adding missing tests or correcting existing tests",
+      "title": "Tests"
+    },
+    "chore": {
+      "description": "Updating grunt tasks etc; no production code change",
+      "title": "Chores"
+    },
+    "perf": {
+      "description": "A code change that improves performance",
+      "title": "Performance Improvements"
+    },
+    "ci": {
+      "description": "Changes to our CI configuration files and scripts",
+      "title": "Continuous Integrations"
+    },
+    "build": {
+      "description": "Changes that affect the build system or external dependencies",
+      "title": "Builds"
+    },
+    "revert": {
+      "description": "Reverts a previous commit",
+      "title": "Reverts"
+    }
+  },
+  "scopes": [
+    "core",
+    "ui",
+    "navigation",
+    "storage",
+    "services",
+    "components",
+    "hooks",
+    "utils",
+    "contexts",
+    "screens",
+    "types",
+    "config",
+    "tests",
+    "docs",
+    "ci",
+    "deps"
+  ]
+}

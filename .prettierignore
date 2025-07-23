@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+.expo/
+.next/
+coverage/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# Generated files
+*.tsbuildinfo
+.DS_Store
+*.log
+
+# Binary files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.ttf
+*.woff
+*.woff2
+*.eot
+
+# Environment files
+.env*
+!.env.example
+
+# IDE files
+.vscode/settings.json
+.idea/
+
+# OS files
+Thumbs.db

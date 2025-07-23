@@ -41,17 +41,20 @@ function PetScreen() {
 #### Available Methods
 
 ##### Pet Management
+
 - `addPet(petData)` - Add a new pet
 - `updatePet(pet)` - Update existing pet
 - `deletePet(petId)` - Delete a pet
 - `getPetById(id)` - Get pet by ID
 
 ##### Health Records
+
 - `addVetVisit(visitData)` - Add vet visit
 - `addVaccination(vaccinationData)` - Add vaccination record
 - `addActivity(activityData)` - Add activity log
 
 ##### Weight & Nutrition
+
 - `addWeightRecord(weightData)` - Log weight measurement
 - `addFoodEntry(foodData)` - Add food entry
 - `updateFoodEntry(foodEntry)` - Update food entry
@@ -60,6 +63,7 @@ function PetScreen() {
 - `setNutritionProfile(profile)` - Set nutrition profile
 
 ##### Data Queries
+
 - `getWeightRecordsForPet(petId)` - Get weight history
 - `getFoodEntriesForPet(petId)` - Get food entries
 - `getCalorieTargetForPet(petId)` - Get calorie target
@@ -91,7 +95,7 @@ const foodEntry = NutritionService.createFoodEntry(
   100, // quantity in grams
   MealType.BREAKFAST,
   undefined, // custom calories (optional)
-  undefined  // custom nutrition (optional)
+  undefined // custom nutrition (optional)
 );
 ```
 
@@ -101,7 +105,7 @@ const foodEntry = NutritionService.createFoodEntry(
 const summary = NutritionService.calculateDailySummary(
   foodEntries,
   new Date(), // date
-  2000        // calorie goal
+  2000 // calorie goal
 );
 // Returns: DailyNutritionSummary object
 ```
@@ -135,10 +139,10 @@ const calculator = CalorieCalculatorFactory.createCalculator(PetType.DOG);
 
 // Calculate maintenance calories
 const maintenanceCalories = calculator.calculateMaintenanceCalories(
-  25,                              // weight in kg
-  3,                              // age in years
+  25, // weight in kg
+  3, // age in years
   ActivityLevel.MODERATELY_ACTIVE, // activity level
-  true                            // spayed/neutered
+  true // spayed/neutered
 );
 
 // Calculate target calories for weight goal
@@ -184,11 +188,13 @@ const {
 #### Methods
 
 ##### logWeight
+
 ```typescript
 logWeight(weight: number, notes?: string): void
 ```
 
 ##### logFood
+
 ```typescript
 logFood(
   foodName: string,
@@ -200,6 +206,7 @@ logFood(
 ```
 
 ##### updateCalorieGoal
+
 ```typescript
 updateCalorieGoal(
   dailyCalorieGoal: number,
@@ -209,6 +216,7 @@ updateCalorieGoal(
 ```
 
 ##### updateNutritionProfile
+
 ```typescript
 updateNutritionProfile(
   activityLevel: ActivityLevel,
@@ -227,10 +235,10 @@ Environment-aware logging utility.
 import { logger } from '@/utils';
 
 // Log levels
-logger.debug('Debug information');  // Only in development
+logger.debug('Debug information'); // Only in development
 logger.info('General information'); // When logging enabled
-logger.warn('Warning message');     // Always when logging enabled
-logger.error('Error occurred');     // Always when logging enabled
+logger.warn('Warning message'); // Always when logging enabled
+logger.error('Error occurred'); // Always when logging enabled
 
 // Grouped logging
 logger.group('API Calls');
@@ -262,25 +270,25 @@ const id = generateId(); // Unique string ID
 import { config } from '@/config';
 
 // Environment information
-config.environment        // 'development' | 'testing' | 'staging' | 'production'
-config.apiBaseUrl        // API base URL
-config.apiTimeout        // Request timeout
-config.enableLogging     // Logging enabled
-config.enableDebugMode   // Debug mode enabled
+config.environment; // 'development' | 'testing' | 'staging' | 'production'
+config.apiBaseUrl; // API base URL
+config.apiTimeout; // Request timeout
+config.enableLogging; // Logging enabled
+config.enableDebugMode; // Debug mode enabled
 
 // Feature flags
-config.features.enableOfflineMode      // Offline functionality
-config.features.enablePushNotifications // Push notifications
-config.features.enableDataExport      // Data export feature
+config.features.enableOfflineMode; // Offline functionality
+config.features.enablePushNotifications; // Push notifications
+config.features.enableDataExport; // Data export feature
 
 // Database config
-config.database.name     // Database name
-config.database.version  // Database version
+config.database.name; // Database name
+config.database.version; // Database version
 
 // App constants
-config.constants.maxPetPhotos        // Maximum photos per pet
-config.constants.supportEmail       // Support contact
-config.constants.privacyPolicyUrl   // Privacy policy URL
+config.constants.maxPetPhotos; // Maximum photos per pet
+config.constants.supportEmail; // Support contact
+config.constants.privacyPolicyUrl; // Privacy policy URL
 ```
 
 ## Type Definitions
@@ -288,6 +296,7 @@ config.constants.privacyPolicyUrl   // Privacy policy URL
 ### Core Types
 
 #### Pet
+
 ```typescript
 interface Pet {
   id: string;
@@ -307,6 +316,7 @@ interface Pet {
 ```
 
 #### WeightRecord
+
 ```typescript
 interface WeightRecord {
   id: string;
@@ -318,6 +328,7 @@ interface WeightRecord {
 ```
 
 #### FoodEntry
+
 ```typescript
 interface FoodEntry {
   id: string;
@@ -327,8 +338,8 @@ interface FoodEntry {
   quantity: number; // in grams
   calories: number;
   protein?: number; // in grams
-  fat?: number;     // in grams
-  carbs?: number;   // in grams
+  fat?: number; // in grams
+  carbs?: number; // in grams
   date: Date;
   mealType: MealType;
   notes?: string;
@@ -338,6 +349,7 @@ interface FoodEntry {
 ### Enums
 
 #### PetType
+
 ```typescript
 enum PetType {
   DOG = 'dog',
@@ -352,6 +364,7 @@ enum PetType {
 ```
 
 #### ActivityLevel
+
 ```typescript
 enum ActivityLevel {
   SEDENTARY = 'sedentary',
@@ -363,6 +376,7 @@ enum ActivityLevel {
 ```
 
 #### MealType
+
 ```typescript
 enum MealType {
   BREAKFAST = 'breakfast',

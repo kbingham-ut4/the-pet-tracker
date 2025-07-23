@@ -26,17 +26,20 @@ A modern mobile application built with React Native, Expo, and TypeScript to hel
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd the-pet-tracker
    ```
 
 2. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 3. Start the development server:
+
    ```bash
    pnpm start
    ```
@@ -86,7 +89,7 @@ The app supports multiple environments with specific configurations:
 
 - **Development**: Local development with console + file logging
 - **Testing**: Minimal logging for automated tests
-- **Staging**: Full logging with BetterStack for pre-production testing  
+- **Staging**: Full logging with BetterStack for pre-production testing
 - **Production**: Remote logging only with BetterStack
 
 Copy `.env.example` to `.env.development` and configure your environment variables.
@@ -126,6 +129,7 @@ See [logging documentation](./docs/development/logging.md) for detailed usage.
 ## 🎨 Design System
 
 The app uses a custom design system with:
+
 - Consistent color palette
 - Typography scale
 - Spacing system

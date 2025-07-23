@@ -5,24 +5,24 @@ import { Pet } from './Pet';
 
 // Root Stack Navigator Types
 export type RootStackParamList = {
-    Main: undefined;
-    PetDetails: { petId: string };
-    AddPet: undefined;
-    EditPet: { pet: Pet };
-    AddVetVisit: { petId: string };
-    VetVisitDetails: { visitId: string };
-    WeightManagement: { petId: string };
-    FoodLog: { petId: string };
-    Onboarding: undefined;
+  Main: undefined;
+  PetDetails: { petId: string };
+  AddPet: undefined;
+  EditPet: { pet: Pet };
+  AddVetVisit: { petId: string };
+  VetVisitDetails: { visitId: string };
+  WeightManagement: { petId: string };
+  FoodLog: { petId: string };
+  Onboarding: undefined;
 };
 
 // Bottom Tab Navigator Types
 export type MainTabParamList = {
-    Home: undefined;
-    Pets: undefined;
-    Activities: undefined;
-    Health: undefined;
-    Profile: undefined;
+  Home: undefined;
+  Pets: undefined;
+  Activities: undefined;
+  Health: undefined;
+  Profile: undefined;
 };
 
 // Navigation Props
@@ -37,16 +37,16 @@ export type VetVisitDetailsRouteProp = RouteProp<RootStackParamList, 'VetVisitDe
 
 // Screen Props
 export interface PetDetailsScreenProps {
-    route: PetDetailsRouteProp;
-    navigation: RootStackNavigationProp;
+  route: PetDetailsRouteProp;
+  navigation: RootStackNavigationProp;
 }
 
 export interface EditPetScreenProps {
-    route: EditPetRouteProp;
-    navigation: RootStackNavigationProp;
+  route: EditPetRouteProp;
+  navigation: RootStackNavigationProp;
 }
 
 export interface AddVetVisitScreenProps {
-    route: AddVetVisitRouteProp;
-    navigation: RootStackNavigationProp;
+  route: AddVetVisitRouteProp;
+  navigation: RootStackNavigationProp;
 }

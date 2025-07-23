@@ -21,14 +21,14 @@ runs:
         else
           NODE_VERSION=$(grep '^node-version=' .npmrc | cut -d'=' -f2 || echo '24')
         fi
-        
+
         # Read pnpm version from .npmrc or use input
         if [[ -n "${{ inputs.pnpm-version }}" ]]; then
           PNPM_VERSION="${{ inputs.pnpm-version }}"
         else
           PNPM_VERSION=$(grep '^pnpm-version=' .npmrc | cut -d'=' -f2 || echo '10')
         fi
-        
+
         echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
         echo "PNPM_VERSION=$PNPM_VERSION" >> $GITHUB_ENV
 
@@ -70,7 +70,7 @@ runs:
       run: |
         # Install with shamefully-hoist to help with binary resolution
         pnpm install --frozen-lockfile --shamefully-hoist
-        
+
         # Ensure platform-specific binaries are available
         pnpm rebuild esbuild 2>/dev/null || true
 
