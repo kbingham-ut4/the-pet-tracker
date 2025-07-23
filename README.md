@@ -126,6 +126,106 @@ See [logging documentation](./docs/development/logging.md) for detailed usage.
 - **Package Manager**: PNPM
 - **Code Quality**: ESLint + Prettier
 
+## ✨ Code Quality & Development Workflow
+
+This project enforces high code quality standards through automated tools and processes:
+
+### 🔧 Code Quality Tools
+
+- **ESLint**: Linting with TypeScript-specific rules and React Native best practices
+- **Prettier**: Code formatting with consistent style
+- **TypeScript**: Static type checking for better code reliability
+- **Husky**: Git hooks for automated quality checks
+- **lint-staged**: Run quality checks only on staged files
+- **Commitlint**: Conventional commit message enforcement
+- **Commitizen**: Interactive commit message helper
+
+### 🎯 Quality Scripts
+
+```bash
+# Linting
+pnpm lint          # Check for linting issues
+pnpm lint:fix      # Auto-fix linting issues
+
+# Formatting
+pnpm format        # Format all files
+pnpm format:check  # Check if files are formatted
+
+# Type Checking
+pnpm type-check    # Run TypeScript type checking
+
+# All Quality Checks
+pnpm quality:check # Run lint + type-check + tests
+
+# Commit Helper
+pnpm commit        # Interactive commit with proper formatting
+```
+
+### 🪝 Git Hooks
+
+Automated quality checks run at different stages:
+
+- **pre-commit**: Runs lint-staged (linting and formatting on staged files)
+- **commit-msg**: Validates commit message format using commitlint
+- **pre-push**: Runs comprehensive checks (lint, type-check, tests)
+
+### 📝 Commit Message Format
+
+We use [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+```
+type(scope): description
+
+body (optional)
+
+footer (optional)
+```
+
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`, `build`, `revert`
+
+**Examples**:
+
+```bash
+feat: add pet weight tracking feature
+fix(storage): resolve data sync issue
+docs: update API documentation
+test: add unit tests for nutrition service
+```
+
+### 🚀 GitHub Actions
+
+Automated CI/CD workflows ensure code quality:
+
+- **Code Quality**: Runs on all PRs - linting, type-checking, formatting checks
+- **CI**: Comprehensive quality gate with tests and security audits
+- **Tests**: Unit and integration test execution
+
+### 📊 Development Workflow
+
+1. **Create Feature Branch**: `git checkout -b feat/new-feature`
+2. **Make Changes**: Write code following TypeScript and ESLint rules
+3. **Commit Changes**: Use `pnpm commit` for properly formatted commits
+4. **Push Changes**: Automated pre-push hooks run quality checks
+5. **Create PR**: GitHub Actions run comprehensive quality and test suites
+6. **Code Review**: Team reviews for logic, design, and maintainability
+7. **Merge**: Squash and merge after all checks pass
+
+### 🔍 Local Development Tips
+
+```bash
+# Check your code before committing
+pnpm quality:check
+
+# Auto-fix common issues
+pnpm lint:fix && pnpm format
+
+# Use the commit helper for proper messages
+pnpm commit
+
+# Test specific functionality
+pnpm test src/services/
+```
+
 ## 🎨 Design System
 
 The app uses a custom design system with:

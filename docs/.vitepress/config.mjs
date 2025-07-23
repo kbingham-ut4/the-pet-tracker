@@ -65,6 +65,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: 'Development Workflow', link: '/development/workflow' },
+          { text: 'GitHub Actions & CI/CD', link: '/development/github-actions' },
           { text: 'Logging System', link: '/development/logging' },
           { text: 'Storage System', link: '/development/storage' },
           { text: 'Code Style', link: '/development/code-style' },
@@ -104,6 +105,7 @@ export default defineConfig({
           { text: 'App Store Deployment', link: '/deployment/app-store' },
           { text: 'Play Store Deployment', link: '/deployment/play-store' },
           { text: 'CI/CD Pipeline', link: '/deployment/ci-cd' },
+          { text: 'GitHub Actions', link: '/development/github-actions' },
         ],
       },
       {
