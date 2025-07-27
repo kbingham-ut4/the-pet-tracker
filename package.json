@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.ts",
-  "packageManager": "pnpm@10.12.4",
   "scripts": {
     "start": "expo start",
     "start:dev": "cp .env.development .env && expo start --tunnel",
