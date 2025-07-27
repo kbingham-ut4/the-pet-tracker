@@ -19,26 +19,49 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
 
   return (
     <View style={styles.scrollIndicator}>
-      {Array.from({ length: totalItems }).map((_, index) => (
-        <TouchableOpacity
-          key={index}
-          style={[styles.indicatorDot, index === currentIndex && styles.indicatorDotActive]}
-          onPress={() => onDotPress(index)}
-        />
-      ))}
+      <View style={styles.dotsContainer}>
+        {Array.from({ length: totalItems }).map((_, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[styles.indicatorDot, index === currentIndex && styles.indicatorDotActive]}
+            onPress={() => onDotPress(index)}
+          />
+        ))}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   scrollIndicator: {
+    position: 'absolute',
+    bottom: 16,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: 4,
-    backgroundColor: COLORS.background,
-    borderTopWidth: 0,
+    paddingVertical: 8,
+    backgroundColor: 'transparent',
+    zIndex: 10,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.surface,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   indicatorDot: {
     width: 8,
