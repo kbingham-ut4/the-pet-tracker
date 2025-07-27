@@ -6,7 +6,7 @@
 
 import NetInfo from '@react-native-community/netinfo';
 import { CloudSyncProvider, StorageItem, SyncResult, SyncError } from '../types';
-import { info, warn, error, debug } from '../../utils/logging';
+import { info, warn, error, debug } from '../../utils/logger';
 
 interface GraphQLResponse<T = unknown> {
   data?: T;

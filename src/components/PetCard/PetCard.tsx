@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
 import { Pet, PetType } from '../../types';
-import { debug } from '../../utils/logging';
+import { debug } from '../../utils/logger';
 import { usePetCalories } from '../../hooks';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -19,169 +19,199 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 interface PetCardProps {
   pet: Pet;
   loading: boolean;
-  onRefresh: () => Promise<void>;
+  onRefresh: (_petId: string) => Promise<void>;
   onNavigateToWeight: (_petId: string) => void;
   onNavigateToFoodLog: (_petId: string) => void;
 }
 
-const PetCard = forwardRef<ScrollView, PetCardProps>(
-  ({ pet, loading, onRefresh, onNavigateToWeight, onNavigateToFoodLog }, ref) => {
-    debug('Rendering pet card', { context: { petId: pet.id, petName: pet.name } });
+const PetCard = React.memo(
+  forwardRef<ScrollView, PetCardProps>(
+    ({ pet, loading, onRefresh, onNavigateToWeight, onNavigateToFoodLog }, ref) => {
+      // Only log in development mode to reduce noise
+      if (__DEV__) {
+        debug('Rendering pet card', { context: { petId: pet.id, petName: pet.name } });
+      }
 
-    const { todaysCalories, targetCalories } = usePetCalories(pet);
-    const calorieProgress = targetCalories > 0 ? (todaysCalories / targetCalories) * 100 : 0;
+      // Memoize calorie calculations to prevent unnecessary recalculations
+      const { todaysCalories, targetCalories } = usePetCalories(pet);
+      const calorieProgress = React.useMemo(() => {
+        return targetCalories > 0 ? (todaysCalories / targetCalories) * 100 : 0;
+      }, [todaysCalories, targetCalories]);
 
-    return (
-      <View style={styles.petCard}>
-        <ScrollView
-          ref={ref}
-          contentContainerStyle={styles.cardContent}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={loading}
-              onRefresh={onRefresh}
-              tintColor={COLORS.primary}
-              colors={[COLORS.primary]}
-            />
-          }
-        >
-          {/* Pet Header */}
-          <View style={styles.petHeader}>
-            <View
-              style={[
-                styles.petTypeIcon,
-                { backgroundColor: COLORS.petColors[pet.type] || COLORS.petColors.other },
-              ]}
-            >
-              <Ionicons name="paw" size={32} color={COLORS.surface} />
-            </View>
-            <View style={styles.petHeaderInfo}>
-              <Text style={styles.petName}>{pet.name}</Text>
-              <Text style={styles.petDetails}>
-                {pet.breed} • {pet.age ? `${pet.age} years old` : 'Age unknown'}
-              </Text>
-              <Text style={styles.petType}>{pet.type}</Text>
-            </View>
-          </View>
+      const handleRefresh = useCallback(() => {
+        debug('Pet card refresh triggered', { context: { petId: pet.id, petName: pet.name } });
+        return onRefresh(pet.id);
+      }, [pet.id, pet.name, onRefresh]);
 
-          {/* Calorie Section */}
-          <View style={styles.calorieSection}>
-            <Text style={styles.sectionTitle}>Daily Nutrition</Text>
-
-            <View style={styles.calorieCard}>
-              <View style={styles.calorieHeader}>
-                <Text style={styles.calorieTitle}>Calories Today</Text>
-                <Text style={styles.caloriePercentage}>{Math.round(calorieProgress)}%</Text>
+      return (
+        <View style={styles.petCard}>
+          <ScrollView
+            ref={ref}
+            contentContainerStyle={styles.cardContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={loading}
+                onRefresh={handleRefresh}
+                tintColor={COLORS.primary}
+                colors={[COLORS.primary]}
+              />
+            }
+          >
+            {/* Pet Header */}
+            <View style={styles.petHeader}>
+              <View
+                style={[
+                  styles.petTypeIcon,
+                  { backgroundColor: COLORS.petColors[pet.type] || COLORS.petColors.other },
+                ]}
+              >
+                <Ionicons name="paw" size={32} color={COLORS.surface} />
               </View>
-
-              <View style={styles.calorieProgressContainer}>
-                <View style={styles.calorieProgressBackground}>
-                  <View
-                    style={[
-                      styles.calorieProgressBar,
-                      {
-                        width: `${Math.min(calorieProgress, 100)}%`,
-                        backgroundColor:
-                          calorieProgress > 100
-                            ? COLORS.warning
-                            : calorieProgress > 80
-                              ? COLORS.success
-                              : COLORS.accent,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-
-              <View style={styles.calorieNumbers}>
-                <Text style={styles.calorieConsumed}>
-                  {Math.round(todaysCalories)} cal consumed
+              <View style={styles.petHeaderInfo}>
+                <Text style={styles.petName}>{pet.name}</Text>
+                <Text style={styles.petDetails}>
+                  {pet.breed} • {pet.age ? `${pet.age} years old` : 'Age unknown'}
                 </Text>
-                <Text style={styles.calorieTarget}>{Math.round(targetCalories)} cal target</Text>
+                <Text style={styles.petType}>{pet.type}</Text>
               </View>
             </View>
-          </View>
 
-          {/* Pet Stats */}
-          <View style={styles.statsSection}>
-            <Text style={styles.sectionTitle}>Pet Information</Text>
+            {/* Calorie Section */}
+            <View style={styles.calorieSection}>
+              <Text style={styles.sectionTitle}>Daily Nutrition</Text>
 
-            <View style={styles.statsGrid}>
-              {pet.weight && (
-                <View style={styles.statCard}>
-                  <Ionicons name="scale" size={20} color={COLORS.accent} />
-                  <Text style={styles.statValue}>{pet.weight} kg</Text>
-                  <Text style={styles.statLabel}>Weight</Text>
+              <View style={styles.calorieCard}>
+                <View style={styles.calorieHeader}>
+                  <Text style={styles.calorieTitle}>Calories Today</Text>
+                  <Text style={styles.caloriePercentage}>{Math.round(calorieProgress)}%</Text>
                 </View>
-              )}
 
-              {pet.age && (
-                <View style={styles.statCard}>
-                  <Ionicons name="calendar" size={20} color={COLORS.secondary} />
-                  <Text style={styles.statValue}>{pet.age} years</Text>
-                  <Text style={styles.statLabel}>Age</Text>
+                <View style={styles.calorieProgressContainer}>
+                  <View style={styles.calorieProgressBackground}>
+                    <View
+                      style={[
+                        styles.calorieProgressBar,
+                        {
+                          width: `${Math.min(calorieProgress, 100)}%`,
+                          backgroundColor:
+                            calorieProgress > 100
+                              ? COLORS.warning
+                              : calorieProgress > 80
+                                ? COLORS.success
+                                : COLORS.accent,
+                        },
+                      ]}
+                    />
+                  </View>
                 </View>
-              )}
 
-              {pet.color && (
-                <View style={styles.statCard}>
-                  <Ionicons name="color-palette" size={20} color={COLORS.primary} />
-                  <Text style={styles.statValue}>{pet.color}</Text>
-                  <Text style={styles.statLabel}>Color</Text>
+                <View style={styles.calorieNumbers}>
+                  <Text style={styles.calorieConsumed}>
+                    {Math.round(todaysCalories)} cal consumed
+                  </Text>
+                  <Text style={styles.calorieTarget}>{Math.round(targetCalories)} cal target</Text>
                 </View>
-              )}
-
-              {pet.gender && (
-                <View style={styles.statCard}>
-                  <Ionicons
-                    name={
-                      pet.gender === 'male' ? 'male' : pet.gender === 'female' ? 'female' : 'help'
-                    }
-                    size={20}
-                    color={COLORS.textSecondary}
-                  />
-                  <Text style={styles.statValue}>{pet.gender}</Text>
-                  <Text style={styles.statLabel}>Gender</Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* Action Buttons */}
-          {pet.type === PetType.DOG && (
-            <View style={styles.actionSection}>
-              <Text style={styles.sectionTitle}>Quick Actions</Text>
-
-              <View style={styles.actionButtons}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => onNavigateToWeight(pet.id)}
-                >
-                  <Ionicons name="fitness" size={20} color={COLORS.surface} />
-                  <Text style={styles.actionButtonText}>Weight Management</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => onNavigateToFoodLog(pet.id)}
-                >
-                  <Ionicons name="restaurant" size={20} color={COLORS.surface} />
-                  <Text style={styles.actionButtonText}>Food Log</Text>
-                </TouchableOpacity>
               </View>
             </View>
-          )}
 
-          {/* Owner Notes */}
-          {pet.ownerNotes && (
-            <View style={styles.notesSection}>
-              <Text style={styles.sectionTitle}>Notes</Text>
-              <Text style={styles.notesText}>{pet.ownerNotes}</Text>
+            {/* Pet Stats */}
+            <View style={styles.statsSection}>
+              <Text style={styles.sectionTitle}>Pet Information</Text>
+
+              <View style={styles.statsGrid}>
+                {pet.weight && (
+                  <View style={styles.statCard}>
+                    <Ionicons name="scale" size={20} color={COLORS.accent} />
+                    <Text style={styles.statValue}>{pet.weight} kg</Text>
+                    <Text style={styles.statLabel}>Weight</Text>
+                  </View>
+                )}
+
+                {pet.age && (
+                  <View style={styles.statCard}>
+                    <Ionicons name="calendar" size={20} color={COLORS.secondary} />
+                    <Text style={styles.statValue}>{pet.age} years</Text>
+                    <Text style={styles.statLabel}>Age</Text>
+                  </View>
+                )}
+
+                {pet.color && (
+                  <View style={styles.statCard}>
+                    <Ionicons name="color-palette" size={20} color={COLORS.primary} />
+                    <Text style={styles.statValue}>{pet.color}</Text>
+                    <Text style={styles.statLabel}>Color</Text>
+                  </View>
+                )}
+
+                {pet.gender && (
+                  <View style={styles.statCard}>
+                    <Ionicons
+                      name={
+                        pet.gender === 'male' ? 'male' : pet.gender === 'female' ? 'female' : 'help'
+                      }
+                      size={20}
+                      color={COLORS.textSecondary}
+                    />
+                    <Text style={styles.statValue}>{pet.gender}</Text>
+                    <Text style={styles.statLabel}>Gender</Text>
+                  </View>
+                )}
+              </View>
             </View>
-          )}
-        </ScrollView>
-      </View>
+
+            {/* Action Buttons */}
+            {pet.type === PetType.DOG && (
+              <View style={styles.actionSection}>
+                <Text style={styles.sectionTitle}>Quick Actions</Text>
+
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => onNavigateToWeight(pet.id)}
+                  >
+                    <Ionicons name="fitness" size={20} color={COLORS.surface} />
+                    <Text style={styles.actionButtonText}>Weight Management</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => onNavigateToFoodLog(pet.id)}
+                  >
+                    <Ionicons name="restaurant" size={20} color={COLORS.surface} />
+                    <Text style={styles.actionButtonText}>Food Log</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* Owner Notes */}
+            {pet.ownerNotes && (
+              <View style={styles.notesSection}>
+                <Text style={styles.sectionTitle}>Notes</Text>
+                <Text style={styles.notesText}>{pet.ownerNotes}</Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      );
+    }
+  ),
+  (prevProps, nextProps) => {
+    // Only re-render if the pet data, loading state, or callbacks have actually changed
+    return (
+      prevProps.pet.id === nextProps.pet.id &&
+      prevProps.pet.name === nextProps.pet.name &&
+      prevProps.pet.weight === nextProps.pet.weight &&
+      prevProps.pet.age === nextProps.pet.age &&
+      prevProps.pet.color === nextProps.pet.color &&
+      prevProps.pet.breed === nextProps.pet.breed &&
+      prevProps.pet.ownerNotes === nextProps.pet.ownerNotes &&
+      prevProps.pet.updatedAt?.getTime() === nextProps.pet.updatedAt?.getTime() &&
+      prevProps.loading === nextProps.loading &&
+      prevProps.onRefresh === nextProps.onRefresh &&
+      prevProps.onNavigateToWeight === nextProps.onNavigateToWeight &&
+      prevProps.onNavigateToFoodLog === nextProps.onNavigateToFoodLog
     );
   }
 );
@@ -386,4 +416,32 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PetCard;
+// Custom comparison function to prevent unnecessary re-renders
+const arePropsEqual = (prevProps: PetCardProps, nextProps: PetCardProps) => {
+  // Only re-render if the pet data, loading state, or callback functions actually changed
+  const petChanged =
+    prevProps.pet.id !== nextProps.pet.id ||
+    prevProps.pet.name !== nextProps.pet.name ||
+    prevProps.pet.weight !== nextProps.pet.weight ||
+    prevProps.pet.age !== nextProps.pet.age ||
+    prevProps.pet.breed !== nextProps.pet.breed ||
+    prevProps.pet.type !== nextProps.pet.type ||
+    prevProps.pet.ownerNotes !== nextProps.pet.ownerNotes ||
+    // Now we can safely use getTime() since dates are normalized at storage level
+    prevProps.pet.createdAt.getTime() !== nextProps.pet.createdAt.getTime() ||
+    prevProps.pet.updatedAt.getTime() !== nextProps.pet.updatedAt.getTime();
+
+  const loadingChanged = prevProps.loading !== nextProps.loading;
+
+  // For callback functions, we assume they're memoized with useCallback
+  // so reference equality should be sufficient
+  const callbacksChanged =
+    prevProps.onRefresh !== nextProps.onRefresh ||
+    prevProps.onNavigateToWeight !== nextProps.onNavigateToWeight ||
+    prevProps.onNavigateToFoodLog !== nextProps.onNavigateToFoodLog;
+
+  // Return true if props are equal (no re-render needed)
+  return !petChanged && !loadingChanged && !callbacksChanged;
+};
+
+export default React.memo(PetCard, arePropsEqual);

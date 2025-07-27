@@ -15,7 +15,7 @@ import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants';
 import { usePets } from '../contexts';
 import { Pet, PetType } from '../types';
 import { RootStackNavigationProp } from '../types/Navigation';
-import { info, error } from '../utils/logging';
+import { info, error } from '../utils/logger';
 
 interface PetFormData {
   name: string;
@@ -88,7 +88,9 @@ export default function AddPetScreen() {
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (err) {
-      error('Failed to add pet', err);
+      error('Failed to add pet', {
+        error: err instanceof Error ? err.message : String(err),
+      });
       Alert.alert('Error', 'Failed to add pet. Please try again.');
     } finally {
       setLoading(false);

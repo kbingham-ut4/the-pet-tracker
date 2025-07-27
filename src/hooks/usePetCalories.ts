@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Pet, PetType, ActivityLevel } from '../types';
 import { usePets } from '../contexts';
 import { CalorieCalculatorFactory } from '../services/CalorieCalculatorFactory';
-import { error } from '../utils/logging';
+import { error } from '../utils/logger';
 
 interface PetCalorieData {
   todaysCalories: number;
@@ -12,15 +12,17 @@ interface PetCalorieData {
 export const usePetCalories = (pet: Pet): PetCalorieData => {
   const { getFoodEntriesForPet, getCalorieTargetForPet } = usePets();
 
+  // Memoize today's date string to prevent recalculation on every render
+  const todayDateString = useMemo(() => new Date().toDateString(), []);
+
   const todaysCalories = useMemo(() => {
     const todayEntries = getFoodEntriesForPet(pet.id).filter(entry => {
       const entryDate = new Date(entry.date).toDateString();
-      const today = new Date().toDateString();
-      return entryDate === today;
+      return entryDate === todayDateString;
     });
 
     return todayEntries.reduce((total, entry) => total + (entry.calories || 0), 0);
-  }, [pet.id, getFoodEntriesForPet]);
+  }, [pet.id, getFoodEntriesForPet, todayDateString]);
 
   const targetCalories = useMemo(() => {
     const calorieTarget = getCalorieTargetForPet(pet.id);
@@ -45,13 +47,15 @@ export const usePetCalories = (pet: Pet): PetCalorieData => {
 
         return calculator.calculateTargetCalories(maintenanceCalories, 'maintain');
       } catch (err) {
-        error('Failed to calculate target calories', err);
+        error('Failed to calculate target calories', {
+          error: err instanceof Error ? err.message : String(err),
+        });
         return 0;
       }
     }
 
     return 0;
-  }, [pet, getCalorieTargetForPet]);
+  }, [pet.id, pet.type, pet.weight, pet.age, getCalorieTargetForPet]);
 
   return { todaysCalories, targetCalories };
 };

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants';
 import { usePets } from '../contexts';
 import { config } from '../config';
-import { info, warn, error } from '../utils/logging';
+import { info, warn, error } from '../utils/logger';
 
 export default function ProfileScreen() {
   const { addSamplePets, clearAllPets, pets, loadPetsFromStorage } = usePets();
@@ -49,7 +49,9 @@ export default function ProfileScreen() {
       await addSamplePets();
       Alert.alert('Success', 'Sample pets have been generated!');
     } catch (err) {
-      error('Failed to generate sample pets', err);
+      error('Failed to generate sample pets', {
+        error: err instanceof Error ? err.message : String(err),
+      });
       Alert.alert('Error', 'Failed to generate sample pets. Please try again.');
     }
   };
@@ -69,7 +71,9 @@ export default function ProfileScreen() {
               await clearAllPets();
               Alert.alert('Success', 'All pets have been cleared!');
             } catch (err) {
-              error('Failed to clear pets', err);
+              error('Failed to clear pets', {
+                error: err instanceof Error ? err.message : String(err),
+              });
               Alert.alert('Error', 'Failed to clear pets. Please try again.');
             }
           },
@@ -99,7 +103,9 @@ export default function ProfileScreen() {
 
               Alert.alert('Success', 'All app data has been cleared!');
             } catch (err) {
-              error('Failed to clear storage', err);
+              error('Failed to clear storage', {
+                error: err instanceof Error ? err.message : String(err),
+              });
               Alert.alert('Error', 'Failed to clear storage. Please try again.');
             }
           },
@@ -114,7 +120,9 @@ export default function ProfileScreen() {
       await loadPetsFromStorage();
       Alert.alert('Success', 'Data has been refreshed!');
     } catch (err) {
-      error('Failed to refresh data', err);
+      error('Failed to refresh data', {
+        error: err instanceof Error ? err.message : String(err),
+      });
       Alert.alert('Error', 'Failed to refresh data. Please try again.');
     }
   };

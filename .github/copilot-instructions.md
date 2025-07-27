@@ -86,7 +86,7 @@ try {
 
 ```typescript
 // Use the custom logger service
-import { logger } from '@/utils/logger';
+import { logger } from '@/logger';
 
 logger.info('User action completed', {
   userId: user.id,

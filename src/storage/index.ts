@@ -114,4 +114,5 @@ export class StorageFactory {
 // Convenience exports
 export { PetTrackerStorageManager } from './StorageManager';
 export * from './types';
-export * from './services';
+// Note: Services are not re-exported to avoid circular dependencies
+// Import services directly from './services' if needed

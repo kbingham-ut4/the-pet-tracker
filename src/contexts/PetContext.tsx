@@ -15,7 +15,7 @@ import {
   OfflinePetStorageService,
   type PetStorageService as _PetStorageService,
 } from '../storage/services';
-import { info, warn as _warn, error, debug, getLogger } from '../utils/logging';
+import { info, error, debug } from '../utils/logger';
 
 interface PetState {
   pets: Pet[];
@@ -27,11 +27,13 @@ interface PetState {
   calorieTargets: CalorieTarget[];
   nutritionProfiles: PetNutritionProfile[];
   loading: boolean;
+  petLoadingStates: { [petId: string]: boolean }; // Individual pet loading states
   error: string | null;
 }
 
 type PetAction =
   | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_PET_LOADING'; payload: { petId: string; loading: boolean } }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'ADD_PET'; payload: Pet }
   | { type: 'UPDATE_PET'; payload: Pet }
@@ -57,6 +59,7 @@ const initialState: PetState = {
   calorieTargets: [],
   nutritionProfiles: [],
   loading: false,
+  petLoadingStates: {},
   error: null,
 };
 
@@ -64,6 +67,14 @@ function petReducer(state: PetState, action: PetAction): PetState {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
+    case 'SET_PET_LOADING':
+      return {
+        ...state,
+        petLoadingStates: {
+          ...state.petLoadingStates,
+          [action.payload.petId]: action.payload.loading,
+        },
+      };
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
     case 'SET_PETS':
@@ -126,6 +137,8 @@ interface PetContextType extends PetState {
   updatePet: (_pet: Pet) => Promise<void>;
   deletePet: (_petId: string) => Promise<void>;
   loadPetsFromStorage: () => Promise<void>;
+  refreshPet: (_petId: string) => Promise<void>;
+  getPetLoadingState: (_petId: string) => boolean;
   addVetVisit: (_vetVisit: Omit<VetVisit, 'id'>) => void;
   addVaccination: (_vaccination: Omit<Vaccination, 'id'>) => void;
   addActivity: (_activity: Omit<Activity, 'id'>) => void;
@@ -148,7 +161,7 @@ const PetContext = createContext<PetContextType | undefined>(undefined);
 
 export function PetProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(petReducer, initialState);
-  const _logger = getLogger();
+  // Logger is imported directly from utils/logger
   const petStorageService = new OfflinePetStorageService();
 
   // Load pets from storage on mount
@@ -165,7 +178,9 @@ export function PetProvider({ children }: { children: ReactNode }) {
 
       info('Loaded pets from storage', { count: pets.length });
     } catch (err) {
-      error('Failed to load pets from storage', err);
+      error('Failed to load pets from storage', {
+        error: err instanceof Error ? err.message : String(err),
+      });
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load pets' });
     }
   };
@@ -174,7 +189,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
 
-      info('Adding new pet:', petData.name);
+      info('Adding new pet', { petName: petData.name });
 
       const newPet = await petStorageService.addPet({
         ...petData,
@@ -186,9 +201,11 @@ export function PetProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'ADD_PET', payload: newPet });
       dispatch({ type: 'SET_LOADING', payload: false });
 
-      debug('Pet added successfully:', newPet);
+      debug('Pet added successfully:', { petId: newPet.id, petName: newPet.name });
     } catch (err) {
-      error('Failed to add pet', err);
+      error('Failed to add pet', {
+        error: err instanceof Error ? err.message : String(err),
+      });
       dispatch({ type: 'SET_ERROR', payload: 'Failed to add pet' });
     }
   };
@@ -205,9 +222,11 @@ export function PetProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'UPDATE_PET', payload: updatedPet });
       dispatch({ type: 'SET_LOADING', payload: false });
 
-      debug('Pet updated successfully:', updatedPet);
+      debug('Pet updated successfully:', { petId: updatedPet.id, petName: updatedPet.name });
     } catch (err) {
-      error('Failed to update pet', err);
+      error('Failed to update pet', {
+        error: err instanceof Error ? err.message : String(err),
+      });
       dispatch({ type: 'SET_ERROR', payload: 'Failed to update pet' });
     }
   };
@@ -222,7 +241,9 @@ export function PetProvider({ children }: { children: ReactNode }) {
 
       info('Pet deleted successfully', { petId });
     } catch (err) {
-      error('Failed to delete pet', err);
+      error('Failed to delete pet', {
+        error: err instanceof Error ? err.message : String(err),
+      });
       dispatch({ type: 'SET_ERROR', payload: 'Failed to delete pet' });
     }
   };
@@ -303,6 +324,32 @@ export function PetProvider({ children }: { children: ReactNode }) {
     return state.nutritionProfiles.find(profile => profile.petId === petId);
   };
 
+  const refreshPet = async (petId: string) => {
+    try {
+      dispatch({ type: 'SET_PET_LOADING', payload: { petId, loading: true } });
+
+      // Refresh the specific pet from storage
+      const pet = await petStorageService.getPet(petId);
+      if (pet) {
+        dispatch({ type: 'UPDATE_PET', payload: pet });
+      }
+
+      dispatch({ type: 'SET_PET_LOADING', payload: { petId, loading: false } });
+
+      info('Pet refreshed successfully', { petId });
+    } catch (err) {
+      error('Failed to refresh pet', {
+        petId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      dispatch({ type: 'SET_PET_LOADING', payload: { petId, loading: false } });
+    }
+  };
+
+  const getPetLoadingState = (petId: string): boolean => {
+    return state.petLoadingStates[petId] || false;
+  };
+
   // Development helper - add sample pets for testing
   const addSamplePets = async () => {
     const samplePets = [
@@ -376,7 +423,9 @@ export function PetProvider({ children }: { children: ReactNode }) {
 
       info('All pets cleared successfully');
     } catch (err) {
-      error('Failed to clear all pets', err);
+      error('Failed to clear all pets', {
+        error: err instanceof Error ? err.message : String(err),
+      });
       throw err;
     }
   };
@@ -387,6 +436,8 @@ export function PetProvider({ children }: { children: ReactNode }) {
     updatePet,
     deletePet,
     loadPetsFromStorage,
+    refreshPet,
+    getPetLoadingState,
     addVetVisit,
     addVaccination,
     addActivity,

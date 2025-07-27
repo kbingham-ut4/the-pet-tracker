@@ -5,7 +5,7 @@
  */
 
 import { generateId } from '../utils';
-import { info, warn as _warn, error as _error, debug, getLogger } from '../utils/logging';
+import { info, warn, error, debug } from '../utils/logger';
 import {
   OfflineStorageManager,
   StorageConfig,
@@ -27,12 +27,12 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
   private cloudProvider?: CloudSyncProvider;
   private eventListeners: StorageEventListener[] = [];
   private syncInterval?: ReturnType<typeof setInterval>;
-  private logger = getLogger();
+  // Logger functions are imported directly - no need for instance property
   private initialized = false;
 
   async initialize(config: StorageConfig): Promise<void> {
     if (this.initialized) {
-      this.logger.warn('Storage manager already initialized');
+      warn('Storage manager already initialized');
       return;
     }
 
@@ -93,7 +93,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
       try {
         listener(event);
       } catch (err) {
-        this.logger.error('Error in storage event listener', {
+        error('Error in storage event listener', {
           error: err instanceof Error ? err : new Error('Unknown error'),
           context: { event },
         });
@@ -131,7 +131,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
       // Try to sync immediately if cloud sync is enabled
       if (this.config.enableCloudSync && this.cloudProvider) {
         this.syncItem(key).catch(err => {
-          this.logger.warn('Immediate sync failed, will retry later', {
+          warn('Immediate sync failed, will retry later', {
             error: err instanceof Error ? err : new Error('Unknown error'),
             context: { key },
           });
@@ -160,7 +160,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
       const item = await this.localProvider.getItem<T>(key);
       return item ? item.data : null;
     } catch (err) {
-      this.logger.error('Failed to get item', {
+      error('Failed to get item', {
         error: err instanceof Error ? err : new Error('Unknown error'),
         context: { key },
       });
@@ -184,7 +184,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
       // Try to delete from cloud if sync is enabled
       if (this.config.enableCloudSync && this.cloudProvider) {
         this.cloudProvider.deleteItem(key).catch(err => {
-          this.logger.warn('Failed to delete item from cloud', {
+          warn('Failed to delete item from cloud', {
             error: err instanceof Error ? err : new Error('Unknown error'),
             context: { key },
           });
@@ -211,7 +211,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
       const item = await this.localProvider.getItem(key);
       return item !== null;
     } catch (err) {
-      this.logger.error('Failed to check if item exists', {
+      error('Failed to check if item exists', {
         error: err instanceof Error ? err : new Error('Unknown error'),
         context: { key },
       });
@@ -228,7 +228,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
       const results = await this.localProvider.multiGet<T>(keys);
       return results.map(([key, item]) => [key, item ? item.data : null]);
     } catch (err) {
-      this.logger.error('Failed to get multiple items', {
+      error('Failed to get multiple items', {
         error: err instanceof Error ? err : new Error('Unknown error'),
         context: { keyCount: keys.length },
       });
@@ -274,7 +274,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
         context: { itemCount: items.length },
       });
     } catch (err) {
-      this.logger.error('Failed to set multiple items', {
+      error('Failed to set multiple items', {
         error: err instanceof Error ? err : new Error('Unknown error'),
         context: { itemCount: items.length },
       });
@@ -302,7 +302,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
         context: { itemCount: keys.length },
       });
     } catch (err) {
-      this.logger.error('Failed to remove multiple items', {
+      error('Failed to remove multiple items', {
         error: err instanceof Error ? err : new Error('Unknown error'),
         context: { itemCount: keys.length },
       });
@@ -361,7 +361,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
 
       return filteredResults;
     } catch (err) {
-      this.logger.error('Query failed', {
+      error('Query failed', {
         error: err instanceof Error ? err : new Error('Unknown error'),
         context: { query },
       });
@@ -375,7 +375,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
 
   async sync(): Promise<SyncResult> {
     if (!this.config.enableCloudSync || !this.cloudProvider) {
-      this.logger.warn('Cloud sync is disabled or not configured');
+      warn('Cloud sync is disabled or not configured');
       return {
         success: false,
         itemsProcessed: 0,
@@ -410,7 +410,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
 
       return result;
     } catch (err) {
-      this.logger.error('Sync operation failed', {
+      error('Sync operation failed', {
         error: err instanceof Error ? err : new Error('Unknown error'),
       });
 
@@ -450,7 +450,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
 
       return true;
     } catch (err) {
-      this.logger.error('Item sync failed', {
+      error('Item sync failed', {
         error: err instanceof Error ? err : new Error('Unknown error'),
         context: { key },
       });
@@ -504,7 +504,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
         });
       }
     } catch (err) {
-      this.logger.error('Cleanup failed', {
+      error('Cleanup failed', {
         error: err instanceof Error ? err : new Error('Unknown error'),
       });
     }
@@ -558,7 +558,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
         newestItem,
       };
     } catch (err) {
-      this.logger.error('Failed to get storage stats', {
+      error('Failed to get storage stats', {
         error: err instanceof Error ? err : new Error('Unknown error'),
       });
 
@@ -586,7 +586,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
 
       info('Storage cleared successfully');
     } catch (err) {
-      this.logger.error('Failed to clear storage', {
+      error('Failed to clear storage', {
         error: err instanceof Error ? err : new Error('Unknown error'),
       });
       throw err;
@@ -602,7 +602,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
 
     this.syncInterval = setInterval(() => {
       this.sync().catch(err => {
-        this.logger.warn('Background sync failed', {
+        warn('Background sync failed', {
           error: err instanceof Error ? err : new Error('Unknown error'),
         });
       });

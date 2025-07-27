@@ -2,124 +2,179 @@
 
 ## Overview
 
-The Pet Tracker app uses a comprehensive, pluggable logging system that supports multiple logging providers including console output, file logging, and remote logging via BetterStack. This system is designed to provide structured, contextual logging across different environments with appropriate log levels and filtering.
+The Pet Tracker app uses a modular, provider-based logging system inspired by Pino. This architecture provides structured, contextual logging with support for multiple output destinations and easy extensibility.
 
-## Architecture
+**📚 For detailed documentation, see [`src/logger/README.md`](../../src/logger/README.md)**
 
-### Core Components
+## Quick Start
 
-1. **LoggingProvider Interface**: Defines the contract for all logging providers
-2. **Logger Class**: Main logging orchestrator that manages multiple providers
-3. **LoggerFactory**: Factory class for creating configured logger instances
-4. **Built-in Providers**:
-   - `ConsoleProvider`: For development debugging
-   - `BetterStackProvider`: For remote logging and monitoring
-   - `FileProvider`: For local file-based logging
-
-### Type Safety
-
-The logging system is fully typed with TypeScript, providing:
-
-- `LogLevel`: 'debug' | 'info' | 'warn' | 'error'
-- `LogEntry`: Structured log entry with metadata
-- `LoggerConfig`: Configuration options for logger initialization
-- `LoggerOptions`: Per-log contextual options
-
-## Configuration
-
-### Environment Variables
-
-Add these to your `.env.*` files:
-
-```bash
-# BetterStack Configuration
-EXPO_PUBLIC_BETTERSTACK_TOKEN=your_betterstack_source_token
-EXPO_PUBLIC_BETTERSTACK_ENDPOINT=https://in.logs.betterstack.com
-```
-
-### Logger Initialization
-
-#### Automatic Initialization (Recommended)
+### Basic Usage
 
 ```typescript
-import { initializeAppLogging } from '../utils/logging/examples';
+import { info, warn, error, debug } from '@/logger';
 
-// In your App.tsx or main entry point
-export default function App() {
-  useEffect(() => {
-    initializeAppLogging();
-  }, []);
-
-  return <YourAppComponents />;
-}
-```
-
-#### Manual Configuration
-
-```typescript
-import { LoggerFactory } from '../utils/logging';
-
-// Development logger
-const devLogger = await LoggerFactory.createDevelopmentLogger('user_123');
-
-// Production logger
-const prodLogger = await LoggerFactory.createProductionLogger('your_betterstack_token', 'user_123');
-
-// Custom configuration
-const customLogger = await LoggerFactory.createLogger({
-  enableConsole: true,
-  enableBetterStack: true,
-  betterStackToken: process.env.EXPO_PUBLIC_BETTERSTACK_TOKEN,
-  logLevel: 'info',
-  context: { component: 'MyService' },
-});
-```
-
-## Usage Patterns
-
-### Basic Logging
-
-```typescript
-import { debug, info, warn, error } from '../utils/logging';
-
-// Simple logging
-debug('User navigated to screen');
-info('Operation completed successfully');
-warn('Deprecated API used');
-error('Operation failed');
+// Simple message
+info('User logged in');
 
 // With context
-info('Pet created', {
-  context: {
-    petId: '123',
-    petName: 'Fluffy',
-  },
+info('Pet profile updated', {
+  petId: 'pet-123',
+  updatedFields: ['name', 'weight'],
+});
+
+// Error logging
+error('Failed to save pet data', {
+  petId: 'pet-123',
+  error: error.message,
 });
 ```
+
+### Legacy Imports (Still Supported)
+
+```typescript
+// Old imports still work via re-export
+import { info, warn, error, debug } from '../utils/logger';
+```
+
+## New Architecture Features
+
+The logging system now supports:
+
+- **Multiple Providers**: Console, BetterStack, and custom providers
+- **Child Loggers**: Component-specific logging with bound context
+- **Batching & Retry**: Efficient remote logging with retry logic
+- **Environment Configuration**: Automatic provider setup based on environment
+- **Full Backward Compatibility**: Existing imports continue to work
+
+### Child Loggers
+
+```typescript
+import { logger } from '@/logger';
+
+// Create a component-specific logger
+const petLogger = logger.child({ component: 'PetManagement' });
+
+petLogger.info('Pet created', { petId: '123', name: 'Buddy' });
+// Output includes both component context and log-specific context
+```
+
+### Custom Configuration
+
+```typescript
+import { Logger, ConsoleProvider, BetterStackProvider } from '@/logger';
+
+const customLogger = new Logger();
+customLogger.addProvider(new ConsoleProvider());
+customLogger.addProvider(
+  new BetterStackProvider({
+    sourceToken: 'your-token',
+  })
+);
+```
+
+## Migration Guide
+
+### No Action Required
+
+Existing code continues to work without changes:
+
+```typescript
+// This still works
+import { info, error } from '../utils/logger';
+info('Still working!');
+```
+
+### Recommended Updates
+
+For new code, prefer the new import path:
+
+```typescript
+// Recommended for new code
+import { info, error } from '@/logger';
+// or
+import { logger } from '@/logger';
+```
+
+## Documentation
+
+For complete documentation including:
+
+- Provider development
+- Configuration options
+- Best practices
+- Troubleshooting
+
+See the comprehensive guide at [`src/logger/README.md`](../../src/logger/README.md)
+
+// Simple message
+info('User logged in');
+
+// With context
+info('Pet profile updated', {
+context: {
+petId: 'pet-123',
+updatedFields: ['name', 'weight'],
+},
+});
+
+// Error logging
+error('Failed to save pet data', {
+context: {
+petId: 'pet-123',
+error: error.message,
+},
+});
+
+````
+
+### Structured Context
+
+The logger automatically includes:
+
+- Timestamp (ISO 8601 format)
+- Log level
+- App name and version
+- Platform (mobile/web)
+- Environment (development/staging/production)
+
+Additional context can be provided via the `context` parameter:
+
+```typescript
+info('Database operation completed', {
+  context: {
+    operation: 'create',
+    table: 'pets',
+    recordId: 'pet-123',
+    duration: 150,
+  },
+});
+````
+
+## Common Patterns
 
 ### Service Integration
 
 ```typescript
-import { getLogger } from '../utils/logging';
+import { info, error, debug } from '../utils/logger';
 
 class PetService {
-  private logger = getLogger();
-
   async createPet(petData: any) {
-    this.logger.info('Creating pet', { context: petData });
+    info('Creating pet', { context: petData });
 
     try {
       const result = await this.apiCall(petData);
-      this.logger.info('Pet created successfully', {
+      info('Pet created successfully', {
         context: { petId: result.id },
       });
       return result;
-    } catch (error) {
-      this.logger.error('Pet creation failed', {
-        error,
-        context: petData,
+    } catch (err) {
+      error('Pet creation failed', {
+        context: {
+          error: err.message,
+          petData,
+        },
       });
-      throw error;
+      throw err;
     }
   }
 }
@@ -128,115 +183,84 @@ class PetService {
 ### React Component Integration
 
 ```typescript
-import { useLogging } from '../utils/logging/examples';
+import { info, debug } from '../utils/logger';
 
-function PetProfileScreen({ petId }: { petId: string }) {
-  const { logAction, logError } = useLogging('PetProfileScreen');
+export const PetProfile = ({ petId }: { petId: string }) => {
+  useEffect(() => {
+    debug('PetProfile component mounted', {
+      context: { petId }
+    });
+
+    return () => {
+      debug('PetProfile component unmounted', {
+        context: { petId }
+      });
+    };
+  }, [petId]);
 
   const handleSave = async (data: any) => {
-    logAction('save_pet_profile', { petId });
-
-    try {
-      await savePetProfile(data);
-      logAction('save_pet_profile_success', { petId });
-    } catch (error) {
-      logError('save_pet_profile', error, { petId });
-    }
+    info('Saving pet profile', {
+      context: { petId, fields: Object.keys(data) }
+    });
+    // ... save logic
   };
 
-  return (
-    // Your component JSX
-  );
-}
+  return <div>...</div>;
+};
 ```
 
-### Grouped Operations
+### Context Hook Integration
 
 ```typescript
-import { getLogger } from '../utils/logging';
+import { info, warn } from '../utils/logger';
 
-const logger = getLogger();
+export const usePetContext = () => {
+  const addPet = useCallback((petData: Pet) => {
+    info('Adding pet to context', {
+      context: {
+        petId: petData.id,
+        petName: petData.name,
+      },
+    });
+    // ... context logic
+  }, []);
 
-async function complexOperation() {
-  logger.group('Complex Pet Operation');
+  const updatePet = useCallback((petId: string, updates: Partial<Pet>) => {
+    info('Updating pet in context', {
+      context: {
+        petId,
+        updatedFields: Object.keys(updates),
+      },
+    });
+    // ... update logic
+  }, []);
 
-  try {
-    logger.info('Step 1: Validating data');
-    // validation logic
-
-    logger.info('Step 2: Processing');
-    // processing logic
-
-    logger.info('Step 3: Saving');
-    // save logic
-  } finally {
-    logger.groupEnd();
-  }
-}
+  return { addPet, updatePet };
+};
 ```
 
-## Environment-Specific Behavior
+## Output Format
 
-### Development
+### Console Output
 
-- **Providers**: Console + File
-- **Log Level**: debug
-- **Features**: Detailed logging, stack traces, performance metrics
+```
+[2025-07-27T17:54:52.607Z] [INFO ] [PetTracker] User logged in {"appVersion":"1.0.0","platform":"mobile","environment":"development","context":{"userId":"user-123"}}
+```
 
-### Testing
+### Structured JSON
 
-- **Providers**: Console (minimal)
-- **Log Level**: warn
-- **Features**: Only warnings and errors
+All logs are formatted as structured JSON with the following schema:
 
-### Staging
-
-- **Providers**: Console + BetterStack
-- **Log Level**: info
-- **Features**: Full remote logging for testing
-
-### Production
-
-- **Providers**: BetterStack only
-- **Log Level**: info
-- **Features**: Remote logging, error aggregation, performance monitoring
-
-## BetterStack Integration
-
-### Setup
-
-1. Sign up at [BetterStack](https://betterstack.com)
-2. Create a new source in your BetterStack dashboard
-3. Copy the source token to your environment variables
-4. Configure the logger to use BetterStack provider
-
-### Features
-
-- **Automatic Batching**: Logs are batched and sent periodically
-- **Retry Logic**: Failed log submissions are retried automatically
-- **Structured Data**: Full context and metadata preservation
-- **Error Tracking**: Stack traces and error details
-- **Performance Monitoring**: Request timing and performance metrics
-
-### Log Structure in BetterStack
-
-```json
+```typescript
 {
-  "timestamp": "2024-01-15T10:30:00.000Z",
-  "level": "info",
-  "message": "Pet created successfully",
-  "context": {
-    "petId": "123",
-    "petName": "Fluffy"
-  },
-  "metadata": {
-    "userId": "user_456",
-    "sessionId": "session_789",
-    "deviceInfo": {
-      "platform": "ios",
-      "version": "17.0"
-    }
-  }
+  timestamp: string;     // ISO 8601 timestamp
+  level: LogLevel;       // 'debug' | 'info' | 'warn' | 'error'
+  appName: string;       // 'PetTracker'
+  appVersion: string;    // From package.json
+  platform: string;     // 'mobile' | 'web'
+  environment: string;   // 'development' | 'staging' | 'production'
+  message: string;       // Log message
+  context?: any;         // Additional context data
 }
 ```
 
@@ -244,52 +268,127 @@ async function complexOperation() {
 
 ### 1. Use Appropriate Log Levels
 
-```typescript
-// DEBUG: Detailed diagnostic information
-debug('Function entered with params', { params });
+- **debug**: Development debugging, verbose information
+- **info**: General application flow, important events
+- **warn**: Potentially harmful situations, deprecated usage
+- **error**: Error events that might still allow the application to continue
 
-// INFO: General application flow
-info('User logged in', { userId });
-
-// WARN: Something unexpected but not critical
-warn('API rate limit approaching', { remaining: 10 });
-
-// ERROR: Something failed and needs attention
-error('Payment processing failed', { error, orderId });
-```
-
-### 2. Provide Context
+### 2. Provide Meaningful Context
 
 ```typescript
-// Good: Rich context
-logger.info('Order processed', {
+// Good
+info('Pet weight updated', {
   context: {
-    orderId: '123',
-    amount: 49.99,
-    userId: 'user_456',
-    duration: 1500,
+    petId: 'pet-123',
+    oldWeight: 25.5,
+    newWeight: 26.2,
+    unit: 'kg',
   },
 });
 
-// Avoid: Minimal context
-logger.info('Order processed');
+// Less helpful
+info('Weight updated');
 ```
 
-### 3. Handle Sensitive Data
+### 3. Don't Log Sensitive Information
 
 ```typescript
-// Good: Redact sensitive information
-logger.info('User login', {
+// Bad - exposes sensitive data
+info('User authenticated', {
   context: {
-    userId: user.id,
-    email: user.email.replace(/(.{2}).*(@.*)/, '$1***$2'),
-    // password is omitted
+    password: 'secret123',
+    apiKey: 'abc123',
   },
 });
+
+// Good - logs relevant context without sensitive data
+info('User authenticated', {
+  context: {
+    userId: 'user-123',
+    loginMethod: 'password',
+  },
+});
+```
+
+### 4. Use Consistent Naming Conventions
+
+- Use camelCase for context property names
+- Use descriptive, specific messages
+- Include relevant IDs (petId, userId, etc.) in context
+
+### 5. Log State Changes
+
+```typescript
+// Service operations
+info('Starting data sync', { context: { operation: 'sync', itemCount: 10 } });
+info('Data sync completed', { context: { operation: 'sync', synced: 8, failed: 2 } });
+
+// User actions
+info('User navigation', { context: { from: 'HomeScreen', to: 'PetProfile' } });
+```
+
+## Environment Considerations
+
+### Development
+
+- All log levels are shown
+- Logs appear in console and Metro bundler
+- Full context information is displayed
+
+### Production
+
+- Only `info`, `warn`, and `error` levels should be used
+- `debug` logs are automatically filtered out
+- Consider implementing remote logging for production monitoring
+
+## Migration from Old Logger
+
+If migrating from the previous complex logging system:
+
+1. Replace imports:
+
+   ```typescript
+   // Old
+   import { getLogger } from '../utils/logging';
+
+   // New
+   import { info, warn, error, debug } from '../utils/logger';
+   ```
+
+2. Replace logger instances:
+
+   ```typescript
+   // Old
+   private logger = getLogger();
+   this.logger.info('message', { context });
+
+   // New
+   info('message', { context });
+   ```
+
+3. Update error handling:
+
+   ```typescript
+   // Old
+   this.logger.error('Error occurred', { error: err, context });
+
+   // New
+   error('Error occurred', { context: { error: err.message, ...otherContext } });
+   ```
+
+   // Good: Redact sensitive information
+   logger.info('User login', {
+   context: {
+   userId: user.id,
+   email: user.email.replace(/(.{2})._(@._)/, '$1\*\*\*$2'),
+   // password is omitted
+   },
+   });
 
 // Avoid: Logging sensitive data
 logger.info('User login', { context: user }); // Contains password!
-```
+
+````
 
 ### 4. Use Error Objects Properly
 
@@ -308,7 +407,7 @@ try {
 catch (error) {
   logger.error('Operation failed: ' + error);
 }
-```
+````
 
 ### 5. Performance Considerations
 
