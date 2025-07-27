@@ -1,0 +1,48 @@
+# Global code ownership
+# This file defines code ownership for the Pet Tracker repository
+# Code owners will be automatically requested for review on pull requests
+
+# Global ownership - kbingham-ut4 owns all files by default
+* @kbingham-ut4
+
+# Documentation ownership
+/docs/ @kbingham-ut4
+/README.md @kbingham-ut4
+/CODE_QUALITY.md @kbingham-ut4
+
+# GitHub workflows and configuration
+/.github/ @kbingham-ut4
+
+# Core application code
+/src/ @kbingham-ut4
+/App.tsx @kbingham-ut4
+
+# Configuration files
+/package.json @kbingham-ut4
+/tsconfig.json @kbingham-ut4
+/eslint.config.js @kbingham-ut4
+/vitest.config.ts @kbingham-ut4
+/app.config.js @kbingham-ut4
+/eas.json @kbingham-ut4
+
+# Environment and deployment
+/.env* @kbingham-ut4
+/pnpm-lock.yaml @kbingham-ut4
+
+# Tests
+/__tests__/ @kbingham-ut4
+/**/__tests__/ @kbingham-ut4
+/**/*.test.* @kbingham-ut4
+/**/*.spec.* @kbingham-ut4
+
+# GitHub Copilot and AI-related configurations
+/.copilot/ @kbingham-ut4
+/copilot.yml @kbingham-ut4
+/.github/copilot/ @kbingham-ut4
+/.github/copilot-instructions.md @kbingham-ut4
+/.github/copilot-knowledge/ @kbingham-ut4
+/copilot-instructions.md @kbingham-ut4
+/copilot-knowledge.md @kbingham-ut4
+/**/.copilot @kbingham-ut4
+/**/.copilot.yml @kbingham-ut4
+/**/copilot.yml @kbingham-ut4

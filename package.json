@@ -42,7 +42,8 @@
     "commit:retry": "git-cz --retry",
     "quality:check": "pnpm lint && pnpm type-check && pnpm test:run",
     "quality:fix": "pnpm lint:fix && pnpm format",
-    "pre-push": "pnpm quality:check"
+    "pre-push": "pnpm quality:check",
+    "setup:copilot": "bash scripts/setup-copilot-reviews.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
