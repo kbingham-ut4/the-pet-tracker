@@ -4,19 +4,34 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'Pet Tracker Documentation',
   description: 'Complete documentation for the Pet Tracker mobile application',
-  base: '/pet-tracker-docs/',
+  base: '/the-pet-tracker/',
+
+  // Ensure proper asset handling for GitHub Pages
+  assetsDir: 'assets',
+
+  // Enable source maps for better debugging
+  vite: {
+    build: {
+      sourcemap: false,
+      rollupOptions: {
+        output: {
+          manualChunks: undefined,
+        },
+      },
+    },
+  },
 
   ignoreDeadLinks: true,
 
   head: [
-    ['link', { rel: 'icon', href: '/pet-tracker-docs/favicon.ico' }],
+    ['link', { rel: 'icon', href: '/the-pet-tracker/favicon.ico' }],
     ['meta', { name: 'theme-color', content: '#3c82f6' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'en' }],
     ['meta', { property: 'og:title', content: 'Pet Tracker Documentation' }],
     ['meta', { property: 'og:site_name', content: 'Pet Tracker Docs' }],
-    ['meta', { property: 'og:image', content: '/pet-tracker-docs/og-image.png' }],
-    ['meta', { property: 'og:url', content: 'https://your-domain.com/pet-tracker-docs/' }],
+    ['meta', { property: 'og:image', content: '/the-pet-tracker/og-image.png' }],
+    ['meta', { property: 'og:url', content: 'https://kbingham-ut4.github.io/the-pet-tracker/' }],
   ],
 
   themeConfig: {
@@ -130,7 +145,7 @@ export default defineConfig({
       },
     ],
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/yourusername/pet-tracker' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/kbingham-ut4/the-pet-tracker' }],
 
     footer: {
       message: 'Released under the MIT License.',
@@ -142,7 +157,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/yourusername/pet-tracker/edit/main/docs/:path',
+      pattern: 'https://github.com/kbingham-ut4/the-pet-tracker/edit/main/docs/:path',
     },
 
     lastUpdated: {

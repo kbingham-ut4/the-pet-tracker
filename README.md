@@ -49,7 +49,39 @@ A modern mobile application built with React Native, Expo, and TypeScript to hel
    - **Android**: `pnpm android`
    - **Web**: `pnpm web`
 
-## 📱 Development
+## � Documentation
+
+Complete documentation for the Pet Tracker application is available online:
+
+**🌐 [View Full Documentation](https://kbingham-ut4.github.io/the-pet-tracker/)**
+
+The documentation includes:
+
+- **Getting Started Guide**: Detailed setup and installation instructions
+- **Development Workflow**: Best practices and development patterns
+- **API Reference**: Complete API documentation for all services and utilities
+- **Architecture Overview**: System design and data flow
+- **Testing Guide**: Testing strategies and examples
+- **Deployment Guide**: Build and deployment instructions
+- **Storage System**: Offline-first storage implementation details
+- **Logging System**: Comprehensive logging with multiple providers
+
+### Local Documentation
+
+You can also run the documentation locally:
+
+```bash
+# Start the documentation development server
+pnpm docs:dev
+
+# Build the documentation
+pnpm docs:build
+
+# Preview the built documentation
+pnpm docs:preview
+```
+
+## �📱 Development
 
 ### Project Structure
 
