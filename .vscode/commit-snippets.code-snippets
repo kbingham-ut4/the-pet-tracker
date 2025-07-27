@@ -1,53 +1,53 @@
 {
-    "Conventional Commit": {
-        "prefix": "commit",
-        "body": [
-            "${1|feat,fix,docs,style,refactor,test,chore,perf,ci,build,revert|}${2:($3)}: ${4:subject}",
-            "",
-            "${5:body}",
-            "",
-            "${6:footer}"
-        ],
-        "description": "Conventional commit message format"
-    },
-    "Feature Commit": {
-        "prefix": "feat",
-        "body": [
-            "feat${1:($2)}: ${3:add new feature}",
-            "",
-            "${4:Describe what this feature does and why it was added}",
-            "",
-            "${5:Closes #issue-number}"
-        ],
-        "description": "Feature commit message"
-    },
-    "Fix Commit": {
-        "prefix": "fix",
-        "body": [
-            "fix${1:($2)}: ${3:resolve issue with}",
-            "",
-            "${4:Describe what was broken and how it was fixed}",
-            "",
-            "${5:Fixes #issue-number}"
-        ],
-        "description": "Bug fix commit message"
-    },
-    "Docs Commit": {
-        "prefix": "docs",
-        "body": [
-            "docs${1:($2)}: ${3:update documentation}",
-            "",
-            "${4:Describe what documentation was changed and why}"
-        ],
-        "description": "Documentation commit message"
-    },
-    "Chore Commit": {
-        "prefix": "chore",
-        "body": [
-            "chore${1:($2)}: ${3:maintenance task}",
-            "",
-            "${4:Describe the maintenance task performed}"
-        ],
-        "description": "Chore commit message"
-    }
+  "Conventional Commit": {
+    "prefix": "commit",
+    "body": [
+      "${1|feat,fix,docs,style,refactor,test,chore,perf,ci,build,revert|}${2:($3)}: ${4:subject}",
+      "",
+      "${5:body}",
+      "",
+      "${6:footer}",
+    ],
+    "description": "Conventional commit message format",
+  },
+  "Feature Commit": {
+    "prefix": "feat",
+    "body": [
+      "feat${1:($2)}: ${3:add new feature}",
+      "",
+      "${4:Describe what this feature does and why it was added}",
+      "",
+      "${5:Closes #issue-number}",
+    ],
+    "description": "Feature commit message",
+  },
+  "Fix Commit": {
+    "prefix": "fix",
+    "body": [
+      "fix${1:($2)}: ${3:resolve issue with}",
+      "",
+      "${4:Describe what was broken and how it was fixed}",
+      "",
+      "${5:Fixes #issue-number}",
+    ],
+    "description": "Bug fix commit message",
+  },
+  "Docs Commit": {
+    "prefix": "docs",
+    "body": [
+      "docs${1:($2)}: ${3:update documentation}",
+      "",
+      "${4:Describe what documentation was changed and why}",
+    ],
+    "description": "Documentation commit message",
+  },
+  "Chore Commit": {
+    "prefix": "chore",
+    "body": [
+      "chore${1:($2)}: ${3:maintenance task}",
+      "",
+      "${4:Describe the maintenance task performed}",
+    ],
+    "description": "Chore commit message",
+  },
 }
