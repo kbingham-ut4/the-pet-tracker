@@ -56,15 +56,30 @@ export default function PetsScreen() {
     navigation.navigate('FoodLog', { petId });
   };
 
-  const handleAddPet = () => {
-    info('Navigation to Add Pet', {
-      context: {
-        screen: 'PetsScreen',
-        targetScreen: 'AddPet',
-      },
+  // Set header options with add button
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => {
+            info('Navigation to Add Pet', {
+              context: {
+                screen: 'PetsScreen',
+                targetScreen: 'AddPet',
+              },
+            });
+            navigation.navigate('AddPet');
+          }}
+          disabled={loading}
+        >
+          <View style={styles.addButtonCircle}>
+            <Ionicons name="add" size={24} color={COLORS.primary} />
+          </View>
+        </TouchableOpacity>
+      ),
     });
-    navigation.navigate('AddPet');
-  };
+  }, [navigation, loading]);
 
   const renderPetItem = ({ item }: { item: Pet }) => {
     debug('Rendering pet item', { context: { petId: item.id, petName: item.name } });
@@ -124,13 +139,6 @@ export default function PetsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        {/* Add pet button */}
-        <TouchableOpacity style={styles.addButton} onPress={handleAddPet} disabled={loading}>
-          <Ionicons name="add" size={24} color={COLORS.surface} />
-        </TouchableOpacity>
-      </View>
-
       <FlatList
         data={pets}
         renderItem={renderPetItem}
@@ -150,17 +158,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.md,
+  headerButton: {
+    marginRight: SPACING.md,
+    padding: SPACING.xs,
   },
-  addButton: {
-    backgroundColor: COLORS.primary,
+  addButtonCircle: {
+    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.round,
-    width: 48,
-    height: 48,
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
