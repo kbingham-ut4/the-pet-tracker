@@ -116,6 +116,13 @@ const { pets, addPet, updatePet } = usePetContext();
 
 ## Testing Guidelines
 
+### Test Execution
+
+- **Always use `pnpm test:run`** when running tests programmatically
+- This command runs all tests once and exits, suitable for CI/CD and verification
+- Avoid using `pnpm test` which starts watch mode and blocks the terminal
+- Use `pnpm test:coverage` for coverage reports when needed
+
 ### Test Structure
 
 - Place tests in `__tests__` directories alongside source files
