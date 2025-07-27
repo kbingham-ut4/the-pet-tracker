@@ -185,11 +185,29 @@ describe('FileProvider', () => {
   describe('auto-flush timer', () => {
     it('should set up flush timer on initialization', async () => {
       const fastProvider = new FileProvider();
-      fastProvider.initialize();
 
-      // Wait a bit to see if timer is working
-      await new Promise(resolve => setTimeout(resolve, 100));
-      expect(() => fastProvider.destroy()).not.toThrow();
+      try {
+        fastProvider.initialize();
+
+        // Use Promise.race to add timeout protection
+        await Promise.race([
+          new Promise(resolve => setTimeout(resolve, 100)),
+          new Promise((_, reject) => {
+            setTimeout(() => {
+              reject(new Error('Test timeout: timer initialization took too long'));
+            }, 1000); // 1 second timeout
+          }),
+        ]);
+
+        expect(() => fastProvider.destroy()).not.toThrow();
+      } finally {
+        // Ensure cleanup even if test fails
+        try {
+          fastProvider.destroy();
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
     });
 
     it('should clear timer on destroy', () => {
