@@ -1,0 +1,101 @@
+# Copilot Review Configuration
+
+# Enable Copilot code reviews for this repository
+reviews:
+  enabled: true
+  auto_request: true
+  required_approvals: 1
+
+  # Review triggers
+  triggers:
+    - pull_request_opened
+    - pull_request_synchronize
+    - pull_request_reopened
+
+  # File patterns to review
+  include_patterns:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '**/*.js'
+    - '**/*.jsx'
+    - '**/*.json'
+    - '**/*.md'
+    - '**/package.json'
+    - '**/tsconfig.json'
+    - '**/*.yml'
+    - '**/*.yaml'
+
+  # File patterns to exclude from review
+  exclude_patterns:
+    - '**/node_modules/**'
+    - '**/coverage/**'
+    - '**/dist/**'
+    - '**/build/**'
+    - '**/*.min.js'
+    - '**/*.generated.*'
+    - '**/pnpm-lock.yaml'
+
+  # Review settings
+  settings:
+    review_level: 'thorough'
+    max_files_per_review: 50
+    max_lines_per_file: 1000
+    comment_on_unchanged_files: false
+
+    # Focus areas for review
+    focus_areas:
+      - code_quality
+      - type_safety
+      - performance
+      - security
+      - accessibility
+      - testing
+      - documentation
+
+    # Custom review prompts
+    custom_prompts:
+      typescript: |
+        Review this TypeScript code for:
+        - Type safety and proper typing
+        - Interface definitions
+        - Generic usage
+        - Null/undefined handling
+        - Async/await patterns
+
+      react_native: |
+        Review this React Native code for:
+        - Component structure and props
+        - Performance optimizations
+        - Accessibility features
+        - Platform compatibility
+        - Memory leaks
+        - Navigation patterns
+
+      testing: |
+        Review this test code for:
+        - Test coverage and completeness
+        - Proper assertions
+        - Mock usage
+        - Test structure (AAA pattern)
+        - Edge case coverage
+
+      security: |
+        Review this code for security issues:
+        - Input validation
+        - Authentication/authorization
+        - Data encryption
+        - Credential management
+        - API security
+        - XSS/injection vulnerabilities
+
+# Integration settings
+integration:
+  github_actions: true
+  status_checks: true
+  auto_merge_ready: false
+
+  # Notification settings
+  notifications:
+    review_completed: true
+    security_issues_found: true
+    review_required: true

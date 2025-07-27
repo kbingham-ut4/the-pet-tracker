@@ -130,21 +130,25 @@ App navigation structure:
 ## File Naming Conventions
 
 ### Components and Screens
+
 - **PascalCase** for component files: `PetCard.tsx`
 - **PascalCase** for screen files: `PetsScreen.tsx`
 - **Component names** match file names
 
 ### Services and Utils
+
 - **PascalCase** for service classes: `NutritionService.ts`
 - **camelCase** for utility functions: `formatDate.ts`
 - **PascalCase** for factory patterns: `CalorieCalculatorFactory.ts`
 
 ### Types and Interfaces
+
 - **PascalCase** for interfaces: `Pet.ts`
 - **Interface prefix** when needed: `IPetService.ts`
 - **Enum naming**: `PetType`, `ActivityLevel`
 
 ### Constants and Config
+
 - **camelCase** for configuration: `environments.ts`
 - **UPPERCASE** for static constants: `API_ENDPOINTS`
 - **PascalCase** for theme objects: `Theme.ts`
@@ -152,6 +156,7 @@ App navigation structure:
 ## Architecture Patterns
 
 ### State Management
+
 ```typescript
 // Context + useReducer pattern
 const [state, dispatch] = useReducer(petReducer, initialState);
@@ -161,20 +166,22 @@ const { pet, logWeight, updateCalories } = useNutrition(petId);
 ```
 
 ### Service Layer
+
 ```typescript
 // Static service classes
 export class NutritionService {
-  static createFoodEntry(/* ... */) { }
-  static calculateDailySummary(/* ... */) { }
+  static createFoodEntry(/* ... */) {}
+  static calculateDailySummary(/* ... */) {}
 }
 
 // Factory pattern for calculators
 export class CalorieCalculatorFactory {
-  static createCalculator(petType: PetType) { }
+  static createCalculator(petType: PetType) {}
 }
 ```
 
 ### Type Safety
+
 ```typescript
 // Strict typing for all data structures
 interface Pet {
@@ -194,27 +201,32 @@ type ActionType<T> = {
 ## Design Principles
 
 ### 1. **Feature-First Organization**
+
 - Group related functionality together
 - Easy to locate and modify features
 - Scalable as app grows
 
 ### 2. **Separation of Concerns**
+
 - **Screens**: UI and user interaction
 - **Services**: Business logic and calculations
 - **Context**: State management
 - **Utils**: Pure functions and helpers
 
 ### 3. **Type Safety**
+
 - TypeScript for all code
 - Strict typing enabled
 - Interface-driven development
 
 ### 4. **Local-First Architecture**
+
 - Data stored locally by default
 - Offline-first functionality
 - Optional cloud sync (future feature)
 
 ### 5. **Environment Awareness**
+
 - Configuration-driven behavior
 - Environment-specific features
 - Easy deployment to different stages
@@ -222,6 +234,7 @@ type ActionType<T> = {
 ## Adding New Features
 
 ### 1. Create Types
+
 ```typescript
 // src/types/NewFeature.ts
 export interface NewFeature {
@@ -231,6 +244,7 @@ export interface NewFeature {
 ```
 
 ### 2. Add to Context
+
 ```typescript
 // src/contexts/PetContext.tsx
 interface PetState {
@@ -240,20 +254,23 @@ interface PetState {
 ```
 
 ### 3. Create Service (if needed)
+
 ```typescript
 // src/services/NewFeatureService.ts
 export class NewFeatureService {
-  static processNewFeature() { }
+  static processNewFeature() {}
 }
 ```
 
 ### 4. Build Screen/Component
+
 ```typescript
 // src/screens/NewFeatureScreen.tsx
-export default function NewFeatureScreen() { }
+export default function NewFeatureScreen() {}
 ```
 
 ### 5. Add Navigation
+
 ```typescript
 // src/navigation/TabNavigator.tsx
 <Tab.Screen name="NewFeature" component={NewFeatureScreen} />
@@ -262,6 +279,7 @@ export default function NewFeatureScreen() { }
 ## Best Practices
 
 ### Import Organization
+
 ```typescript
 // 1. React and React Native imports
 import React from 'react';
@@ -277,6 +295,7 @@ import { COLORS, SPACING } from '../constants';
 ```
 
 ### Component Structure
+
 ```typescript
 // 1. Interface definitions
 interface Props {
@@ -288,12 +307,12 @@ interface Props {
 export default function PetCard({ pet, onPress }: Props) {
   // 3. State and hooks
   const [loading, setLoading] = useState(false);
-  
+
   // 4. Event handlers
   const handlePress = () => {
     onPress();
   };
-  
+
   // 5. Render
   return (
     <View>

@@ -22,11 +22,13 @@ Firebase Analytics is free, comprehensive, and works great with React Native/Exp
      - `google-services.json` (Android)
 
 3. **Install Dependencies**
+
    ```bash
    npx expo install @react-native-firebase/app @react-native-firebase/analytics
    ```
 
 4. **Configure Environment**
+
    ```bash
    # In .env files, set:
    EXPO_PUBLIC_FIREBASE_ENABLED=true
@@ -36,10 +38,7 @@ Firebase Analytics is free, comprehensive, and works great with React Native/Exp
    - Place `google-services.json` in project root
    - Add to `app.config.js`:
    ```javascript
-   plugins: [
-     '@react-native-firebase/app',
-     '@react-native-firebase/analytics'
-   ]
+   plugins: ['@react-native-firebase/app', '@react-native-firebase/analytics'];
    ```
 
 ## 🔄 **Alternative: Mixpanel**
@@ -57,6 +56,7 @@ Event-based analytics with detailed user tracking.
    - Copy "Project Token"
 
 3. **Install Dependencies**
+
    ```bash
    npx expo install mixpanel-react-native
    ```
@@ -82,6 +82,7 @@ Product analytics focused on user behavior.
    - Copy "API Key"
 
 3. **Install Dependencies**
+
    ```bash
    npx expo install @amplitude/analytics-react-native
    ```
@@ -95,21 +96,25 @@ Product analytics focused on user behavior.
 ## 🎛 **Environment-Specific Setup**
 
 ### Development
+
 - Use test/development projects
 - Enable all logging
 - Separate from production data
 
 ### Testing
+
 - Use dedicated test projects
 - Mock analytics calls in unit tests
 - Separate analytics events
 
 ### Staging
+
 - Mirror production setup
 - Use staging projects
 - Test all analytics flows
 
 ### Production
+
 - Use production projects
 - Minimal logging
 - Real user data
@@ -123,7 +128,7 @@ import { config } from '../config';
 
 class AnalyticsService {
   private static instance: AnalyticsService;
-  
+
   static getInstance(): AnalyticsService {
     if (!this.instance) {
       this.instance = new AnalyticsService();
@@ -133,20 +138,20 @@ class AnalyticsService {
 
   async initialize() {
     if (!config.analyticsEnabled) return;
-    
+
     if (process.env.EXPO_PUBLIC_FIREBASE_ENABLED === 'true') {
       // Initialize Firebase Analytics
       const analytics = await import('@react-native-firebase/analytics');
       await analytics.default().setAnalyticsCollectionEnabled(true);
     }
-    
+
     if (process.env.EXPO_PUBLIC_MIXPANEL_TOKEN) {
       // Initialize Mixpanel
       const { Mixpanel } = await import('mixpanel-react-native');
       const mixpanel = new Mixpanel(process.env.EXPO_PUBLIC_MIXPANEL_TOKEN);
       await mixpanel.init();
     }
-    
+
     if (process.env.EXPO_PUBLIC_AMPLITUDE_API_KEY) {
       // Initialize Amplitude
       const amplitude = await import('@amplitude/analytics-react-native');
@@ -156,7 +161,7 @@ class AnalyticsService {
 
   trackEvent(eventName: string, properties?: Record<string, any>) {
     if (!config.analyticsEnabled) return;
-    
+
     // Track with your chosen service
     console.log(`Analytics: ${eventName}`, properties);
   }
@@ -175,6 +180,7 @@ export const analytics = AnalyticsService.getInstance();
 ## 📱 **Events to Track**
 
 For Pet Tracker app:
+
 - `pet_added`
 - `weight_logged`
 - `food_entry_added`

@@ -2,8 +2,8 @@
 layout: home
 
 hero:
-  name: "Pet Tracker"
-  text: "Complete Pet Care Management"
+  name: 'Pet Tracker'
+  text: 'Complete Pet Care Management'
   tagline: "Track your pet's health, nutrition, activities, and veterinary records all in one place"
   image:
     src: /hero-pet.png
@@ -20,27 +20,26 @@ features:
   - icon: 🐕
     title: Pet Management
     details: Manage multiple pets with detailed profiles, photos, and basic information.
-    
+
   - icon: 🏥
     title: Health Tracking
     details: Track veterinary visits, vaccinations, medications, and health records.
-    
+
   - icon: 🍖
     title: Nutrition & Weight
     details: Monitor food intake, calorie tracking, and weight management with smart recommendations.
-    
+
   - icon: 🎾
     title: Activity Logging
     details: Record walks, playtime, training sessions, and other pet activities.
-    
+
   - icon: 📱
     title: Cross-Platform
     details: Built with React Native and Expo for iOS, Android, and web platforms.
-    
+
   - icon: 🔒
     title: Privacy First
     details: Your pet's data stays on your device with optional cloud sync.
-
 ---
 
 ## Quick Start

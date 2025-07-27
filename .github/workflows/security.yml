@@ -1,0 +1,213 @@
+name: Security Scan
+
+on:
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 24
+  PNPM_VERSION: 10
+
+jobs:
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: true
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Run npm audit
+        run: |
+          echo "Running comprehensive security audit..."
+
+          # Generate audit report
+          pnpm audit --json > npm-audit.json || true
+
+          # Check for vulnerabilities by severity
+          echo "Checking for critical vulnerabilities..."
+          if pnpm audit --audit-level critical --json > critical-audit.json 2>/dev/null; then
+            echo "✅ No critical vulnerabilities found"
+          else
+            echo "❌ Critical vulnerabilities detected!"
+            echo "Critical vulnerabilities must be fixed:"
+            pnpm audit --audit-level critical
+            exit 1
+          fi
+
+          echo "Checking for high severity vulnerabilities..."
+          if pnpm audit --audit-level high --json > high-audit.json 2>/dev/null; then
+            echo "✅ No high severity vulnerabilities found"
+          else
+            echo "⚠️ High severity vulnerabilities detected!"
+            echo "High severity vulnerabilities found (review required):"
+            pnpm audit --audit-level high
+          fi
+
+      - name: Upload audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-results-${{ github.run_id }}
+          path: |
+            npm-audit.json
+            critical-audit.json
+            high-audit.json
+          retention-days: 30
+
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{matrix.language}}'
+
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Check licenses
+        run: |
+          echo "Checking license compliance..."
+
+          # Install license-checker if not available
+          if ! command -v license-checker &> /dev/null; then
+            npm install -g license-checker
+          fi
+
+          # Generate license report
+          license-checker --json --out licenses.json || true
+          license-checker --summary
+
+          # Check for problematic licenses (customize as needed)
+          echo "Checking for restricted licenses..."
+          if license-checker --excludePackages 'the-pet-tracker@1.0.0' --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0;Unlicense' --summary; then
+            echo "✅ All licenses are compliant"
+          else
+            echo "⚠️ Some licenses may need review"
+            license-checker --excludePackages 'the-pet-tracker@1.0.0' --summary
+          fi
+
+      - name: Upload license report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report-${{ github.run_id }}
+          path: licenses.json
+          retention-days: 30
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-review, security-audit, codeql-analysis, license-check]
+    if: always()
+    permissions:
+      contents: read
+      security-events: read
+
+    steps:
+      - name: Security Check Summary
+        run: |
+          echo "Security Scan Summary"
+          echo "===================="
+
+          DEPENDENCY_REVIEW_STATUS="${{ needs.dependency-review.result }}"
+          SECURITY_AUDIT_STATUS="${{ needs.security-audit.result }}"
+          CODEQL_STATUS="${{ needs.codeql-analysis.result }}"
+          LICENSE_CHECK_STATUS="${{ needs.license-check.result }}"
+
+          echo "Results:"
+          echo "- Dependency Review: $DEPENDENCY_REVIEW_STATUS"
+          echo "- Security Audit: $SECURITY_AUDIT_STATUS"
+          echo "- CodeQL Analysis: $CODEQL_STATUS"
+          echo "- License Check: $LICENSE_CHECK_STATUS"
+
+          # Fail if critical security checks failed
+          if [[ "$SECURITY_AUDIT_STATUS" == "failure" || "$CODEQL_STATUS" == "failure" ]]; then
+            echo "❌ Critical security issues detected!"
+            exit 1
+          elif [[ "$DEPENDENCY_REVIEW_STATUS" == "failure" || "$LICENSE_CHECK_STATUS" == "failure" ]]; then
+            echo "⚠️ Security scan completed with warnings"
+          else
+            echo "✅ All security checks passed"
+          fi

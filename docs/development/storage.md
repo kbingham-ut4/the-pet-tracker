@@ -59,7 +59,7 @@ const storage = await StorageFactory.createStorageManager();
 // Store data
 await storage.set('user_preferences', {
   theme: 'dark',
-  notifications: true
+  notifications: true,
 });
 
 // Retrieve data
@@ -81,7 +81,7 @@ const newPet = await petService.addPet({
   name: 'Buddy',
   type: PetType.DOG,
   breed: 'Golden Retriever',
-  ownerId: 'user_123'
+  ownerId: 'user_123',
 });
 
 // Get all pets
@@ -103,7 +103,7 @@ import { OfflinePetStorageService } from '../storage';
 function PetListScreen() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [syncStatus, setSyncStatus] = useState<string>('idle');
-  
+
   const petService = useMemo(() => new OfflinePetStorageService(), []);
 
   useEffect(() => {
@@ -176,7 +176,7 @@ The system uses a "last-write-wins" strategy with version numbers:
 const items: Array<[string, any]> = [
   ['pet_1', petData1],
   ['pet_2', petData2],
-  ['pet_3', petData3]
+  ['pet_3', petData3],
 ];
 await storage.setMultiple(items);
 
@@ -249,7 +249,7 @@ console.log({
   totalItems: stats.totalItems,
   pendingSync: stats.pendingSync,
   storageSize: stats.storageSize,
-  syncErrors: stats.syncErrors
+  syncErrors: stats.syncErrors,
 });
 ```
 
@@ -279,9 +279,9 @@ describe('PetStorageService', () => {
   it('should add and retrieve pets', async () => {
     const pet = await storage.addPet({
       name: 'Test Pet',
-      type: PetType.DOG
+      type: PetType.DOG,
     });
-    
+
     const retrieved = await storage.getPet(pet.id);
     expect(retrieved).toEqual(pet);
   });
@@ -328,11 +328,11 @@ When updating data structures:
 // Enable debug logging
 await StorageFactory.createStorageManager({
   enableLogging: true,
-  logLevel: 'debug'
+  logLevel: 'debug',
 });
 
 // Monitor storage events
-storage.addEventListener((event) => {
+storage.addEventListener(event => {
   console.log('Storage event:', event);
 });
 

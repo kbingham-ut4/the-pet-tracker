@@ -24,8 +24,8 @@ export default function App() {
           context: {
             appVersion: '1.0.0',
             platform: 'mobile',
-            environment: process.env.EXPO_PUBLIC_ENV || 'development'
-          }
+            environment: process.env.EXPO_PUBLIC_ENV || 'development',
+          },
         });
 
         setIsLoggerInitialized(true);
@@ -38,8 +38,8 @@ export default function App() {
             isDevelopment: __DEV__,
             timestamp: new Date().toISOString(),
             localStorage: process.env.EXPO_PUBLIC_ENABLE_LOCAL_STORAGE === 'true',
-            cloudSync: process.env.EXPO_PUBLIC_ENABLE_CLOUD_SYNC === 'true'
-          }
+            cloudSync: process.env.EXPO_PUBLIC_ENABLE_CLOUD_SYNC === 'true',
+          },
         });
 
         setIsStorageInitialized(true);

@@ -54,3 +54,7 @@ coverage/
 *.lcov
 coverage.json
 junit.xml
+
+# Code quality
+eslint-report.html
+.eslintcache

@@ -30,12 +30,14 @@ npm install -g @expo/cli
 ## Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/yourusername/pet-tracker.git
    cd pet-tracker
    ```
 
 2. **Install dependencies**:
+
    ```bash
    pnpm install
    # or
@@ -43,9 +45,11 @@ npm install -g @expo/cli
    ```
 
 3. **Set up environment variables**:
+
    ```bash
    cp .env.example .env
    ```
+
    Edit the `.env` file with your configuration (see [Environment Setup](./environment-setup)).
 
 4. **Start the development server**:
@@ -75,21 +79,25 @@ After installation, verify everything works:
 ### Common Issues
 
 **Node.js version mismatch**:
+
 ```bash
 node --version  # Should be v18 or later
 ```
 
 **Expo CLI not found**:
+
 ```bash
 npm list -g @expo/cli  # Check if installed globally
 ```
 
 **Port already in use**:
+
 ```bash
 npx expo start --port 19001  # Use different port
 ```
 
 **Metro bundler issues**:
+
 ```bash
 npx expo start --clear  # Clear Metro cache
 ```

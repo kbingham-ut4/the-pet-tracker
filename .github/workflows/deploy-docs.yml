@@ -40,7 +40,10 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Build documentation with VitePress
-        run: pnpm docs:build
+        run: |
+          pnpm docs:build
+          # Verify build output exists
+          ls -la docs/.vitepress/dist/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -54,8 +57,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     needs: build
     runs-on: ubuntu-latest
-    name: Deploy
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Output documentation URL
+        run: |
+          echo "📚 Documentation successfully deployed!"
+          echo "🌐 URL: https://kbingham-ut4.github.io/the-pet-tracker/"
+          echo "The documentation is now live and accessible at the URL above."

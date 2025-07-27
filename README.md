@@ -26,17 +26,20 @@ A modern mobile application built with React Native, Expo, and TypeScript to hel
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd the-pet-tracker
    ```
 
 2. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 3. Start the development server:
+
    ```bash
    pnpm start
    ```
@@ -46,7 +49,39 @@ A modern mobile application built with React Native, Expo, and TypeScript to hel
    - **Android**: `pnpm android`
    - **Web**: `pnpm web`
 
-## 📱 Development
+## � Documentation
+
+Complete documentation for the Pet Tracker application is available online:
+
+**🌐 [View Full Documentation](https://kbingham-ut4.github.io/the-pet-tracker/)**
+
+The documentation includes:
+
+- **Getting Started Guide**: Detailed setup and installation instructions
+- **Development Workflow**: Best practices and development patterns
+- **API Reference**: Complete API documentation for all services and utilities
+- **Architecture Overview**: System design and data flow
+- **Testing Guide**: Testing strategies and examples
+- **Deployment Guide**: Build and deployment instructions
+- **Storage System**: Offline-first storage implementation details
+- **Logging System**: Comprehensive logging with multiple providers
+
+### Local Documentation
+
+You can also run the documentation locally:
+
+```bash
+# Start the documentation development server
+pnpm docs:dev
+
+# Build the documentation
+pnpm docs:build
+
+# Preview the built documentation
+pnpm docs:preview
+```
+
+## �📱 Development
 
 ### Project Structure
 
@@ -86,7 +121,7 @@ The app supports multiple environments with specific configurations:
 
 - **Development**: Local development with console + file logging
 - **Testing**: Minimal logging for automated tests
-- **Staging**: Full logging with BetterStack for pre-production testing  
+- **Staging**: Full logging with BetterStack for pre-production testing
 - **Production**: Remote logging only with BetterStack
 
 Copy `.env.example` to `.env.development` and configure your environment variables.
@@ -123,9 +158,110 @@ See [logging documentation](./docs/development/logging.md) for detailed usage.
 - **Package Manager**: PNPM
 - **Code Quality**: ESLint + Prettier
 
+## ✨ Code Quality & Development Workflow
+
+This project enforces high code quality standards through automated tools and processes:
+
+### 🔧 Code Quality Tools
+
+- **ESLint**: Linting with TypeScript-specific rules and React Native best practices
+- **Prettier**: Code formatting with consistent style
+- **TypeScript**: Static type checking for better code reliability
+- **Husky**: Git hooks for automated quality checks
+- **lint-staged**: Run quality checks only on staged files
+- **Commitlint**: Conventional commit message enforcement
+- **Commitizen**: Interactive commit message helper
+
+### 🎯 Quality Scripts
+
+```bash
+# Linting
+pnpm lint          # Check for linting issues
+pnpm lint:fix      # Auto-fix linting issues
+
+# Formatting
+pnpm format        # Format all files
+pnpm format:check  # Check if files are formatted
+
+# Type Checking
+pnpm type-check    # Run TypeScript type checking
+
+# All Quality Checks
+pnpm quality:check # Run lint + type-check + tests
+
+# Commit Helper
+pnpm commit        # Interactive commit with proper formatting
+```
+
+### 🪝 Git Hooks
+
+Automated quality checks run at different stages:
+
+- **pre-commit**: Runs lint-staged (linting and formatting on staged files)
+- **commit-msg**: Validates commit message format using commitlint
+- **pre-push**: Runs comprehensive checks (lint, type-check, tests)
+
+### 📝 Commit Message Format
+
+We use [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+```
+type(scope): description
+
+body (optional)
+
+footer (optional)
+```
+
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`, `build`, `revert`
+
+**Examples**:
+
+```bash
+feat: add pet weight tracking feature
+fix(storage): resolve data sync issue
+docs: update API documentation
+test: add unit tests for nutrition service
+```
+
+### 🚀 GitHub Actions
+
+Automated CI/CD workflows ensure code quality:
+
+- **Code Quality**: Runs on all PRs - linting, type-checking, formatting checks
+- **CI**: Comprehensive quality gate with tests and security audits
+- **Tests**: Unit and integration test execution
+
+### 📊 Development Workflow
+
+1. **Create Feature Branch**: `git checkout -b feat/new-feature`
+2. **Make Changes**: Write code following TypeScript and ESLint rules
+3. **Commit Changes**: Use `pnpm commit` for properly formatted commits
+4. **Push Changes**: Automated pre-push hooks run quality checks
+5. **Create PR**: GitHub Actions run comprehensive quality and test suites
+6. **Code Review**: Team reviews for logic, design, and maintainability
+7. **Merge**: Squash and merge after all checks pass
+
+### 🔍 Local Development Tips
+
+```bash
+# Check your code before committing
+pnpm quality:check
+
+# Auto-fix common issues
+pnpm lint:fix && pnpm format
+
+# Use the commit helper for proper messages
+pnpm commit
+
+# Test specific functionality
+pnpm test src/services/
+```
+
 ## 🎨 Design System
 
 The app uses a custom design system with:
+
 - Consistent color palette
 - Typography scale
 - Spacing system

@@ -9,23 +9,28 @@ Pet ownership comes with many responsibilities - tracking vet appointments, mana
 ## Core Philosophy
 
 ### Local-First
+
 Your pet's data belongs to you. Pet Tracker stores all information locally on your device, ensuring privacy and providing offline access. Optional cloud sync may be added in future versions.
 
 ### Comprehensive Care
+
 Beyond basic information storage, Pet Tracker provides intelligent features like calorie calculation, weight trend analysis, and nutrition recommendations based on your pet's specific needs.
 
 ### Multi-Pet Support
+
 Whether you have one pet or many, Pet Tracker scales to accommodate families with multiple pets, each with their own complete profiles and records.
 
 ## Who It's For
 
 ### Pet Owners
+
 - **New pet parents** getting started with pet care
 - **Experienced owners** wanting better organization
 - **Multi-pet families** needing centralized management
 - **Health-conscious pet parents** focused on nutrition and wellness
 
 ### Use Cases
+
 - **Veterinary Visits**: Prepare for appointments with complete health records
 - **Pet Sitters**: Share care instructions and schedules
 - **Emergency Situations**: Quick access to medical history and contacts
@@ -35,24 +40,28 @@ Whether you have one pet or many, Pet Tracker scales to accommodate families wit
 ## Key Benefits
 
 ### Organization
+
 - All pet information in one secure location
 - Easy search and filtering of records
 - Photo storage for visual records
 - Automatic date and time tracking
 
 ### Health Management
+
 - Vaccination schedules and reminders
 - Medication tracking and dosing
 - Weight monitoring with trend analysis
 - Veterinary visit history and notes
 
 ### Nutrition Optimization
+
 - Species-specific calorie calculations
 - Food logging with nutritional analysis
 - Weight management recommendations
 - Activity level considerations
 
 ### Peace of Mind
+
 - Never forget important dates or medications
 - Have complete records for emergencies
 - Share information easily with caregivers
@@ -71,12 +80,14 @@ Pet Tracker is built using modern, reliable technologies:
 ## Privacy & Security
 
 ### Data Control
+
 - Your data stays on your device
 - No accounts or registration required
 - Optional export for backup purposes
 - Complete control over information sharing
 
 ### Security Features
+
 - Local encryption of sensitive data
 - No personal information transmitted
 - Secure photo storage
@@ -85,6 +96,7 @@ Pet Tracker is built using modern, reliable technologies:
 ## Open Source
 
 Pet Tracker is open source, meaning:
+
 - **Transparency**: View all code and functionality
 - **Community**: Contribute features and improvements
 - **Trust**: No hidden data collection or tracking
@@ -93,6 +105,7 @@ Pet Tracker is open source, meaning:
 ## Future Vision
 
 While Pet Tracker starts as a personal pet management tool, future versions may include:
+
 - **Cloud sync** for multi-device access
 - **Veterinarian integration** for appointment scheduling
 - **Community features** for pet owner networking

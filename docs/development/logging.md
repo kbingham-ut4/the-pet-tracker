@@ -19,6 +19,7 @@ The Pet Tracker app uses a comprehensive, pluggable logging system that supports
 ### Type Safety
 
 The logging system is fully typed with TypeScript, providing:
+
 - `LogLevel`: 'debug' | 'info' | 'warn' | 'error'
 - `LogEntry`: Structured log entry with metadata
 - `LoggerConfig`: Configuration options for logger initialization
@@ -48,7 +49,7 @@ export default function App() {
   useEffect(() => {
     initializeAppLogging();
   }, []);
-  
+
   return <YourAppComponents />;
 }
 ```
@@ -62,10 +63,7 @@ import { LoggerFactory } from '../utils/logging';
 const devLogger = await LoggerFactory.createDevelopmentLogger('user_123');
 
 // Production logger
-const prodLogger = await LoggerFactory.createProductionLogger(
-  'your_betterstack_token',
-  'user_123'
-);
+const prodLogger = await LoggerFactory.createProductionLogger('your_betterstack_token', 'user_123');
 
 // Custom configuration
 const customLogger = await LoggerFactory.createLogger({
@@ -73,7 +71,7 @@ const customLogger = await LoggerFactory.createLogger({
   enableBetterStack: true,
   betterStackToken: process.env.EXPO_PUBLIC_BETTERSTACK_TOKEN,
   logLevel: 'info',
-  context: { component: 'MyService' }
+  context: { component: 'MyService' },
 });
 ```
 
@@ -91,11 +89,11 @@ warn('Deprecated API used');
 error('Operation failed');
 
 // With context
-info('Pet created', { 
-  context: { 
-    petId: '123', 
-    petName: 'Fluffy' 
-  } 
+info('Pet created', {
+  context: {
+    petId: '123',
+    petName: 'Fluffy',
+  },
 });
 ```
 
@@ -109,17 +107,17 @@ class PetService {
 
   async createPet(petData: any) {
     this.logger.info('Creating pet', { context: petData });
-    
+
     try {
       const result = await this.apiCall(petData);
-      this.logger.info('Pet created successfully', { 
-        context: { petId: result.id }
+      this.logger.info('Pet created successfully', {
+        context: { petId: result.id },
       });
       return result;
     } catch (error) {
-      this.logger.error('Pet creation failed', { 
-        error, 
-        context: petData 
+      this.logger.error('Pet creation failed', {
+        error,
+        context: petData,
       });
       throw error;
     }
@@ -137,7 +135,7 @@ function PetProfileScreen({ petId }: { petId: string }) {
 
   const handleSave = async (data: any) => {
     logAction('save_pet_profile', { petId });
-    
+
     try {
       await savePetProfile(data);
       logAction('save_pet_profile_success', { petId });
@@ -161,17 +159,16 @@ const logger = getLogger();
 
 async function complexOperation() {
   logger.group('Complex Pet Operation');
-  
+
   try {
     logger.info('Step 1: Validating data');
     // validation logic
-    
+
     logger.info('Step 2: Processing');
     // processing logic
-    
+
     logger.info('Step 3: Saving');
     // save logic
-    
   } finally {
     logger.groupEnd();
   }
@@ -181,21 +178,25 @@ async function complexOperation() {
 ## Environment-Specific Behavior
 
 ### Development
+
 - **Providers**: Console + File
 - **Log Level**: debug
 - **Features**: Detailed logging, stack traces, performance metrics
 
 ### Testing
+
 - **Providers**: Console (minimal)
 - **Log Level**: warn
 - **Features**: Only warnings and errors
 
 ### Staging
+
 - **Providers**: Console + BetterStack
 - **Log Level**: info
 - **Features**: Full remote logging for testing
 
 ### Production
+
 - **Providers**: BetterStack only
 - **Log Level**: info
 - **Features**: Remote logging, error aggregation, performance monitoring
@@ -266,8 +267,8 @@ logger.info('Order processed', {
     orderId: '123',
     amount: 49.99,
     userId: 'user_456',
-    duration: 1500
-  }
+    duration: 1500,
+  },
 });
 
 // Avoid: Minimal context
@@ -283,7 +284,7 @@ logger.info('User login', {
     userId: user.id,
     email: user.email.replace(/(.{2}).*(@.*)/, '$1***$2'),
     // password is omitted
-  }
+  },
 });
 
 // Avoid: Logging sensitive data
@@ -297,7 +298,7 @@ logger.info('User login', { context: user }); // Contains password!
 try {
   await riskyOperation();
 } catch (error) {
-  logger.error('Operation failed', { 
+  logger.error('Operation failed', {
     error: error instanceof Error ? error : new Error('Unknown error'),
     context: { operation: 'risky' }
   });
@@ -314,12 +315,12 @@ catch (error) {
 ```typescript
 // Good: Lazy evaluation for expensive operations
 logger.debug('Complex data structure', () => ({
-  context: { data: JSON.stringify(largeObject) }
+  context: { data: JSON.stringify(largeObject) },
 }));
 
 // Avoid: Always serializing expensive data
-logger.debug('Complex data structure', { 
-  context: { data: JSON.stringify(largeObject) } // Always evaluated
+logger.debug('Complex data structure', {
+  context: { data: JSON.stringify(largeObject) }, // Always evaluated
 });
 ```
 
@@ -383,7 +384,7 @@ Enable detailed logging:
 const logger = await LoggerFactory.createLogger({
   logLevel: 'debug',
   enableConsole: true,
-  context: { debug: true }
+  context: { debug: true },
 });
 ```
 
@@ -392,12 +393,14 @@ const logger = await LoggerFactory.createLogger({
 If you have existing logging code, here's how to migrate:
 
 ### Old Code
+
 ```typescript
 console.log('User action');
 console.error('Something failed', error);
 ```
 
 ### New Code
+
 ```typescript
 import { info, error } from '../utils/logging';
 

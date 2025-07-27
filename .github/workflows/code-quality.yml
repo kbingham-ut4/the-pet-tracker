@@ -1,0 +1,298 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - '**.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.eslintrc.*'
+      - 'eslint.config.*'
+      - '.prettierrc*'
+      - 'tsconfig.json'
+      - 'vitest.config.*'
+      - '.github/workflows/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - '**.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.eslintrc.*'
+      - 'eslint.config.*'
+      - '.prettierrc*'
+      - 'tsconfig.json'
+      - 'vitest.config.*'
+      - '.github/workflows/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 24
+  PNPM_VERSION: 10
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Run ESLint
+        run: |
+          # Run ESLint with SARIF output for GitHub integration (if available)
+          if pnpm list @microsoft/eslint-formatter-sarif &>/dev/null; then
+            pnpm lint --format=@microsoft/eslint-formatter-sarif --output-file=eslint-results.sarif || true
+          fi
+          # Run regular ESLint check
+          pnpm lint
+
+      - name: Upload ESLint results to GitHub
+        if: always() && hashFiles('eslint-results.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+        continue-on-error: true
+
+  type-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Check TypeScript types
+        run: pnpm type-check
+
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Check code formatting
+        run: pnpm format:check
+
+  tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+
+      - name: Upload coverage reports to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+          verbose: true
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            coverage/
+            test-results.xml
+          retention-days: 7
+
+  commit-lint:
+    name: Commit Message Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Validate commit messages
+        run: |
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+
+          echo "Validating commit messages from $BASE_SHA to $HEAD_SHA"
+          pnpm commitlint --from=$BASE_SHA --to=$HEAD_SHA --verbose
+
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Run dependency audit
+        run: |
+          echo "Running dependency security audit..."
+          pnpm audit --audit-level moderate --json > audit-results.json || true
+
+          # Check for high/critical vulnerabilities
+          if pnpm audit --audit-level high --json > high-audit.json 2>/dev/null; then
+            echo "✅ No high/critical vulnerabilities found"
+          else
+            echo "⚠️ High or critical vulnerabilities detected!"
+            echo "Please review and update vulnerable dependencies:"
+            pnpm audit --audit-level high
+            exit 1
+          fi
+
+      - name: Upload audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-results
+          path: |
+            audit-results.json
+            high-audit.json
+          retention-days: 7
+
+      - name: Check for outdated dependencies
+        run: |
+          echo "Checking for outdated dependencies..."
+          pnpm outdated --long || echo "Some dependencies are outdated (non-blocking)"
+
+  build-check:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Verify build configuration
+        run: |
+          echo "Verifying TypeScript compilation..."
+          pnpm type-check
+
+          echo "Checking if project builds without errors..."
+          # For Expo projects, we can verify the bundle can be created
+          npx expo export --platform web --output-dir ./dist --dev || echo "Build check completed with warnings"
+
+      - name: Cache build artifacts
+        if: success()
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/
+            .expo/
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [lint, type-check, format-check, tests, dependency-audit, build-check]
+    if: always()
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Check all jobs status
+        run: |
+          echo "Checking quality gate status..."
+
+          # Check if all required jobs passed
+          LINT_STATUS="${{ needs.lint.result }}"
+          TYPE_CHECK_STATUS="${{ needs.type-check.result }}"
+          FORMAT_STATUS="${{ needs.format-check.result }}"
+          TESTS_STATUS="${{ needs.tests.result }}"
+          AUDIT_STATUS="${{ needs.dependency-audit.result }}"
+          BUILD_STATUS="${{ needs.build-check.result }}"
+
+          echo "Results:"
+          echo "- Lint: $LINT_STATUS"
+          echo "- Type Check: $TYPE_CHECK_STATUS"
+          echo "- Format Check: $FORMAT_STATUS"
+          echo "- Tests: $TESTS_STATUS"
+          echo "- Security Audit: $AUDIT_STATUS"
+          echo "- Build Check: $BUILD_STATUS"
+
+          # Fail if any critical job failed
+          if [[ "$LINT_STATUS" != "success" || "$TYPE_CHECK_STATUS" != "success" || "$FORMAT_STATUS" != "success" || "$TESTS_STATUS" != "success" ]]; then
+            echo "❌ Quality gate failed - critical checks did not pass"
+            exit 1
+          fi
+
+          # Warn if non-critical jobs failed
+          if [[ "$AUDIT_STATUS" != "success" || "$BUILD_STATUS" != "success" ]]; then
+            echo "⚠️ Quality gate passed with warnings - some non-critical checks failed"
+          else
+            echo "✅ Quality gate passed - all checks successful"
+          fi
