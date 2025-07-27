@@ -1,10 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants';
+import { usePets } from '../contexts';
+import { config } from '../config';
+import { info, warn, error } from '../utils/logging';
 
 export default function ProfileScreen() {
+  const { addSamplePets, clearAllPets, pets, loadPetsFromStorage } = usePets();
+
   const handleExportData = () => {
     Alert.alert('Export Data', 'This feature will be available in a future update.', [
       { text: 'OK' },
@@ -32,9 +37,97 @@ export default function ProfileScreen() {
   const handleAbout = () => {
     Alert.alert(
       'About Pet Tracker',
-      "Pet Tracker v1.0.0\n\nKeep track of your beloved pets' activities, health, and more!",
+      `Pet Tracker v1.0.0\n\nKeep track of your beloved pets' activities, health, and more!\n\nEnvironment: ${config.environment}`,
       [{ text: 'OK' }]
     );
+  };
+
+  // Development-only functions
+  const handleGenerateSamplePets = async () => {
+    try {
+      info('Generating sample pets from ProfileScreen');
+      await addSamplePets();
+      Alert.alert('Success', 'Sample pets have been generated!');
+    } catch (err) {
+      error('Failed to generate sample pets', err);
+      Alert.alert('Error', 'Failed to generate sample pets. Please try again.');
+    }
+  };
+
+  const handleClearAllPets = () => {
+    Alert.alert(
+      'Clear All Pets',
+      'This will permanently delete all pets and their data. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              info('Clearing all pets from ProfileScreen');
+              await clearAllPets();
+              Alert.alert('Success', 'All pets have been cleared!');
+            } catch (err) {
+              error('Failed to clear pets', err);
+              Alert.alert('Error', 'Failed to clear pets. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleClearStorage = () => {
+    Alert.alert(
+      'Clear All Storage',
+      'This will permanently delete ALL app data including pets, settings, and cached data. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              warn('Clearing all app storage from ProfileScreen');
+
+              // Clear pets first
+              await clearAllPets();
+
+              // Then clear other storage (you can extend this as needed)
+              // await PetTrackerStorageManager.clearAll();
+
+              Alert.alert('Success', 'All app data has been cleared!');
+            } catch (err) {
+              error('Failed to clear storage', err);
+              Alert.alert('Error', 'Failed to clear storage. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleRefreshData = async () => {
+    try {
+      info('Refreshing all data from ProfileScreen');
+      await loadPetsFromStorage();
+      Alert.alert('Success', 'Data has been refreshed!');
+    } catch (err) {
+      error('Failed to refresh data', err);
+      Alert.alert('Error', 'Failed to refresh data. Please try again.');
+    }
+  };
+
+  const handleShowAppInfo = () => {
+    const petCount = pets.length;
+    const environmentInfo = `Environment: ${config.environment}
+API Base URL: ${config.apiBaseUrl}
+Debug Mode: ${config.enableDebugMode ? 'Enabled' : 'Disabled'}
+Logging: ${config.enableLogging ? 'Enabled' : 'Disabled'}
+Pet Count: ${petCount}`;
+
+    Alert.alert('App Information', environmentInfo, [{ text: 'OK' }]);
   };
 
   const renderMenuItem = (
@@ -54,7 +147,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.profileAvatar}>
@@ -82,9 +175,19 @@ export default function ProfileScreen() {
           {renderMenuItem('information-circle-outline', 'About', handleAbout)}
         </View>
 
+        {/* Development Tools - show in development */}
+        <View style={styles.menuSection}>
+          <Text style={[styles.sectionTitle, { color: COLORS.warning }]}>Development Tools</Text>
+          {renderMenuItem('flask-outline', 'Generate Sample Pets', handleGenerateSamplePets)}
+          {renderMenuItem('information-circle-outline', 'App Info', handleShowAppInfo)}
+          {renderMenuItem('refresh-outline', 'Refresh Data', handleRefreshData)}
+          {renderMenuItem('trash-outline', 'Clear All Pets', handleClearAllPets)}
+          {renderMenuItem('nuclear-outline', 'Clear All Storage', handleClearStorage)}
+        </View>
+
         {/* App Version */}
         <Text style={styles.versionText}>Pet Tracker v1.0.0</Text>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -95,7 +198,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
-    flex: 1,
     paddingHorizontal: SPACING.md,
   },
   profileHeader: {
@@ -162,7 +264,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: COLORS.textLight,
     textAlign: 'center',
-    marginTop: 'auto',
     marginBottom: SPACING.lg,
+    marginTop: SPACING.xl,
   },
 });

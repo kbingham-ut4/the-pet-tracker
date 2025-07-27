@@ -141,6 +141,7 @@ interface PetContextType extends PetState {
   getCalorieTargetForPet: (_petId: string) => CalorieTarget | undefined;
   getNutritionProfileForPet: (_petId: string) => PetNutritionProfile | undefined;
   addSamplePets: () => void; // Development helper
+  clearAllPets: () => Promise<void>; // Development helper
 }
 
 const PetContext = createContext<PetContextType | undefined>(undefined);
@@ -357,6 +358,29 @@ export function PetProvider({ children }: { children: ReactNode }) {
     }, 100);
   };
 
+  // Development helper - clear all pets and related data
+  const clearAllPets = async () => {
+    try {
+      info('Clearing all pets and related data');
+
+      // Clear pets from storage first
+      for (const pet of state.pets) {
+        await petStorageService.deletePet(pet.id);
+      }
+
+      // Clear state by setting empty arrays
+      dispatch({ type: 'SET_PETS', payload: [] });
+
+      // Note: We're not clearing vet visits, vaccinations, etc. here
+      // because they should cascade delete with pets in a real implementation
+
+      info('All pets cleared successfully');
+    } catch (err) {
+      error('Failed to clear all pets', err);
+      throw err;
+    }
+  };
+
   const value: PetContextType = {
     ...state,
     addPet,
@@ -378,6 +402,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
     getCalorieTargetForPet,
     getNutritionProfileForPet,
     addSamplePets,
+    clearAllPets,
   };
 
   return <PetContext.Provider value={value}>{children}</PetContext.Provider>;

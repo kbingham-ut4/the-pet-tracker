@@ -143,7 +143,7 @@ export default function AddPetScreen() {
                 onPress={() => updateFormData('type', type.key)}
               >
                 <Ionicons
-                  name={type.icon as any}
+                  name={type.icon as keyof typeof Ionicons.glyphMap}
                   size={20}
                   color={formData.type === type.key ? COLORS.surface : COLORS.text}
                 />

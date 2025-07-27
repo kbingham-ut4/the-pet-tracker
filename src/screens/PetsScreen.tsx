@@ -10,7 +10,7 @@ import { RootStackNavigationProp } from '../types/Navigation';
 import { info, debug, error } from '../utils/logging';
 
 export default function PetsScreen() {
-  const { pets, addSamplePets, loadPetsFromStorage, loading } = usePets();
+  const { pets, loadPetsFromStorage, loading } = usePets();
   const navigation = useNavigation<RootStackNavigationProp>();
 
   // Log screen view
@@ -23,16 +23,6 @@ export default function PetsScreen() {
       },
     });
   }, [pets.length]);
-
-  const handleAddSamplePets = async () => {
-    try {
-      info('Adding sample pets from PetsScreen');
-      await addSamplePets();
-      info('Sample pets added successfully');
-    } catch (err) {
-      error('Failed to add sample pets', err);
-    }
-  };
 
   const handleRefreshPets = async () => {
     try {
@@ -129,37 +119,12 @@ export default function PetsScreen() {
       <Text style={styles.emptyStateText}>
         Tap the + button to add your first furry, feathered, or scaly friend!
       </Text>
-      {__DEV__ && (
-        <Text style={[styles.emptyStateText, { color: COLORS.warning, marginTop: SPACING.sm }]}>
-          🧪 Development: Tap the flask button to add sample pets
-        </Text>
-      )}
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        {/* Development helper button */}
-        {__DEV__ && (
-          <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: COLORS.warning, marginRight: SPACING.sm }]}
-            onPress={handleAddSamplePets}
-            disabled={loading}
-          >
-            <Ionicons name="flask" size={24} color={COLORS.surface} />
-          </TouchableOpacity>
-        )}
-
-        {/* Refresh button */}
-        <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: COLORS.secondary, marginRight: SPACING.sm }]}
-          onPress={handleRefreshPets}
-          disabled={loading}
-        >
-          <Ionicons name="refresh" size={24} color={COLORS.surface} />
-        </TouchableOpacity>
-
         {/* Add pet button */}
         <TouchableOpacity style={styles.addButton} onPress={handleAddPet} disabled={loading}>
           <Ionicons name="add" size={24} color={COLORS.surface} />

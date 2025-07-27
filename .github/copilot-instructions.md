@@ -19,6 +19,19 @@ Pet Tracker is a React Native mobile application built with Expo that helps pet 
 - **Package Manager**: pnpm
 - **Linting**: ESLint with TypeScript and Prettier integration
 
+## Development Server Status
+
+**IMPORTANT**: The development server is already running via `pnpm run start:dev`.
+
+**DO NOT** start or restart the development server unless explicitly requested by the user. The server is persistent and does not need to be restarted for most code changes as it supports hot reloading.
+
+Available development scripts:
+
+- `pnpm start:dev` - Development server with tunnel (ALREADY RUNNING)
+- `pnpm start` - Standard development server
+- `pnpm android:dev` - Run on Android with dev environment
+- `pnpm ios:dev` - Run on iOS with dev environment
+
 ## Code Style Guidelines
 
 ### TypeScript
