@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-next",
+    "esbenp.prettier-vscode",
+    "ms-vscode.eslint",
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer",
+    "github.copilot",
+    "github.copilot-chat",
+    "conventional-commits.conventional-commits",
+    "vivaxy.vscode-conventional-commits",
+    "qezhu.gitlink",
+    "donjayamanne.git-extension-pack"
+  ]
+}

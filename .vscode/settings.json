@@ -12,5 +12,21 @@
     "emmet.includeLanguages": {
         "typescript": "typescriptreact",
         "javascript": "javascriptreact"
-    }
+    },
+    // Git and commit message settings
+    "git.inputValidation": true,
+    "git.inputValidationLength": 100,
+    "git.inputValidationSubjectLength": 100,
+    "scm.inputFontSize": 12,
+    "scm.inputMinLineCount": 2,
+    "scm.inputMaxLineCount": 5,
+    // GitHub Copilot settings for better commit messages
+    "github.copilot.enable": {
+        "*": true,
+        "yaml": true,
+        "plaintext": true,
+        "markdown": true,
+        "scminput": true
+    },
+    "github.copilot.editor.enableAutoCompletions": true
 }

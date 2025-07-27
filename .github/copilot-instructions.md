@@ -204,3 +204,49 @@ When suggesting new dependencies:
 - Update the VitePress documentation for user-facing features
 - Add README files for complex modules
 - Keep the changelog updated with significant changes
+
+## Commit Message Guidelines
+
+When generating commit messages, follow the conventional commit format with these specific rules:
+
+### Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Rules
+
+- **Header**: Must be ≤ 100 characters
+- **Type**: Use one of: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`, `build`, `revert`
+- **Scope**: Optional, use lowercase (e.g., `auth`, `storage`, `ui`)
+- **Subject**:
+  - Use imperative mood ("add feature" not "added feature")
+  - Don't capitalize first letter
+  - No period at the end
+  - Be concise and descriptive
+- **Body**: Optional, explain what and why (max 120 chars per line)
+- **Footer**: Optional, reference issues or breaking changes
+
+### Examples
+
+```
+feat(auth): add biometric authentication support
+
+fix: resolve memory leak in image cache
+
+docs: update API documentation for storage service
+
+chore: update dependencies to latest versions
+```
+
+### Tips for VS Code Commit Messages
+
+- Keep the first line under 100 characters
+- Use present tense, imperative mood
+- Be specific about what changed
+- Reference issue numbers when applicable
