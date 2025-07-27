@@ -158,14 +158,14 @@ export default function PetsScreen() {
 
   if (pets.length === 0) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={[]}>
         <EmptyState />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={[]}>
       <FlatList
         ref={flatListRef}
         data={pets}
