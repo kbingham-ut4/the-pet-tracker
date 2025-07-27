@@ -1,5 +1,6 @@
 export { default as HomeScreen } from './HomeScreen';
 export { default as PetsScreen } from './PetsScreen';
+export { default as AddPetScreen } from './AddPetScreen';
 export { default as ActivitiesScreen } from './ActivitiesScreen';
 export { default as HealthScreen } from './HealthScreen';
 export { default as ProfileScreen } from './ProfileScreen';

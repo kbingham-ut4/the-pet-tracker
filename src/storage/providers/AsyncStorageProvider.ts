@@ -6,7 +6,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LocalStorageProvider, StorageItem } from '../types';
-import { info, warn, error, debug } from '../../utils/logging';
+import { info, warn, error, debug } from '../../utils/logger';
 
 export class AsyncStorageProvider implements LocalStorageProvider {
   name = 'async-storage';

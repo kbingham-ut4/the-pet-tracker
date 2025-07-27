@@ -1,0 +1,4 @@
+# pnpm-specific configuration
+auto-install-peers=true
+strict-peer-dependencies=false
+save-exact=true

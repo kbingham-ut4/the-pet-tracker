@@ -1,17 +1,33 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useRef, useCallback } from 'react';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants';
+import { COLORS, SPACING, BORDER_RADIUS } from '../constants';
 import { usePets } from '../contexts';
-import { Pet, PetType } from '../types';
+import { Pet } from '../types';
 import { RootStackNavigationProp } from '../types/Navigation';
-import { info, debug, error } from '../utils/logging';
+import { info, error } from '../utils/logger';
+import { PetCard } from '../components/PetCard';
+import { ScrollIndicator, EmptyState } from '../components';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function PetsScreen() {
-  const { pets, addSamplePets, loadPetsFromStorage, loading } = usePets();
+  const { pets, loadPetsFromStorage, refreshPet, getPetLoadingState, loading } = usePets();
   const navigation = useNavigation<RootStackNavigationProp>();
+  const [currentPetIndex, setCurrentPetIndex] = useState(0);
+  const flatListRef = useRef<FlatList<Pet>>(null);
+  const scrollViewRefs = useRef<{ [key: string]: ScrollView | null }>({});
 
   // Log screen view
   React.useEffect(() => {
@@ -24,147 +40,251 @@ export default function PetsScreen() {
     });
   }, [pets.length]);
 
-  const handleAddSamplePets = async () => {
-    try {
-      info('Adding sample pets from PetsScreen');
-      await addSamplePets();
-      info('Sample pets added successfully');
-    } catch (err) {
-      error('Failed to add sample pets', err);
-    }
-  };
+  // Reset scroll position to top when switching between pets
+  React.useEffect(() => {
+    if (pets.length > 0 && pets[currentPetIndex]) {
+      const currentPetId = pets[currentPetIndex].id;
+      const scrollViewRef = scrollViewRefs.current[currentPetId];
 
-  const handleRefreshPets = async () => {
+      if (scrollViewRef) {
+        // Small delay to ensure the card is fully rendered
+        setTimeout(() => {
+          scrollViewRef.scrollTo({ y: 0, animated: true });
+        }, 100);
+      }
+    }
+  }, [currentPetIndex, pets]);
+
+  const _handleRefreshPets = async () => {
     try {
       info('Refreshing pets from storage');
       await loadPetsFromStorage();
       info('Pets refreshed successfully');
     } catch (err) {
-      error('Failed to refresh pets', err);
+      error('Failed to refresh pets', { error: err instanceof Error ? err.message : String(err) });
     }
   };
 
-  const handleNavigateToWeight = (petId: string) => {
-    info('Navigation to Weight Management', {
-      context: {
-        screen: 'PetsScreen',
-        targetScreen: 'WeightManagement',
-        petId,
-      },
-    });
-    navigation.navigate('WeightManagement', { petId });
-  };
-
-  const handleNavigateToFoodLog = (petId: string) => {
-    info('Navigation to Food Log', {
-      context: {
-        screen: 'PetsScreen',
-        targetScreen: 'FoodLog',
-        petId,
-      },
-    });
-    navigation.navigate('FoodLog', { petId });
-  };
-
-  const renderPetItem = ({ item }: { item: Pet }) => {
-    debug('Rendering pet item', { context: { petId: item.id, petName: item.name } });
-
-    return (
-      <View style={styles.petCard}>
-        <View
-          style={[
-            styles.petTypeIcon,
-            { backgroundColor: COLORS.petColors[item.type] || COLORS.petColors.other },
-          ]}
-        >
-          <Ionicons name="paw" size={24} color={COLORS.surface} />
-        </View>
-        <View style={styles.petInfo}>
-          <Text style={styles.petName}>{item.name}</Text>
-          <Text style={styles.petDetails}>
-            {item.breed} • {item.age ? `${item.age} years old` : 'Age unknown'}
-          </Text>
-          <Text style={styles.petType}>{item.type}</Text>
-
-          {/* Weight Management and Food Log buttons for dogs */}
-          {item.type === PetType.DOG && (
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleNavigateToWeight(item.id)}
-              >
-                <Ionicons name="fitness" size={16} color={COLORS.primary} />
-                <Text style={styles.actionButtonText}>Weight</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleNavigateToFoodLog(item.id)}
-              >
-                <Ionicons name="restaurant" size={16} color={COLORS.primary} />
-                <Text style={styles.actionButtonText}>Food Log</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-        <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
-      </View>
-    );
-  };
-
-  const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Ionicons name="paw-outline" size={64} color={COLORS.textLight} />
-      <Text style={styles.emptyStateTitle}>No pets added yet</Text>
-      <Text style={styles.emptyStateText}>
-        Tap the + button to add your first furry, feathered, or scaly friend!
-      </Text>
-      {__DEV__ && (
-        <Text style={[styles.emptyStateText, { color: COLORS.warning, marginTop: SPACING.sm }]}>
-          🧪 Development: Tap the flask button to add sample pets
-        </Text>
-      )}
-    </View>
+  const handleNavigateToWeight = useCallback(
+    (petId: string) => {
+      info('Navigation to Weight Management', {
+        context: {
+          screen: 'PetsScreen',
+          targetScreen: 'WeightManagement',
+          petId,
+        },
+      });
+      navigation.navigate('WeightManagement', { petId });
+    },
+    [navigation]
   );
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        {/* Development helper button */}
-        {__DEV__ && (
-          <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: COLORS.warning, marginRight: SPACING.sm }]}
-            onPress={handleAddSamplePets}
-            disabled={loading}
-          >
-            <Ionicons name="flask" size={24} color={COLORS.surface} />
-          </TouchableOpacity>
-        )}
+  const handleNavigateToFoodLog = useCallback(
+    (petId: string) => {
+      info('Navigation to Food Log', {
+        context: {
+          screen: 'PetsScreen',
+          targetScreen: 'FoodLog',
+          petId,
+        },
+      });
+      navigation.navigate('FoodLog', { petId });
+    },
+    [navigation]
+  );
 
-        {/* Refresh button */}
+  // Smart refresh function that only refreshes the currently visible pet
+  const handleRefreshPet = useCallback(
+    async (petId: string) => {
+      // Only refresh the pet if it's currently visible to avoid unnecessary renders
+      const petIndex = pets.findIndex(pet => pet.id === petId);
+      const isCurrentlyVisible = petIndex === currentPetIndex;
+
+      if (isCurrentlyVisible) {
+        info('Refreshing currently visible pet', {
+          context: {
+            screen: 'PetsScreen',
+            petId,
+            petIndex,
+            isCurrentlyVisible,
+          },
+        });
+        await refreshPet(petId);
+      } else {
+        info('Skipping refresh for non-visible pet', {
+          context: {
+            screen: 'PetsScreen',
+            petId,
+            petIndex,
+            currentPetIndex,
+            isCurrentlyVisible,
+          },
+        });
+      }
+    },
+    [pets, currentPetIndex, refreshPet]
+  );
+
+  // Set header options with add button only
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
         <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: COLORS.secondary, marginRight: SPACING.sm }]}
-          onPress={handleRefreshPets}
+          style={styles.headerButton}
+          onPress={() => {
+            info('Navigation to Add Pet', {
+              context: {
+                screen: 'PetsScreen',
+                targetScreen: 'AddPet',
+              },
+            });
+            navigation.navigate('AddPet');
+          }}
           disabled={loading}
         >
-          <Ionicons name="refresh" size={24} color={COLORS.surface} />
+          <View style={styles.addButtonCircle}>
+            <Ionicons name="add" size={24} color={COLORS.primary} />
+          </View>
         </TouchableOpacity>
+      ),
+    });
+  }, [navigation, loading]);
 
-        {/* Add pet button */}
-        <TouchableOpacity style={styles.addButton} disabled={loading}>
-          <Ionicons name="add" size={24} color={COLORS.surface} />
-        </TouchableOpacity>
-      </View>
+  // Handle scroll to specific pet (no auto-refresh, only on user interaction)
+  const scrollToPet = (index: number) => {
+    if (flatListRef.current && pets.length > 0) {
+      flatListRef.current.scrollToIndex({ index, animated: true });
+      setCurrentPetIndex(index);
 
+      // Reset the scroll position of the target pet card to top
+      const targetPetId = pets[index]?.id;
+      if (targetPetId) {
+        const scrollViewRef = scrollViewRefs.current[targetPetId];
+        if (scrollViewRef) {
+          // Small delay to ensure the horizontal scroll completes first
+          setTimeout(() => {
+            scrollViewRef.scrollTo({ y: 0, animated: true });
+          }, 200);
+        }
+      }
+    }
+  };
+
+  // Handle scroll events for horizontal navigation (no auto-refresh)
+  const handleHorizontalScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const contentOffsetX = event.nativeEvent.contentOffset.x;
+      const index = Math.round(contentOffsetX / SCREEN_WIDTH);
+      if (index !== currentPetIndex && index >= 0 && index < pets.length) {
+        const previousIndex = currentPetIndex;
+        setCurrentPetIndex(index);
+
+        info('Pet card scroll detected', {
+          context: {
+            screen: 'PetsScreen',
+            previousPetIndex: previousIndex,
+            newPetIndex: index,
+            petId: pets[index]?.id,
+            petName: pets[index]?.name,
+          },
+        });
+      }
+    },
+    [currentPetIndex, pets]
+  );
+
+  // Optimized render function with detailed logging
+  const renderPetCard = useCallback(
+    ({ item, index }: { item: Pet; index: number }) => {
+      const petLoading = getPetLoadingState(item.id);
+
+      // Log only when development mode for debugging
+      if (__DEV__) {
+        info('Rendering pet card', {
+          context: {
+            screen: 'PetsScreen',
+            petId: item.id,
+            petName: item.name,
+            index,
+            currentPetIndex,
+            isCurrentCard: index === currentPetIndex,
+          },
+        });
+      }
+
+      return (
+        <PetCard
+          ref={ref => {
+            scrollViewRefs.current[item.id] = ref;
+          }}
+          pet={item}
+          loading={petLoading}
+          onRefresh={handleRefreshPet}
+          onNavigateToWeight={handleNavigateToWeight}
+          onNavigateToFoodLog={handleNavigateToFoodLog}
+        />
+      );
+    },
+    [
+      currentPetIndex,
+      getPetLoadingState,
+      handleRefreshPet,
+      handleNavigateToWeight,
+      handleNavigateToFoodLog,
+    ]
+  );
+
+  const keyExtractor = useCallback((item: Pet) => item.id, []);
+
+  if (pets.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={[]}>
+        <EmptyState />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container} edges={[]}>
       <FlatList
+        ref={flatListRef}
         data={pets}
-        renderItem={renderPetItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyState}
-        refreshing={loading}
-        onRefresh={handleRefreshPets}
+        renderItem={renderPetCard}
+        keyExtractor={keyExtractor}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleHorizontalScroll}
+        scrollEventThrottle={100}
+        getItemLayout={(_, index) => ({
+          length: SCREEN_WIDTH,
+          offset: SCREEN_WIDTH * index,
+          index,
+        })}
+        // Ultra-optimized settings for single-card rendering
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        windowSize={1}
+        removeClippedSubviews={true}
+        viewabilityConfig={{
+          itemVisiblePercentThreshold: 100,
+          minimumViewTime: 300,
+        }}
+        // Prevent over-scrolling and momentum
+        bounces={false}
+        scrollEnabled={!loading}
+        disableIntervalMomentum={true}
+        decelerationRate="fast"
+        snapToInterval={SCREEN_WIDTH}
+        snapToAlignment="start"
+        // Optimize rendering
+        legacyImplementation={false}
+        updateCellsBatchingPeriod={150}
+      />
+      <ScrollIndicator
+        totalItems={pets.length}
+        currentIndex={currentPetIndex}
+        onDotPress={scrollToPet}
       />
     </SafeAreaView>
   );
@@ -175,17 +295,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.md,
+  headerButton: {
+    marginRight: SPACING.md,
+    padding: SPACING.xs,
   },
-  addButton: {
-    backgroundColor: COLORS.primary,
+  addButtonCircle: {
+    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.round,
-    width: 48,
-    height: 48,
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -196,93 +314,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-  },
-  listContainer: {
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.lg,
-    flexGrow: 1,
-  },
-  petCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-    marginBottom: SPACING.md,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  petTypeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BORDER_RADIUS.round,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.md,
-  },
-  petInfo: {
-    flex: 1,
-  },
-  petName: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  petDetails: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.xs,
-  },
-  petType: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-    textTransform: 'capitalize',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    marginTop: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-  },
-  actionButtonText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.primary,
-    marginLeft: SPACING.xs,
-    fontWeight: '500',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.xl,
-  },
-  emptyStateTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginTop: SPACING.lg,
-    marginBottom: SPACING.sm,
-  },
-  emptyStateText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
   },
 });

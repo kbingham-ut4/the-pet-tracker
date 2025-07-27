@@ -6,19 +6,10 @@ import {
   MealType,
 } from '../types';
 import { generateId, formatDate } from '../utils';
-import {
-  info as _info,
-  warn as _warn,
-  error as _error,
-  debug as _debug,
-  getLogger,
-} from '../utils/logging';
+import { info as _info, warn as _warn, error as _error, debug as _debug } from '../utils/logger';
 
 export class NutritionService {
-  // Use getter to avoid initialization issues
-  private static get logger() {
-    return getLogger();
-  }
+  // Logger functions are imported directly
 
   // Common food database with calorie information (per 100g)
   private static readonly COMMON_FOODS = {
@@ -70,7 +61,7 @@ export class NutritionService {
     customCalories?: number,
     customNutrition?: { protein?: number; fat?: number; carbs?: number }
   ): FoodEntry {
-    this.logger.info('Creating food entry', {
+    _info('Creating food entry', {
       context: {
         petId,
         foodName,
@@ -99,7 +90,7 @@ export class NutritionService {
         fat = Math.round(nutrition.fat * multiplier);
         carbs = Math.round(nutrition.carbs * multiplier);
 
-        this.logger.debug('Food nutrition calculated from database', {
+        _debug('Food nutrition calculated from database', {
           context: {
             foodKey,
             multiplier,
@@ -108,7 +99,7 @@ export class NutritionService {
           },
         });
       } else {
-        this.logger.warn('Food not found in database, using zeros', {
+        _warn('Food not found in database, using zeros', {
           context: { foodName, foodKey },
         });
       }
@@ -127,7 +118,7 @@ export class NutritionService {
       mealType,
     };
 
-    this.logger.info('Food entry created successfully', {
+    _info('Food entry created successfully', {
       context: {
         entryId: foodEntry.id,
         totalCalories: calories,

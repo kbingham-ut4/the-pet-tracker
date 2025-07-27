@@ -10,12 +10,12 @@
 // Import the storage system
 import {
   StorageFactory,
-  OfflinePetStorageService,
   StorageConfigHelper,
   PetTrackerStorageManager as _PetTrackerStorageManager,
 } from './index';
+import { OfflinePetStorageService } from './services';
 import { Pet, PetType } from '../types';
-import { info, error } from '../utils/logging';
+import { info, error } from '../utils/logger';
 
 /**
  * Basic Storage Operations

@@ -4,7 +4,7 @@ import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RootNavigator from './src/navigation/RootNavigator';
 import { PetProvider } from './src/contexts/PetContext';
-import { initializeLogger, info } from './src/utils/logging';
+import { info } from './src/utils/logger';
 import { StorageFactory } from './src/storage';
 
 export default function App() {
@@ -15,18 +15,8 @@ export default function App() {
     // Initialize systems on app startup
     const initSystems = async () => {
       try {
-        // Initialize logging first
-        await initializeLogger({
-          enableConsole: true,
-          enableBetterStack: !__DEV__, // Only enable in production/staging
-          betterStackToken: process.env.EXPO_PUBLIC_BETTERSTACK_TOKEN,
-          logLevel: __DEV__ ? 'debug' : 'info',
-          context: {
-            appVersion: '1.0.0',
-            platform: 'mobile',
-            environment: process.env.EXPO_PUBLIC_ENV || 'development',
-          },
-        });
+        // Logger is now automatically initialized
+        // No initialization needed for the simple logger
 
         setIsLoggerInitialized(true);
 

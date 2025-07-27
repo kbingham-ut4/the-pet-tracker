@@ -74,7 +74,7 @@ export default function HealthScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={[]}>
       <FlatList
         data={[...upcomingVisits, ...overdueVaccinations]}
         renderItem={props => {

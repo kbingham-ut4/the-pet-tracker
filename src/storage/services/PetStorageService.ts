@@ -6,7 +6,7 @@
 
 import { Pet, PetType as _PetType } from '../../types';
 import { StorageFactory } from '../index';
-import { info, warn, error, debug, getLogger } from '../../utils/logging';
+import { info, warn, error, debug } from '../../utils/logger';
 import { generateId } from '../../utils';
 
 // Basic interfaces for related data
@@ -57,7 +57,7 @@ export interface PetStorageService {
 }
 
 export class OfflinePetStorageService implements PetStorageService {
-  private logger = getLogger();
+  // Logger functions are imported directly
   private readonly PETS_KEY = 'pets';
 
   private async getStorageManager() {
@@ -74,8 +74,11 @@ export class OfflinePetStorageService implements PetStorageService {
         return [];
       }
 
-      // Filter by user if specified
-      const filteredPets = userId ? pets.filter(pet => pet.ownerId === userId) : pets;
+      // Normalize date fields and filter by user if specified
+      const normalizedPets = pets.map(pet => this.normalizePetData(pet));
+      const filteredPets = userId
+        ? normalizedPets.filter(pet => pet.ownerId === userId)
+        : normalizedPets;
 
       info('Pets retrieved from storage', {
         context: {
@@ -102,11 +105,11 @@ export class OfflinePetStorageService implements PetStorageService {
 
       if (pet) {
         debug('Pet found', { context: { petId, petName: pet.name } });
+        return this.normalizePetData(pet);
       } else {
         debug('Pet not found', { context: { petId } });
+        return null;
       }
-
-      return pet || null;
     } catch (err) {
       error('Failed to get pet', {
         error: err instanceof Error ? err : new Error('Unknown error'),
@@ -317,6 +320,18 @@ export class OfflinePetStorageService implements PetStorageService {
       });
       throw err;
     }
+  }
+
+  /**
+   * Normalizes pet data from storage by converting date strings to Date objects
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private normalizePetData(pet: any): Pet {
+    return {
+      ...pet,
+      createdAt: typeof pet.createdAt === 'string' ? new Date(pet.createdAt) : pet.createdAt,
+      updatedAt: typeof pet.updatedAt === 'string' ? new Date(pet.updatedAt) : pet.updatedAt,
+    };
   }
 
   private async cleanupRelatedData(petId: string): Promise<void> {

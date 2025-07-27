@@ -21,17 +21,11 @@ vi.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 // Mock logger
-vi.mock('../../utils/logging', () => ({
+vi.mock('../../utils/logger', () => ({
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
   debug: vi.fn(),
-  getLogger: () => ({
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-  }),
 }));
 
 describe('PetTrackerStorageManager', () => {

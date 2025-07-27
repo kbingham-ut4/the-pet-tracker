@@ -2,11 +2,341 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start Pet Tracker Development Server",
+      "label": "Start Development Server",
       "type": "shell",
       "command": "pnpm start",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "isBackground": true,
+      "problemMatcher": ["$tsc"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true
+      }
+    },
+    {
+      "label": "Start Development Server (Tunnel)",
+      "type": "shell",
+      "command": "pnpm start:dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": true,
+      "problemMatcher": ["$tsc"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true
+      }
+    },
+    {
+      "label": "Start Test Environment",
+      "type": "shell",
+      "command": "pnpm start:test",
       "group": "build",
       "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Start Staging Environment",
+      "type": "shell",
+      "command": "pnpm start:staging",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Start Production Environment",
+      "type": "shell",
+      "command": "pnpm start:prod",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on Android",
+      "type": "shell",
+      "command": "pnpm android",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on Android (Dev)",
+      "type": "shell",
+      "command": "pnpm android:dev",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on Android (Test)",
+      "type": "shell",
+      "command": "pnpm android:test",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on Android (Staging)",
+      "type": "shell",
+      "command": "pnpm android:staging",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on iOS",
+      "type": "shell",
+      "command": "pnpm ios",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on iOS (Dev)",
+      "type": "shell",
+      "command": "pnpm ios:dev",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on iOS (Test)",
+      "type": "shell",
+      "command": "pnpm ios:test",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on iOS (Staging)",
+      "type": "shell",
+      "command": "pnpm ios:staging",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Run on Web",
+      "type": "shell",
+      "command": "pnpm web",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Build Development",
+      "type": "shell",
+      "command": "pnpm build:dev",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Test",
+      "type": "shell",
+      "command": "pnpm build:test",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Staging",
+      "type": "shell",
+      "command": "pnpm build:staging",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Production",
+      "type": "shell",
+      "command": "pnpm build:prod",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Submit Production",
+      "type": "shell",
+      "command": "pnpm submit:prod",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": "pnpm lint",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "isBackground": false,
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "Lint Fix",
+      "type": "shell",
+      "command": "pnpm lint:fix",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "Format Code",
+      "type": "shell",
+      "command": "pnpm format",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Check Format",
+      "type": "shell",
+      "command": "pnpm format:check",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Type Check",
+      "type": "shell",
+      "command": "pnpm type-check",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Test (Watch Mode)",
+      "type": "shell",
+      "command": "pnpm test",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Run",
+      "type": "shell",
+      "command": "pnpm test:run",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Coverage",
+      "type": "shell",
+      "command": "pnpm test:coverage",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Test UI",
+      "type": "shell",
+      "command": "pnpm test:ui",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Watch",
+      "type": "shell",
+      "command": "pnpm test:watch",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Docs Dev",
+      "type": "shell",
+      "command": "pnpm docs:dev",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Docs Build",
+      "type": "shell",
+      "command": "pnpm docs:build",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Docs Preview",
+      "type": "shell",
+      "command": "pnpm docs:preview",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Prepare Husky",
+      "type": "shell",
+      "command": "pnpm prepare",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Commit",
+      "type": "shell",
+      "command": "pnpm commit",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Commit Retry",
+      "type": "shell",
+      "command": "pnpm commit:retry",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Quality Check",
+      "type": "shell",
+      "command": "pnpm quality:check",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": ["$eslint-stylish", "$tsc"]
+    },
+    {
+      "label": "Quality Fix",
+      "type": "shell",
+      "command": "pnpm quality:fix",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "Pre-push Check",
+      "type": "shell",
+      "command": "pnpm pre-push",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": ["$eslint-stylish", "$tsc"]
+    },
+    {
+      "label": "Setup Copilot",
+      "type": "shell",
+      "command": "pnpm setup:copilot",
+      "group": "build",
+      "isBackground": false,
       "problemMatcher": []
     }
   ]
