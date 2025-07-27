@@ -2,13 +2,12 @@ import { Platform } from 'react-native';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from './Logger';
 import { LoggerConfig, LogLevel } from './types';
-import { ConsoleProvider, BetterStackProvider, FileProvider } from './providers';
+import { ConsoleProvider, BetterStackProvider } from './providers';
 import { config } from '../../config';
 
 export interface LoggerFactoryConfig {
   enableConsole?: boolean;
   enableBetterStack?: boolean;
-  enableFile?: boolean;
   betterStackToken?: string;
   betterStackEndpoint?: string;
   logLevel?: LogLevel;
@@ -23,7 +22,6 @@ export class LoggerFactory {
     const {
       enableConsole = config.enableLogging,
       enableBetterStack = config.environment === 'production' || config.environment === 'staging',
-      enableFile = config.enableDebugMode,
       betterStackToken = process.env.EXPO_PUBLIC_BETTERSTACK_TOKEN,
       betterStackEndpoint = process.env.EXPO_PUBLIC_BETTERSTACK_ENDPOINT,
       logLevel = config.enableDebugMode ? 'debug' : 'info',
@@ -46,16 +44,6 @@ export class LoggerFactory {
           endpoint: betterStackEndpoint,
           batchSize: 50,
           flushInterval: 5000,
-        })
-      );
-    }
-
-    // Add file provider for development
-    if (enableFile && __DEV__) {
-      providers.push(
-        new FileProvider({
-          filename: `pet-tracker-${config.environment}.log`,
-          maxFileSize: 10 * 1024 * 1024, // 10MB
         })
       );
     }
@@ -96,7 +84,6 @@ export class LoggerFactory {
     return this.createLogger({
       enableConsole: true,
       enableBetterStack: false,
-      enableFile: true,
       logLevel: 'debug',
       userId,
       context: {
@@ -112,7 +99,6 @@ export class LoggerFactory {
     return this.createLogger({
       enableConsole: false,
       enableBetterStack: true,
-      enableFile: false,
       betterStackToken,
       logLevel: 'info',
       userId,
@@ -126,7 +112,6 @@ export class LoggerFactory {
     return this.createLogger({
       enableConsole: true,
       enableBetterStack: false,
-      enableFile: false,
       logLevel: 'warn',
       context: {
         isTesting: true,

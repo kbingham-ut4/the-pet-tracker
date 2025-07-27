@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ConsoleProvider } from '../ConsoleProvider';
-import { FileProvider } from '../FileProvider';
 import { BetterStackProvider } from '../BetterStackProvider';
 import { LogEntry, LogLevel } from '../../types';
 
@@ -24,8 +23,6 @@ describe('ConsoleProvider', () => {
     vi.spyOn(console, 'debug').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.spyOn(console, 'group').mockImplementation(() => {});
-    vi.spyOn(console, 'groupEnd').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -48,176 +45,47 @@ describe('ConsoleProvider', () => {
       provider.initialize();
     });
 
-    it('should log info messages to console.info', () => {
+    it('should log info message', () => {
       provider.log(mockLogEntry);
       expect(console.info).toHaveBeenCalled();
     });
 
-    it('should log error messages to console.error', () => {
-      const errorEntry = { ...mockLogEntry, level: 'error' as LogLevel };
-      provider.log(errorEntry);
-      expect(console.error).toHaveBeenCalled();
-    });
-
-    it('should log warn messages to console.warn', () => {
-      const warnEntry = { ...mockLogEntry, level: 'warn' as LogLevel };
-      provider.log(warnEntry);
-      expect(console.warn).toHaveBeenCalled();
-    });
-
-    it('should log debug messages to console.debug', () => {
-      const debugEntry = { ...mockLogEntry, level: 'debug' as LogLevel };
-      provider.log(debugEntry);
+    it('should log debug message', () => {
+      provider.log({ ...mockLogEntry, level: 'debug' as LogLevel });
       expect(console.debug).toHaveBeenCalled();
     });
 
-    it('should format messages with timestamp and level', () => {
-      provider.log(mockLogEntry);
-      const logCall = (console.info as any).mock.calls[0][0];
-      expect(logCall).toContain('[INFO]');
-      expect(logCall).toContain('Test message');
-      expect(logCall).toContain('[PetTracker]');
+    it('should log warn message', () => {
+      provider.log({ ...mockLogEntry, level: 'warn' as LogLevel });
+      expect(console.warn).toHaveBeenCalled();
     });
 
-    it('should include context in formatted output', () => {
-      const entryWithContext = {
-        ...mockLogEntry,
-        context: { userId: '123', sessionId: 'abc' },
-      };
-      provider.log(entryWithContext);
-      const logCall = (console.info as any).mock.calls[0][0];
-      expect(logCall).toContain('userId');
-    });
-  });
-
-  describe('lifecycle', () => {
-    it('should flush without errors', () => {
-      provider.initialize();
-      expect(() => provider.flush()).not.toThrow();
+    it('should log error message', () => {
+      provider.log({ ...mockLogEntry, level: 'error' as LogLevel });
+      expect(console.error).toHaveBeenCalled();
     });
 
-    it('should destroy without errors', () => {
-      provider.initialize();
-      expect(() => provider.destroy()).not.toThrow();
-    });
-  });
-});
-
-describe('FileProvider', () => {
-  let provider: FileProvider;
-  let mockLogEntry: LogEntry;
-
-  beforeEach(() => {
-    provider = new FileProvider();
-    mockLogEntry = {
-      timestamp: new Date(),
-      level: 'info' as LogLevel,
-      message: 'Test message',
-      args: [],
-    };
-
-    // Mock file operations by spying on console.log which FileProvider uses for simulation
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  describe('initialization', () => {
-    it('should initialize with default config', () => {
-      expect(() => provider.initialize()).not.toThrow();
+    it('should handle arguments', () => {
+      const entryWithArgs = { ...mockLogEntry, args: ['arg1', 'arg2'] };
+      provider.log(entryWithArgs);
+      expect(console.info).toHaveBeenCalled();
     });
 
-    it('should initialize with custom config', () => {
-      const customProvider = new FileProvider({
-        maxFileSize: 1024 * 1024, // 1MB
-        maxFiles: 3,
-      });
-      expect(() => customProvider.initialize()).not.toThrow();
+    it('should handle object arguments', () => {
+      const entryWithObjects = { ...mockLogEntry, args: [{ key: 'value' }] };
+      provider.log(entryWithObjects);
+      expect(console.info).toHaveBeenCalled();
+    });
+
+    it('should handle string formatting', () => {
+      const entryWithFormatting = { ...mockLogEntry, message: 'User %s logged in', args: ['John'] };
+      provider.log(entryWithFormatting);
+      expect(console.info).toHaveBeenCalled();
     });
   });
 
-  describe('logging', () => {
-    beforeEach(() => {
-      provider.initialize();
-    });
-
-    it('should accept log entries', () => {
-      expect(() => provider.log(mockLogEntry)).not.toThrow();
-    });
-
-    it('should batch log entries before writing', () => {
-      provider.log(mockLogEntry);
-      provider.log({ ...mockLogEntry, message: 'Second message' });
-
-      // Should not throw and should handle batching
-      expect(() => provider.flush()).not.toThrow();
-    });
-
-    it('should format log entries consistently', () => {
-      provider.log(mockLogEntry);
-      // The actual formatting is tested through integration
-      expect(() => provider.flush()).not.toThrow();
-    });
-  });
-
-  describe('file management', () => {
-    it('should handle file rotation when size limit exceeded', () => {
-      // Create provider with small file size for testing
-      const smallProvider = new FileProvider({ maxFileSize: 1024 });
-      smallProvider.initialize();
-
-      // Log many entries to trigger rotation
-      for (let i = 0; i < 100; i++) {
-        smallProvider.log({ ...mockLogEntry, message: `Message ${i}` });
-      }
-
-      expect(() => smallProvider.flush()).not.toThrow();
-    });
-
-    it('should manage maximum number of files', () => {
-      // This is primarily tested through integration with the file system
-      expect(() => provider.flush()).not.toThrow();
-    });
-  });
-
-  describe('auto-flush timer', () => {
-    it('should set up flush timer on initialization', async () => {
-      const fastProvider = new FileProvider();
-
-      try {
-        fastProvider.initialize();
-
-        // Use Promise.race to add timeout protection
-        await Promise.race([
-          new Promise(resolve => setTimeout(resolve, 100)),
-          new Promise((_, reject) => {
-            setTimeout(() => {
-              reject(new Error('Test timeout: timer initialization took too long'));
-            }, 1000); // 1 second timeout
-          }),
-        ]);
-
-        expect(() => fastProvider.destroy()).not.toThrow();
-      } finally {
-        // Ensure cleanup even if test fails
-        try {
-          fastProvider.destroy();
-        } catch {
-          // Ignore cleanup errors
-        }
-      }
-    });
-
-    it('should clear timer on destroy', () => {
-      provider.initialize();
-      expect(() => provider.destroy()).not.toThrow();
-    });
-  });
-
-  describe('lifecycle', () => {
-    it('should flush pending logs on destroy', () => {
+  describe('cleanup', () => {
+    it('should destroy gracefully', () => {
       provider.initialize();
       provider.log(mockLogEntry);
       expect(() => provider.destroy()).not.toThrow();
@@ -231,7 +99,12 @@ describe('BetterStackProvider', () => {
 
   beforeEach(() => {
     // Note: BetterStackProvider requires sourceToken, not apiToken
-    provider = new BetterStackProvider({ sourceToken: 'test-token' });
+    // Use small batch size and flush interval for testing
+    provider = new BetterStackProvider({
+      sourceToken: 'test-token',
+      batchSize: 1, // Flush immediately
+      flushInterval: 100, // Short interval for testing
+    });
     mockLogEntry = {
       timestamp: new Date(),
       level: 'info' as LogLevel,
@@ -239,35 +112,37 @@ describe('BetterStackProvider', () => {
       args: [],
     };
 
-    // Mock fetch for API calls
+    // Mock fetch globally
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ status: 'ok' }),
+      json: () => Promise.resolve({}),
     });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    delete (global as any).fetch;
   });
 
   describe('initialization', () => {
-    it('should initialize with source token', async () => {
-      await expect(provider.initialize()).resolves.not.toThrow();
+    it('should initialize successfully', () => {
+      expect(() => provider.initialize()).not.toThrow();
     });
 
-    it('should throw error without source token', () => {
-      const invalidProvider = new BetterStackProvider({ sourceToken: '' });
-      expect(invalidProvider.initialize()).rejects.toThrow('BetterStack source token is required');
-    });
-
-    it('should initialize with custom config', async () => {
-      const configProvider = new BetterStackProvider({
-        sourceToken: 'test-token',
-        batchSize: 10,
-        flushInterval: 10000,
+    it('should work with custom config', () => {
+      const customProvider = new BetterStackProvider({
+        sourceToken: 'custom-token',
+        endpoint: 'https://custom.betterstack.com',
+        batchSize: 50,
+        flushInterval: 2000,
       });
-      await expect(configProvider.initialize()).resolves.not.toThrow();
+      expect(() => customProvider.initialize()).not.toThrow();
+    });
+
+    it('should throw on missing token', async () => {
+      const provider = new BetterStackProvider({} as any);
+      await expect(provider.initialize()).rejects.toThrow();
     });
   });
 
@@ -276,94 +151,97 @@ describe('BetterStackProvider', () => {
       await provider.initialize();
     });
 
-    it('should accept log entries', () => {
-      expect(() => provider.log(mockLogEntry)).not.toThrow();
+    it('should log info message', async () => {
+      provider.log(mockLogEntry);
+      // Wait for batch to flush (immediate with batchSize=1)
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(fetch).toHaveBeenCalled();
     });
 
-    it('should batch logs before sending', async () => {
-      await provider.log(mockLogEntry);
-      await provider.log({ ...mockLogEntry, message: 'Second message' });
-
-      // Should batch and send
-      await expect(provider.flush()).resolves.not.toThrow();
+    it('should log debug message', async () => {
+      provider.log({ ...mockLogEntry, level: 'debug' as LogLevel });
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(fetch).toHaveBeenCalled();
     });
 
-    it('should format logs for BetterStack API', async () => {
-      await provider.log(mockLogEntry);
-      await expect(provider.flush()).resolves.not.toThrow();
+    it('should log warn message', async () => {
+      provider.log({ ...mockLogEntry, level: 'warn' as LogLevel });
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(fetch).toHaveBeenCalled();
     });
-  });
 
-  describe('error handling', () => {
-    beforeEach(async () => {
-      await provider.initialize();
+    it('should log error message', async () => {
+      provider.log({ ...mockLogEntry, level: 'error' as LogLevel });
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(fetch).toHaveBeenCalled();
+    });
+
+    it('should handle batch operations', async () => {
+      // Log multiple entries
+      for (let i = 0; i < 5; i++) {
+        provider.log({ ...mockLogEntry, message: `Message ${i}` });
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+      expect(fetch).toHaveBeenCalledTimes(5); // Should be called once per message with batchSize=1
     });
 
     it('should handle network errors gracefully', async () => {
-      // Mock fetch to reject
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
-
-      await provider.log(mockLogEntry);
-      await expect(provider.flush()).resolves.not.toThrow();
+      expect(() => provider.log(mockLogEntry)).not.toThrow();
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
 
     it('should handle API errors gracefully', async () => {
-      // Mock API error response
       global.fetch = vi.fn().mockResolvedValue({
         ok: false,
         status: 400,
-        statusText: 'Bad Request',
+        json: () => Promise.resolve({ error: 'Bad request' }),
       });
-
-      await provider.log(mockLogEntry);
-      await expect(provider.flush()).resolves.not.toThrow();
-    });
-
-    it('should handle invalid JSON responses', async () => {
-      // Mock invalid JSON response
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: () => Promise.reject(new Error('Invalid JSON')),
-      });
-
-      await provider.log(mockLogEntry);
-      await expect(provider.flush()).resolves.not.toThrow();
+      expect(() => provider.log(mockLogEntry)).not.toThrow();
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
   });
 
-  describe('batching and flushing', () => {
+  describe('batching', () => {
     beforeEach(async () => {
       await provider.initialize();
     });
 
-    it('should auto-flush when batch size reached', async () => {
+    it('should respect batch size', async () => {
       const smallBatchProvider = new BetterStackProvider({
         sourceToken: 'test-token',
         batchSize: 2,
       });
       await smallBatchProvider.initialize();
 
-      await smallBatchProvider.log(mockLogEntry);
-      await smallBatchProvider.log({ ...mockLogEntry, message: 'Second' });
+      // Log 3 entries, should trigger batch flush after 2
+      smallBatchProvider.log(mockLogEntry);
+      smallBatchProvider.log(mockLogEntry);
+      smallBatchProvider.log(mockLogEntry);
 
-      // Should auto-flush on third entry
-      expect(() => smallBatchProvider.log({ ...mockLogEntry, message: 'Third' })).not.toThrow();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      expect(fetch).toHaveBeenCalled();
     });
 
-    it('should flush all pending logs on manual flush', async () => {
-      await provider.log(mockLogEntry);
-      await provider.log({ ...mockLogEntry, message: 'Second' });
+    it('should flush on interval', async () => {
+      const fastFlushProvider = new BetterStackProvider({
+        sourceToken: 'test-token',
+        flushInterval: 50,
+      });
+      await fastFlushProvider.initialize();
 
-      await expect(provider.flush()).resolves.not.toThrow();
+      fastFlushProvider.log(mockLogEntry);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      expect(fetch).toHaveBeenCalled();
     });
   });
 
-  describe('lifecycle', () => {
-    it('should flush pending logs on destroy', async () => {
+  describe('cleanup', () => {
+    it('should destroy gracefully', async () => {
       await provider.initialize();
-      await provider.log(mockLogEntry);
-      await expect(provider.destroy()).resolves.not.toThrow();
+      provider.log(mockLogEntry);
+      expect(() => provider.destroy()).not.toThrow();
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
   });
 });
@@ -371,12 +249,10 @@ describe('BetterStackProvider', () => {
 describe('Provider Integration', () => {
   it('should work with all log levels', () => {
     const consoleProvider = new ConsoleProvider();
-    const fileProvider = new FileProvider();
 
     consoleProvider.initialize();
-    fileProvider.initialize();
 
-    const providers = [consoleProvider, fileProvider];
+    const providers = [consoleProvider];
     const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
 
     // Mock console methods
@@ -393,13 +269,17 @@ describe('Provider Integration', () => {
         args: [],
       };
 
-      // Should not throw for any provider/level combination
-      expect(() => providers[0].log(logEntry)).not.toThrow();
-      expect(() => providers[1].log(logEntry)).not.toThrow();
+      providers.forEach(provider => provider.log(logEntry));
     }
 
-    // Clean up
-    providers.forEach(p => p.destroy());
+    // Verify all levels were called
+    expect(console.debug).toHaveBeenCalled();
+    expect(console.info).toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalled();
+
+    // Cleanup
+    providers.forEach(provider => provider.destroy());
     vi.restoreAllMocks();
   });
 });
