@@ -66,6 +66,16 @@ export default function PetsScreen() {
     navigation.navigate('FoodLog', { petId });
   };
 
+  const handleAddPet = () => {
+    info('Navigation to Add Pet', {
+      context: {
+        screen: 'PetsScreen',
+        targetScreen: 'AddPet',
+      },
+    });
+    navigation.navigate('AddPet');
+  };
+
   const renderPetItem = ({ item }: { item: Pet }) => {
     debug('Rendering pet item', { context: { petId: item.id, petName: item.name } });
 
@@ -151,7 +161,7 @@ export default function PetsScreen() {
         </TouchableOpacity>
 
         {/* Add pet button */}
-        <TouchableOpacity style={styles.addButton} disabled={loading}>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddPet} disabled={loading}>
           <Ionicons name="add" size={24} color={COLORS.surface} />
         </TouchableOpacity>
       </View>

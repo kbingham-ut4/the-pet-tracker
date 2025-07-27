@@ -5,6 +5,7 @@ import { RootStackParamList } from '../types';
 import TabNavigator from './TabNavigator';
 import WeightManagementScreen from '../screens/WeightManagementScreen';
 import FoodLogScreen from '../screens/FoodLogScreen';
+import { AddPetScreen } from '../screens';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -18,6 +19,7 @@ export default function RootNavigator() {
         }}
       >
         <Stack.Screen name="Main" component={TabNavigator} />
+        <Stack.Screen name="AddPet" component={AddPetScreen} options={{ headerShown: false }} />
         <Stack.Screen
           name="WeightManagement"
           component={WeightManagementScreen}
