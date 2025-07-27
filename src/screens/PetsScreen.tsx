@@ -1,17 +1,33 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants';
+import { COLORS, SPACING, BORDER_RADIUS } from '../constants';
 import { usePets } from '../contexts';
-import { Pet, PetType } from '../types';
+import { Pet } from '../types';
 import { RootStackNavigationProp } from '../types/Navigation';
-import { info, debug, error } from '../utils/logging';
+import { info, error } from '../utils/logging';
+import { PetCard } from '../components/PetCard';
+import { ScrollIndicator, EmptyState } from '../components';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function PetsScreen() {
   const { pets, loadPetsFromStorage, loading } = usePets();
   const navigation = useNavigation<RootStackNavigationProp>();
+  const [currentPetIndex, setCurrentPetIndex] = useState(0);
+  const flatListRef = useRef<FlatList<Pet>>(null);
+  const scrollViewRefs = useRef<{ [key: string]: ScrollView | null }>({});
 
   // Log screen view
   React.useEffect(() => {
@@ -23,6 +39,21 @@ export default function PetsScreen() {
       },
     });
   }, [pets.length]);
+
+  // Reset scroll position to top when switching between pets
+  React.useEffect(() => {
+    if (pets.length > 0 && pets[currentPetIndex]) {
+      const currentPetId = pets[currentPetIndex].id;
+      const scrollViewRef = scrollViewRefs.current[currentPetId];
+
+      if (scrollViewRef) {
+        // Small delay to ensure the card is fully rendered
+        setTimeout(() => {
+          scrollViewRef.scrollTo({ y: 0, animated: true });
+        }, 100);
+      }
+    }
+  }, [currentPetIndex, pets]);
 
   const handleRefreshPets = async () => {
     try {
@@ -56,7 +87,7 @@ export default function PetsScreen() {
     navigation.navigate('FoodLog', { petId });
   };
 
-  // Set header options with add button
+  // Set header options with add button only
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -81,73 +112,81 @@ export default function PetsScreen() {
     });
   }, [navigation, loading]);
 
-  const renderPetItem = ({ item }: { item: Pet }) => {
-    debug('Rendering pet item', { context: { petId: item.id, petName: item.name } });
+  // Handle scroll to specific pet
+  const scrollToPet = (index: number) => {
+    if (flatListRef.current && pets.length > 0) {
+      flatListRef.current.scrollToIndex({ index, animated: true });
+      setCurrentPetIndex(index);
 
+      // Reset the scroll position of the target pet card to top
+      const targetPetId = pets[index]?.id;
+      if (targetPetId) {
+        const scrollViewRef = scrollViewRefs.current[targetPetId];
+        if (scrollViewRef) {
+          // Small delay to ensure the horizontal scroll completes first
+          setTimeout(() => {
+            scrollViewRef.scrollTo({ y: 0, animated: true });
+          }, 200);
+        }
+      }
+    }
+  };
+
+  // Handle scroll events for horizontal navigation
+  const handleHorizontalScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffsetX / SCREEN_WIDTH);
+    if (index !== currentPetIndex && index >= 0 && index < pets.length) {
+      setCurrentPetIndex(index);
+    }
+  };
+
+  const renderPetCard = ({ item }: { item: Pet }) => {
     return (
-      <View style={styles.petCard}>
-        <View
-          style={[
-            styles.petTypeIcon,
-            { backgroundColor: COLORS.petColors[item.type] || COLORS.petColors.other },
-          ]}
-        >
-          <Ionicons name="paw" size={24} color={COLORS.surface} />
-        </View>
-        <View style={styles.petInfo}>
-          <Text style={styles.petName}>{item.name}</Text>
-          <Text style={styles.petDetails}>
-            {item.breed} • {item.age ? `${item.age} years old` : 'Age unknown'}
-          </Text>
-          <Text style={styles.petType}>{item.type}</Text>
-
-          {/* Weight Management and Food Log buttons for dogs */}
-          {item.type === PetType.DOG && (
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleNavigateToWeight(item.id)}
-              >
-                <Ionicons name="fitness" size={16} color={COLORS.primary} />
-                <Text style={styles.actionButtonText}>Weight</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleNavigateToFoodLog(item.id)}
-              >
-                <Ionicons name="restaurant" size={16} color={COLORS.primary} />
-                <Text style={styles.actionButtonText}>Food Log</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-        <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
-      </View>
+      <PetCard
+        ref={ref => {
+          scrollViewRefs.current[item.id] = ref;
+        }}
+        pet={item}
+        loading={loading}
+        onRefresh={handleRefreshPets}
+        onNavigateToWeight={handleNavigateToWeight}
+        onNavigateToFoodLog={handleNavigateToFoodLog}
+      />
     );
   };
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Ionicons name="paw-outline" size={64} color={COLORS.textLight} />
-      <Text style={styles.emptyStateTitle}>No pets added yet</Text>
-      <Text style={styles.emptyStateText}>
-        Tap the + button to add your first furry, feathered, or scaly friend!
-      </Text>
-    </View>
-  );
+  if (pets.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <EmptyState />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <FlatList
+        ref={flatListRef}
         data={pets}
-        renderItem={renderPetItem}
+        renderItem={renderPetCard}
         keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyState}
-        refreshing={loading}
-        onRefresh={handleRefreshPets}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.flatListContainer}
+        onScroll={handleHorizontalScroll}
+        scrollEventThrottle={16}
+        getItemLayout={(_, index) => ({
+          length: SCREEN_WIDTH,
+          offset: SCREEN_WIDTH * index,
+          index,
+        })}
+      />
+      <ScrollIndicator
+        totalItems={pets.length}
+        currentIndex={currentPetIndex}
+        onDotPress={scrollToPet}
       />
     </SafeAreaView>
   );
@@ -178,92 +217,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  listContainer: {
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.lg,
+  flatListContainer: {
     flexGrow: 1,
-  },
-  petCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-    marginBottom: SPACING.md,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  petTypeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BORDER_RADIUS.round,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.md,
-  },
-  petInfo: {
-    flex: 1,
-  },
-  petName: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  petDetails: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.xs,
-  },
-  petType: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textLight,
-    textTransform: 'capitalize',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    marginTop: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.sm,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-  },
-  actionButtonText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.primary,
-    marginLeft: SPACING.xs,
-    fontWeight: '500',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.xl,
-  },
-  emptyStateTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginTop: SPACING.lg,
-    marginBottom: SPACING.sm,
-  },
-  emptyStateText: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
   },
 });

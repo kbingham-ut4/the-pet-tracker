@@ -14,7 +14,7 @@ export default function HomeScreen() {
   const recentActivities = activities.slice(-5).reverse();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Welcome to Pet Tracker</Text>
 

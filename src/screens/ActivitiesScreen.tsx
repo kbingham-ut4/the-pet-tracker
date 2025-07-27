@@ -68,7 +68,7 @@ export default function ActivitiesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <FlatList
         data={sortedActivities}
         renderItem={renderActivityItem}
