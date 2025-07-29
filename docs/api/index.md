@@ -258,8 +258,8 @@ import { formatDate, formatDateTime, generateId } from '@/utils';
 const dateStr = formatDate(new Date()); // "Jan 15, 2025"
 const dateTimeStr = formatDateTime(new Date()); // "Jan 15, 2025, 3:45 PM"
 
-// ID generation
-const id = generateId(); // Unique string ID
+// ID generation (UUID v4)
+const id = generateId(); // Generates a UUID v4 unique identifier
 ```
 
 ## Configuration

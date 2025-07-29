@@ -81,6 +81,7 @@ export default defineConfig({
         items: [
           { text: 'Development Workflow', link: '/development/workflow' },
           { text: 'GitHub Actions & CI/CD', link: '/development/github-actions' },
+          { text: 'ID Management', link: '/development/id-management' },
           { text: 'Logging System', link: '/development/logging' },
           { text: 'Storage System', link: '/development/storage' },
           { text: 'Code Style', link: '/development/code-style' },

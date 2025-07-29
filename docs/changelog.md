@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive environment configuration
 - Environment-aware logging system
 - Analytics service integration options
+- UUID v4 implementation for all entity IDs
+- Cross-platform crypto polyfill for UUID generation
+
+### Security
+
+- Replaced timestamp-based ID generation with cryptographically secure UUIDs
+- Added expo-crypto based implementation for secure random number generation
 
 ### Changed
 

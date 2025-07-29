@@ -4,20 +4,22 @@ import { StorageConfig, StorageQuery } from '../types';
 import { mockPet } from '../../test/test-utils';
 
 // Mock AsyncStorage
-const mockAsyncStorage = {
-  setItem: vi.fn(),
-  getItem: vi.fn(),
-  removeItem: vi.fn(),
-  getAllKeys: vi.fn(),
-  multiGet: vi.fn(),
-  multiSet: vi.fn(),
-  multiRemove: vi.fn(),
-  clear: vi.fn(),
-};
-
 vi.mock('@react-native-async-storage/async-storage', () => ({
-  default: mockAsyncStorage,
+  default: {
+    setItem: vi.fn(),
+    getItem: vi.fn(),
+    removeItem: vi.fn(),
+    getAllKeys: vi.fn(),
+    multiGet: vi.fn(),
+    multiSet: vi.fn(),
+    multiRemove: vi.fn(),
+    clear: vi.fn(),
+  },
 }));
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const mockAsyncStorage = AsyncStorage as any;
 
 // Mock logger
 vi.mock('../../utils/logger', () => ({

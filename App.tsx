@@ -6,6 +6,8 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { PetProvider } from './src/contexts/PetContext';
 import { info } from './src/utils/logger';
 import { StorageFactory } from './src/storage';
+// Import crypto polyfill early to ensure it's available throughout the app
+import './src/utils/cryptoPolyfill';
 
 export default function App() {
   const [isLoggerInitialized, setIsLoggerInitialized] = useState(false);

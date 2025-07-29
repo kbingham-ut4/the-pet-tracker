@@ -5,20 +5,21 @@ import { StorageConfig, StorageItem as _StorageItem } from '../types';
 import { mockPet, wait as _wait } from '../../test/test-utils';
 
 // Mock AsyncStorage
-const mockAsyncStorage = {
-  setItem: vi.fn(),
-  getItem: vi.fn(),
-  removeItem: vi.fn(),
-  getAllKeys: vi.fn(),
-  multiGet: vi.fn(),
-  multiSet: vi.fn(),
-  multiRemove: vi.fn(),
-  clear: vi.fn(),
-};
-
 vi.mock('@react-native-async-storage/async-storage', () => ({
-  default: mockAsyncStorage,
+  default: {
+    setItem: vi.fn(),
+    getItem: vi.fn(),
+    removeItem: vi.fn(),
+    getAllKeys: vi.fn(),
+    multiGet: vi.fn(),
+    multiSet: vi.fn(),
+    multiRemove: vi.fn(),
+    clear: vi.fn(),
+  },
 }));
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const mockAsyncStorage = AsyncStorage as any;
 
 // Mock logger
 vi.mock('../../utils/logger', () => ({

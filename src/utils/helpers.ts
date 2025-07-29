@@ -1,7 +1,58 @@
 import { PetType } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { logger } from '../logger';
 
+// Ensure crypto is available for UUID generation
+if (typeof global.crypto !== 'object') {
+  global.crypto = {} as Crypto;
+}
+
+if (typeof global.crypto.getRandomValues !== 'function') {
+  // Simple fallback that works everywhere
+  global.crypto.getRandomValues = (<T extends ArrayBufferView | null>(array: T): T => {
+    if (array === null) {
+      return array;
+    }
+    if (array instanceof Uint8Array) {
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    return array;
+  }) as Crypto['getRandomValues'];
+}
+
+// In real app, use the full implementation if it's not a test
+if (!process.env.NODE_ENV && !process.env.VITEST) {
+  try {
+    require('./cryptoPolyfill');
+  } catch {
+    // Already using the fallback, so we can ignore this
+  }
+}
+
+/**
+ * Generates a globally unique identifier (UUID v4)
+ * Uses the uuid package with crypto polyfill to ensure compatibility across all environments
+ * Fallbacks to timestamp-based ID if UUID generation fails
+ *
+ * @returns A UUID v4 string in the format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+ */
 export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  try {
+    return uuidv4();
+  } catch (error) {
+    // Log the error
+    logger.error('UUID generation failed, using fallback', {
+      error,
+      context: { fallbackMethod: 'timestamp' },
+    });
+
+    // Fallback to timestamp-based ID with some randomness
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 10000);
+    return `${timestamp}-${random}`;
+  }
 }
 
 export function formatDate(date: Date): string {

@@ -4,6 +4,7 @@ import { CalorieCalculatorFactory } from '../services/CalorieCalculatorFactory';
 import { DogCalorieCalculator } from '../services/CalorieCalculator';
 import { NutritionService } from '../services/NutritionService';
 import { DailyNutritionSummary, WeightGoal, ActivityLevel, MealType, PetType } from '../types';
+import { generateId } from '../utils';
 
 export function useNutrition(petId: string) {
   const {
@@ -91,7 +92,7 @@ export function useNutrition(petId: string) {
     targetWeight?: number
   ) => {
     setCalorieTarget({
-      id: calorieTarget?.id || Date.now().toString(),
+      id: calorieTarget?.id || generateId(),
       petId,
       dailyCalorieGoal,
       targetWeight,
