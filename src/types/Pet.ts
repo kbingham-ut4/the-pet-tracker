@@ -1,159 +1,153 @@
-export interface Pet {
-  id: string;
-  name: string;
-  type: PetType;
-  breed?: string;
-  age?: number;
-  weight?: number;
-  color?: string;
-  gender?: 'male' | 'female' | 'unknown';
-  microchipId?: string;
-  photoUri?: string;
-  ownerNotes?: string;
-  ownerId?: string; // User ID who owns this pet
-  createdAt: Date;
-  updatedAt: Date;
-}
+/**
+ * Pet Types - Backward Compatible Interface Exports
+ * 
+ * This file re-exports the comprehensive interfaces as the main types
+ * for backward compatibility while leveraging the new interface definitions.
+ */
 
-export enum PetType {
-  DOG = 'dog',
-  CAT = 'cat',
-  BIRD = 'bird',
-  FISH = 'fish',
-  RABBIT = 'rabbit',
-  HAMSTER = 'hamster',
-  REPTILE = 'reptile',
-  OTHER = 'other',
-}
+import type {
+  IPet,
+  IVetVisit,
+  IVaccination,
+  IActivity,
+  IWeightRecord,
+  IFoodEntry,
+  ICalorieTarget,
+  IDailyNutritionSummary,
+  IPetNutritionProfile,
+} from '../interfaces';
 
-export interface VetVisit {
-  id: string;
-  petId: string;
-  visitDate: Date;
-  veterinarian: string;
-  clinic: string;
-  reason: string;
-  diagnosis?: string;
-  treatment?: string;
-  medications?: Medication[];
-  nextVisitDate?: Date;
-  cost?: number;
-  notes?: string;
-}
+import {
+  PetType as InterfacePetType,
+  ActivityType as InterfaceActivityType,
+  ActivityLevel as InterfaceActivityLevel,
+  MealType as InterfaceMealType,
+  WeightGoal as InterfaceWeightGoal,
+  PetGender,
+  CoatType,
+  TailType,
+  EarType,
+  InsuranceCoverageType,
+  HealthSeverity,
+  AllergyType,
+  VetVisitType,
+  ProcedureType,
+  TestType,
+  VaccineType,
+  ActivityIntensity,
+  WeightMeasurementMethod,
+  FoodType,
+  FeedingMethod,
+  WeightTrend,
+  PetSortOrder,
+  DietaryRestrictionType,
+} from '../interfaces';
 
-export interface Medication {
-  name: string;
-  dosage: string;
-  frequency: string;
-  startDate: Date;
-  endDate?: Date;
-  instructions?: string;
-}
+// ============================================================================
+// TYPE ALIASES FOR BACKWARD COMPATIBILITY
+// ============================================================================
 
-export interface Vaccination {
-  id: string;
-  petId: string;
-  vaccineName: string;
-  dateAdministered: Date;
-  nextDueDate?: Date;
-  veterinarian: string;
-  batchNumber?: string;
-  notes?: string;
-}
+/**
+ * Main Pet interface - now using the comprehensive IPet interface
+ */
+export type Pet = IPet;
 
-export interface Activity {
-  id: string;
-  petId: string;
-  type: ActivityType;
-  date: Date;
-  duration?: number; // in minutes
-  distance?: number; // in kilometers
-  location?: string;
-  notes?: string;
-}
+/**
+ * Veterinary visit record
+ */
+export type VetVisit = IVetVisit;
 
-export enum ActivityType {
-  WALK = 'walk',
-  RUN = 'run',
-  PLAY = 'play',
-  TRAINING = 'training',
-  GROOMING = 'grooming',
-  FEEDING = 'feeding',
-  OTHER = 'other',
-}
+/**
+ * Vaccination record
+ */
+export type Vaccination = IVaccination;
 
-// Weight and Nutrition Tracking
-export interface WeightRecord {
-  id: string;
-  petId: string;
-  weight: number; // in kilograms
-  date: Date;
-  notes?: string;
-}
+/**
+ * Activity record
+ */
+export type Activity = IActivity;
 
-export interface FoodEntry {
-  id: string;
-  petId: string;
-  foodName: string;
-  brand?: string;
-  quantity: number; // in grams
-  calories: number;
-  protein?: number; // in grams
-  fat?: number; // in grams
-  carbs?: number; // in grams
-  date: Date;
-  mealType: MealType;
-  notes?: string;
-}
+/**
+ * Weight tracking record
+ */
+export type WeightRecord = IWeightRecord;
 
-export enum MealType {
-  BREAKFAST = 'breakfast',
-  LUNCH = 'lunch',
-  DINNER = 'dinner',
-  SNACK = 'snack',
-  TREAT = 'treat',
-}
+/**
+ * Food entry record
+ */
+export type FoodEntry = IFoodEntry;
 
-export interface CalorieTarget {
-  id: string;
-  petId: string;
-  dailyCalorieGoal: number;
-  targetWeight?: number;
-  weightGoal: WeightGoal;
-  createdAt: Date;
-  updatedAt: Date;
-}
+/**
+ * Calorie target configuration
+ */
+export type CalorieTarget = ICalorieTarget;
 
-export enum WeightGoal {
-  MAINTAIN = 'maintain',
-  LOSE = 'lose',
-  GAIN = 'gain',
-}
+/**
+ * Daily nutrition summary
+ */
+export type DailyNutritionSummary = IDailyNutritionSummary;
 
-export interface DailyNutritionSummary {
-  date: Date;
-  totalCalories: number;
-  totalProtein: number;
-  totalFat: number;
-  totalCarbs: number;
-  calorieGoal: number;
-  remainingCalories: number;
-  foodEntries: FoodEntry[];
-}
+/**
+ * Pet nutrition profile
+ */
+export type PetNutritionProfile = IPetNutritionProfile;
 
-// Enhanced Pet interface for nutrition tracking
-export interface PetNutritionProfile {
-  petId: string;
-  activityLevel: ActivityLevel;
-  spayedNeutered: boolean;
-  healthConditions?: string[];
-  lastUpdated: Date;
-}
+// ============================================================================
+// ENUM RE-EXPORTS FOR BACKWARD COMPATIBILITY
+// ============================================================================
 
-export enum ActivityLevel {
-  SEDENTARY = 'sedentary',
-  LIGHTLY_ACTIVE = 'lightly_active',
-  MODERATELY_ACTIVE = 'moderately_active',
-  VERY_ACTIVE = 'very_active',
-  EXTREMELY_ACTIVE = 'extremely_active',
-}
+/**
+ * Pet type enumeration
+ */
+export const PetType = InterfacePetType;
+export type PetType = InterfacePetType;
+
+/**
+ * Activity type enumeration
+ */
+export const ActivityType = InterfaceActivityType;
+export type ActivityType = InterfaceActivityType;
+
+/**
+ * Activity level enumeration
+ */
+export const ActivityLevel = InterfaceActivityLevel;
+export type ActivityLevel = InterfaceActivityLevel;
+
+/**
+ * Meal type enumeration
+ */
+export const MealType = InterfaceMealType;
+export type MealType = InterfaceMealType;
+
+/**
+ * Weight goal enumeration
+ */
+export const WeightGoal = InterfaceWeightGoal;
+export type WeightGoal = InterfaceWeightGoal;
+
+// ============================================================================
+// ENHANCED ENUMS FROM NEW INTERFACES
+// ============================================================================
+
+// Export new enums not present in the original interface
+export {
+  PetGender,
+  CoatType,
+  TailType,
+  EarType,
+  InsuranceCoverageType,
+  HealthSeverity,
+  AllergyType,
+  VetVisitType,
+  ProcedureType,
+  TestType,
+  VaccineType,
+  ActivityIntensity,
+  WeightMeasurementMethod,
+  FoodType,
+  FeedingMethod,
+  WeightTrend,
+  PetSortOrder,
+  DietaryRestrictionType,
+};

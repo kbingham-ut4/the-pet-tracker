@@ -95,4 +95,77 @@ describe('PetStorageService', () => {
       expect(stats.collections.pets).toBe(3);
     });
   });
+
+  describe('date normalization', () => {
+    it('should normalize date strings to Date objects when retrieving pets', async () => {
+      // Import the service for testing
+      const { OfflinePetStorageService } = await import('../PetStorageService');
+      const service = new OfflinePetStorageService();
+
+      // Test the private normalizePetData method indirectly by testing the data flow
+      // This is a more integration-style test to ensure the date normalization works
+      const mockPetWithStringDates = {
+        id: 'test-pet',
+        name: 'Test Pet',
+        type: 'dog',
+        dateOfBirth: '2020-01-15T00:00:00.000Z', // String date
+        createdAt: '2023-01-01T12:00:00.000Z', // String date
+        updatedAt: '2023-01-02T12:00:00.000Z', // String date
+      };
+
+      // Mock the storage manager to return pet data with string dates
+      const mockStorageManager = {
+        get: vi.fn().mockResolvedValue([mockPetWithStringDates]),
+      };
+
+      // Mock the getStorageManager method to return our mock
+      vi.spyOn(service as any, 'getStorageManager').mockResolvedValue(mockStorageManager);
+
+      const pets = await service.getAllPets();
+
+      expect(pets).toHaveLength(1);
+      const pet = pets[0];
+
+      // Verify that string dates have been converted to Date objects
+      expect(pet.dateOfBirth).toBeInstanceOf(Date);
+      expect(pet.createdAt).toBeInstanceOf(Date);
+      expect(pet.updatedAt).toBeInstanceOf(Date);
+
+      // Verify the date values are correct
+      expect(pet.dateOfBirth?.getFullYear()).toBe(2020);
+      expect(pet.dateOfBirth?.getMonth()).toBe(0); // January is 0
+      expect(pet.dateOfBirth?.getDate()).toBe(15);
+    });
+
+    it('should handle pets with missing dateOfBirth', async () => {
+      const { OfflinePetStorageService } = await import('../PetStorageService');
+      const service = new OfflinePetStorageService();
+
+      const mockPetWithoutDOB = {
+        id: 'test-pet',
+        name: 'Test Pet',
+        type: 'dog',
+        age: 3, // Has age instead of dateOfBirth
+        createdAt: '2023-01-01T12:00:00.000Z',
+        updatedAt: '2023-01-02T12:00:00.000Z',
+      };
+
+      const mockStorageManager = {
+        get: vi.fn().mockResolvedValue([mockPetWithoutDOB]),
+      };
+
+      vi.spyOn(service as any, 'getStorageManager').mockResolvedValue(mockStorageManager);
+
+      const pets = await service.getAllPets();
+
+      expect(pets).toHaveLength(1);
+      const pet = pets[0];
+
+      // Verify that dateOfBirth is undefined when not present
+      expect(pet.dateOfBirth).toBeUndefined();
+      expect(pet.age).toBe(3);
+      expect(pet.createdAt).toBeInstanceOf(Date);
+      expect(pet.updatedAt).toBeInstanceOf(Date);
+    });
+  });
 });

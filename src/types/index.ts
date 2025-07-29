@@ -1,2 +1,52 @@
 export * from './Pet';
 export * from './Navigation';
+
+// Export new interfaces with explicit naming to avoid conflicts
+export type {
+  IPet,
+  IVetVisit,
+  IVaccination,
+  IActivity,
+  IWeightRecord,
+  IFoodEntry,
+  ICalorieTarget,
+  IDailyNutritionSummary,
+  IPetNutritionProfile,
+  IPetStatistics,
+  IPetCollection,
+  IPetSearchCriteria,
+  IPhysicalCharacteristics,
+  IBehavioralTraits,
+  IEmergencyContact,
+  IPetInsurance,
+  IHealthStatus,
+  IHealthCondition,
+  IMedication,
+  IAllergy,
+  IProcedure,
+  ITestResult,
+  IDietaryRestriction,
+  IFeedingSchedule,
+  IWeatherConditions,
+} from '../interfaces';
+
+export {
+  PetGender,
+  CoatType,
+  TailType,
+  EarType,
+  InsuranceCoverageType,
+  HealthSeverity,
+  AllergyType,
+  VetVisitType,
+  ProcedureType,
+  TestType,
+  VaccineType,
+  ActivityIntensity,
+  WeightMeasurementMethod,
+  FoodType,
+  FeedingMethod,
+  WeightTrend,
+  PetSortOrder,
+  DietaryRestrictionType,
+} from '../interfaces';

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Pet, PetType, ActivityLevel } from '../types';
 import { usePets } from '../contexts';
 import { CalorieCalculatorFactory } from '../services/CalorieCalculatorFactory';
+import { calculateAgeInYears } from '../utils';
 import { error } from '../utils/logger';
 
 interface PetCalorieData {
@@ -34,7 +35,7 @@ export const usePetCalories = (pet: Pet): PetCalorieData => {
     if (pet.type === PetType.DOG && pet.weight) {
       try {
         const calculator = CalorieCalculatorFactory.createCalculator(pet.type);
-        const age = pet.age || 3; // Default age if not provided
+        const age = calculateAgeInYears(pet.dateOfBirth) || pet.age || 3; // Use dateOfBirth first, then fallback to age or default
         const activityLevel = ActivityLevel.MODERATELY_ACTIVE; // Default activity level
         const isSpayedNeutered = true; // Default assumption
 
@@ -55,7 +56,7 @@ export const usePetCalories = (pet: Pet): PetCalorieData => {
     }
 
     return 0;
-  }, [pet.id, pet.type, pet.weight, pet.age, getCalorieTargetForPet]);
+  }, [pet.id, pet.type, pet.weight, pet.dateOfBirth, pet.age, getCalorieTargetForPet]);
 
   return { todaysCalories, targetCalories };
 };

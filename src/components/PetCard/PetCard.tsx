@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
 import { Pet, PetType } from '../../types';
+import { calculateAgeInYears, formatDateDDMMYYYY } from '../../utils';
 import { debug } from '../../utils/logger';
 import { usePetCalories } from '../../hooks';
 
@@ -31,6 +32,9 @@ const PetCard = React.memo(
       if (__DEV__) {
         debug('Rendering pet card', { context: { petId: pet.id, petName: pet.name } });
       }
+
+      // Calculate age from date of birth if available, otherwise use the age field
+      const calculatedAge = calculateAgeInYears(pet.dateOfBirth) || pet.age;
 
       // Memoize calorie calculations to prevent unnecessary recalculations
       const { todaysCalories, targetCalories } = usePetCalories(pet);
@@ -71,7 +75,7 @@ const PetCard = React.memo(
               <View style={styles.petHeaderInfo}>
                 <Text style={styles.petName}>{pet.name}</Text>
                 <Text style={styles.petDetails}>
-                  {pet.breed} • {pet.age ? `${pet.age} years old` : 'Age unknown'}
+                  {pet.breed} • {calculatedAge ? `${calculatedAge} years old` : 'Age unknown'}
                 </Text>
                 <Text style={styles.petType}>{pet.type}</Text>
               </View>
@@ -128,11 +132,19 @@ const PetCard = React.memo(
                   </View>
                 )}
 
-                {pet.age && (
+                {calculatedAge && (
                   <View style={styles.statCard}>
                     <Ionicons name="calendar" size={20} color={COLORS.secondary} />
-                    <Text style={styles.statValue}>{pet.age} years</Text>
+                    <Text style={styles.statValue}>{calculatedAge} years</Text>
                     <Text style={styles.statLabel}>Age</Text>
+                  </View>
+                )}
+
+                {pet.dateOfBirth && (
+                  <View style={styles.statCard}>
+                    <Ionicons name="gift" size={20} color={COLORS.info} />
+                    <Text style={styles.statValue}>{formatDateDDMMYYYY(pet.dateOfBirth)}</Text>
+                    <Text style={styles.statLabel}>Date of Birth</Text>
                   </View>
                 )}
 
@@ -204,6 +216,7 @@ const PetCard = React.memo(
       prevProps.pet.name === nextProps.pet.name &&
       prevProps.pet.weight === nextProps.pet.weight &&
       prevProps.pet.age === nextProps.pet.age &&
+      prevProps.pet.dateOfBirth?.getTime() === nextProps.pet.dateOfBirth?.getTime() &&
       prevProps.pet.color === nextProps.pet.color &&
       prevProps.pet.breed === nextProps.pet.breed &&
       prevProps.pet.ownerNotes === nextProps.pet.ownerNotes &&
@@ -427,6 +440,8 @@ const arePropsEqual = (prevProps: PetCardProps, nextProps: PetCardProps) => {
     prevProps.pet.breed !== nextProps.pet.breed ||
     prevProps.pet.type !== nextProps.pet.type ||
     prevProps.pet.ownerNotes !== nextProps.pet.ownerNotes ||
+    // Compare dateOfBirth - handle null/undefined cases
+    (prevProps.pet.dateOfBirth?.getTime() || 0) !== (nextProps.pet.dateOfBirth?.getTime() || 0) ||
     // Now we can safely use getTime() since dates are normalized at storage level
     prevProps.pet.createdAt.getTime() !== nextProps.pet.createdAt.getTime() ||
     prevProps.pet.updatedAt.getTime() !== nextProps.pet.updatedAt.getTime();

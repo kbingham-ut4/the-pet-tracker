@@ -3,12 +3,16 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
 import { Pet } from '../../types';
+import { calculateAgeInYears, formatDateDDMMYYYY } from '../../utils';
 
 interface PetStatsProps {
   pet: Pet;
 }
 
 const PetStats: React.FC<PetStatsProps> = ({ pet }) => {
+  // Calculate age from date of birth if available, otherwise use the age field
+  const calculatedAge = calculateAgeInYears(pet.dateOfBirth) || pet.age;
+
   return (
     <View style={styles.statsSection}>
       <Text style={styles.sectionTitle}>Pet Information</Text>
@@ -22,11 +26,19 @@ const PetStats: React.FC<PetStatsProps> = ({ pet }) => {
           </View>
         )}
 
-        {pet.age && (
+        {calculatedAge && (
           <View style={styles.statCard}>
             <Ionicons name="calendar" size={20} color={COLORS.secondary} />
-            <Text style={styles.statValue}>{pet.age} years</Text>
+            <Text style={styles.statValue}>{calculatedAge} years</Text>
             <Text style={styles.statLabel}>Age</Text>
+          </View>
+        )}
+
+        {pet.dateOfBirth && (
+          <View style={styles.statCard}>
+            <Ionicons name="gift" size={20} color={COLORS.info} />
+            <Text style={styles.statValue}>{formatDateDDMMYYYY(pet.dateOfBirth)}</Text>
+            <Text style={styles.statLabel}>Date of Birth</Text>
           </View>
         )}
 

@@ -4,7 +4,7 @@ import { CalorieCalculatorFactory } from '../services/CalorieCalculatorFactory';
 import { DogCalorieCalculator } from '../services/CalorieCalculator';
 import { NutritionService } from '../services/NutritionService';
 import { DailyNutritionSummary, WeightGoal, ActivityLevel, MealType, PetType } from '../types';
-import { generateId } from '../utils';
+import { generateId, calculateAgeInYears } from '../utils';
 
 export function useNutrition(petId: string) {
   const {
@@ -35,7 +35,8 @@ export function useNutrition(petId: string) {
       const summary = NutritionService.calculateDailySummary(
         foodEntries,
         today,
-        calorieTarget.dailyCalorieGoal
+        calorieTarget.dailyCalorieGoal,
+        petId
       );
       setDailySummary(summary);
     }
@@ -43,12 +44,13 @@ export function useNutrition(petId: string) {
 
   // Calculate recommended calories when pet data changes
   useEffect(() => {
-    if (pet && pet.type && pet.age && pet.weight && nutritionProfile) {
+    const age = calculateAgeInYears(pet?.dateOfBirth) || pet?.age;
+    if (pet && pet.type && age && pet.weight && nutritionProfile) {
       try {
         const calculator = CalorieCalculatorFactory.createCalculator(pet.type);
         const maintenanceCalories = calculator.calculateMaintenanceCalories(
           pet.weight,
-          pet.age,
+          age,
           nutritionProfile.activityLevel,
           nutritionProfile.spayedNeutered
         );
@@ -97,6 +99,8 @@ export function useNutrition(petId: string) {
       dailyCalorieGoal,
       targetWeight,
       weightGoal,
+      activityLevel: ActivityLevel.MODERATELY_ACTIVE, // Default, could be parameterized
+      isActive: true,
       createdAt: calorieTarget?.createdAt || new Date(),
       updatedAt: new Date(),
     });

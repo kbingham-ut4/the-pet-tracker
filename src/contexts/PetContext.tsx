@@ -10,6 +10,8 @@ import {
   PetNutritionProfile,
   PetType,
   ActivityLevel,
+  PetGender,
+  CoatType,
 } from '../types';
 import {
   OfflinePetStorageService,
@@ -351,6 +353,32 @@ export function PetProvider({ children }: { children: ReactNode }) {
     return state.petLoadingStates[petId] || false;
   };
 
+  // Helper function to generate a random date of birth based on age
+  const generateRandomDateOfBirth = (ageInYears: number): Date => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const currentDay = now.getDate();
+    
+    // Calculate birth year
+    const birthYear = currentYear - ageInYears;
+    
+    // Generate random month (0-11) and day
+    const birthMonth = Math.floor(Math.random() * 12);
+    const daysInMonth = new Date(birthYear, birthMonth + 1, 0).getDate();
+    const birthDay = Math.floor(Math.random() * daysInMonth) + 1;
+    
+    // Create the date of birth
+    let dateOfBirth = new Date(birthYear, birthMonth, birthDay);
+    
+    // Ensure the pet isn't older than specified age (adjust if birthday hasn't occurred this year)
+    if (birthMonth > currentMonth || (birthMonth === currentMonth && birthDay > currentDay)) {
+      dateOfBirth = new Date(birthYear - 1, birthMonth, birthDay);
+    }
+    
+    return dateOfBirth;
+  };
+
   // Development helper - add sample pets for testing
   const addSamplePets = async () => {
     const samplePets = [
@@ -358,31 +386,77 @@ export function PetProvider({ children }: { children: ReactNode }) {
         name: 'Buddy',
         type: PetType.DOG,
         breed: 'Golden Retriever',
-        age: 3,
         weight: 28.5,
-        gender: 'male' as const,
+        gender: PetGender.MALE,
         color: 'Golden',
         ownerId: 'current-user', // TODO: Get from auth context
+        dateOfBirth: generateRandomDateOfBirth(3),
+        microchipId: '123456789012345',
+        physicalCharacteristics: {
+          coatType: CoatType.LONG,
+          height: 61,
+          eyeColor: 'Brown',
+        },
+        behavioralTraits: {
+          energyLevel: 8,
+          humanFriendliness: 10,
+          petFriendliness: 9,
+          trainability: 9,
+          favoriteActivities: ['fetch', 'swimming', 'walks'],
+          trainingStatus: {
+            houseTrained: true,
+            knownCommands: ['sit', 'stay', 'come', 'down'],
+          },
+        },
       },
       {
         name: 'Luna',
         type: PetType.DOG,
         breed: 'Border Collie',
-        age: 2,
         weight: 18.2,
-        gender: 'female' as const,
+        gender: PetGender.FEMALE,
         color: 'Black and White',
         ownerId: 'current-user', // TODO: Get from auth context
+        dateOfBirth: generateRandomDateOfBirth(2),
+        microchipId: '987654321098765',
+        physicalCharacteristics: {
+          coatType: CoatType.MEDIUM,
+          height: 53,
+          eyeColor: 'Blue',
+          markings: ['White chest', 'White paws'],
+        },
+        behavioralTraits: {
+          energyLevel: 10,
+          humanFriendliness: 8,
+          petFriendliness: 7,
+          trainability: 10,
+          favoriteActivities: ['agility', 'frisbee', 'herding games'],
+          trainingStatus: {
+            houseTrained: true,
+            knownCommands: ['sit', 'stay', 'come', 'down', 'heel', 'leave it'],
+          },
+        },
       },
       {
         name: 'Whiskers',
         type: PetType.CAT,
         breed: 'Maine Coon',
-        age: 5,
         weight: 6.8,
-        gender: 'male' as const,
+        gender: PetGender.MALE,
         color: 'Tabby',
         ownerId: 'current-user', // TODO: Get from auth context
+        dateOfBirth: generateRandomDateOfBirth(5),
+        physicalCharacteristics: {
+          coatType: CoatType.LONG,
+          eyeColor: 'Green',
+          markings: ['M-shaped forehead marking', 'Striped tail'],
+        },
+        behavioralTraits: {
+          energyLevel: 6,
+          humanFriendliness: 9,
+          petFriendliness: 5,
+          favoriteActivities: ['bird watching', 'climbing', 'sunbathing'],
+        },
       },
     ];
 

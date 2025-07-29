@@ -329,6 +329,11 @@ export class OfflinePetStorageService implements PetStorageService {
   private normalizePetData(pet: any): Pet {
     return {
       ...pet,
+      dateOfBirth: pet.dateOfBirth
+        ? typeof pet.dateOfBirth === 'string'
+          ? new Date(pet.dateOfBirth)
+          : pet.dateOfBirth
+        : undefined,
       createdAt: typeof pet.createdAt === 'string' ? new Date(pet.createdAt) : pet.createdAt,
       updatedAt: typeof pet.updatedAt === 'string' ? new Date(pet.updatedAt) : pet.updatedAt,
     };

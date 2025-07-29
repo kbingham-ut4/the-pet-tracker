@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach as _beforeEach } from 'vitest';
 import { NutritionService } from '../NutritionService';
 import { createMockPet } from '../../test/test-utils';
-import { PetType, MealType } from '../../types';
+import { PetType, MealType, FoodType } from '../../types';
 
 describe('NutritionService', () => {
   const mockPet = createMockPet({
@@ -25,6 +25,7 @@ describe('NutritionService', () => {
       carbs: 45,
       date: new Date('2024-01-01T08:00:00Z'),
       mealType: MealType.BREAKFAST,
+      foodType: FoodType.DRY_KIBBLE,
     },
     {
       id: 'entry-2',
@@ -37,6 +38,7 @@ describe('NutritionService', () => {
       carbs: 30,
       date: new Date('2024-01-01T12:00:00Z'),
       mealType: MealType.SNACK,
+      foodType: FoodType.TREAT,
     },
   ];
 
@@ -129,7 +131,7 @@ describe('NutritionService', () => {
       const calorieGoal = 1200;
       const date = new Date('2024-01-01');
 
-      const summary = NutritionService.calculateDailySummary(sampleFoodEntries, date, calorieGoal);
+      const summary = NutritionService.calculateDailySummary(sampleFoodEntries, date, calorieGoal, mockPet.id);
 
       expect(summary.totalCalories).toBe(525); // 350 + 175
       expect(summary.totalProtein).toBe(32); // 25 + 7
@@ -144,7 +146,7 @@ describe('NutritionService', () => {
       const calorieGoal = 1000;
       const date = new Date('2024-01-01');
 
-      const summary = NutritionService.calculateDailySummary([], date, calorieGoal);
+      const summary = NutritionService.calculateDailySummary([], date, calorieGoal, mockPet.id);
 
       expect(summary.totalCalories).toBe(0);
       expect(summary.totalProtein).toBe(0);
@@ -169,13 +171,15 @@ describe('NutritionService', () => {
           carbs: 10,
           date: new Date('2024-01-02'), // Different date
           mealType: MealType.DINNER,
+          foodType: FoodType.WET_FOOD,
         },
       ];
 
       const summary = NutritionService.calculateDailySummary(
         entriesWithDifferentDates,
         new Date('2024-01-01'),
-        1000
+        1000,
+        mockPet.id
       );
 
       expect(summary.totalCalories).toBe(525); // Should not include entry-3

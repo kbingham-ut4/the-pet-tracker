@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mockPet, mockCat, createMockPet } from '../../test/test-utils';
-import { PetType, Pet, FoodEntry, MealType } from '../../types';
+import { PetType, Pet, FoodEntry, MealType, FoodType, PetGender } from '../../types';
 
 // Mock the PetContext
 const mockPetContext = {
@@ -381,6 +381,7 @@ describe('PetsScreen', () => {
           foodName: 'Test Food 1',
           quantity: 100,
           mealType: MealType.BREAKFAST,
+          foodType: FoodType.DRY_KIBBLE,
         },
         {
           id: '2',
@@ -390,6 +391,7 @@ describe('PetsScreen', () => {
           foodName: 'Test Food 2',
           quantity: 75,
           mealType: MealType.LUNCH,
+          foodType: FoodType.WET_FOOD,
         },
       ];
 
@@ -505,7 +507,7 @@ describe('PetsScreen', () => {
         age: 4,
         weight: 20,
         color: 'Brown',
-        gender: 'male',
+        gender: PetGender.MALE,
         ownerNotes: 'Very friendly dog',
         type: PetType.DOG,
       });

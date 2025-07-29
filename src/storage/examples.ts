@@ -14,7 +14,7 @@ import {
   PetTrackerStorageManager as _PetTrackerStorageManager,
 } from './index';
 import { OfflinePetStorageService } from './services';
-import { Pet, PetType } from '../types';
+import { Pet, PetType, PetGender } from '../types';
 import { info, error } from '../utils/logger';
 
 /**
@@ -62,13 +62,13 @@ export const petStorageExamples = async () => {
     name: 'Buddy',
     type: PetType.DOG,
     breed: 'Golden Retriever',
-    age: 3,
     weight: 30,
     color: 'Golden',
-    gender: 'male',
+    gender: PetGender.MALE,
     ownerId: 'user_123',
     createdAt: new Date(),
     updatedAt: new Date(),
+    dateOfBirth: new Date('2021-03-15'), // Makes pet approximately 3 years old
   });
 
   console.log('New pet added:', newPet);

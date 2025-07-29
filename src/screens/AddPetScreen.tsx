@@ -7,44 +7,68 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants';
 import { usePets } from '../contexts';
-import { Pet, PetType } from '../types';
+import { Pet, PetType, PetGender, CoatType } from '../types';
 import { RootStackNavigationProp } from '../types/Navigation';
+import { formatDateDDMMYYYY, parseDateDDMMYYYY } from '../utils';
 import { info, error } from '../utils/logger';
 
 interface PetFormData {
   name: string;
   type: PetType;
   breed: string;
-  age: string;
+  dateOfBirth: string;
   weight: string;
+  color: string;
+  gender: PetGender;
+  coatType: CoatType;
+  microchipId: string;
   ownerNotes: string;
 }
 
 const PET_TYPES = [
-  { key: PetType.DOG, label: 'Dog', icon: 'paw' },
-  { key: PetType.CAT, label: 'Cat', icon: 'paw' },
-  { key: PetType.BIRD, label: 'Bird', icon: 'airplane' },
-  { key: PetType.FISH, label: 'Fish', icon: 'fish' },
-  { key: PetType.RABBIT, label: 'Rabbit', icon: 'leaf' },
-  { key: PetType.OTHER, label: 'Other', icon: 'ellipsis-horizontal' },
+  { key: PetType.DOG, label: 'Dog', icon: 'bone' as const },
+  { key: PetType.CAT, label: 'Cat', icon: 'moon' as const },
+];
+
+const GENDER_OPTIONS = [
+  { key: PetGender.MALE, label: 'Male', icon: 'male' as const },
+  { key: PetGender.FEMALE, label: 'Female', icon: 'female' as const },
+  { key: PetGender.UNKNOWN, label: 'Unknown', icon: 'help' as const },
+];
+
+const COAT_TYPES = [
+  { key: CoatType.SHORT, label: 'Short' },
+  { key: CoatType.MEDIUM, label: 'Medium' },
+  { key: CoatType.LONG, label: 'Long' },
+  { key: CoatType.CURLY, label: 'Curly' },
+  { key: CoatType.WIRE, label: 'Wire' },
+  { key: CoatType.HAIRLESS, label: 'Hairless' },
 ];
 
 export default function AddPetScreen() {
   const navigation = useNavigation<RootStackNavigationProp>();
   const { addPet } = usePets();
   const [loading, setLoading] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [formData, setFormData] = useState<PetFormData>({
     name: '',
     type: PetType.DOG,
     breed: '',
-    age: '',
+    dateOfBirth: '',
     weight: '',
+    color: '',
+    gender: PetGender.UNKNOWN,
+    coatType: CoatType.SHORT,
+    microchipId: '',
     ownerNotes: '',
   });
 
@@ -63,15 +87,29 @@ export default function AddPetScreen() {
     setLoading(true);
 
     try {
+      // Parse the date from dd-mm-yyyy format if provided
+      let dateOfBirth: Date | undefined;
+      if (formData.dateOfBirth) {
+        const parsedDate = parseDateDDMMYYYY(formData.dateOfBirth);
+        dateOfBirth = parsedDate || undefined;
+      }
+
       const newPet: Omit<Pet, 'id'> = {
         name: formData.name.trim(),
         type: formData.type,
         breed: formData.breed.trim(),
-        age: formData.age ? parseInt(formData.age, 10) : undefined,
+        dateOfBirth,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
+        color: formData.color.trim() || undefined,
+        gender: formData.gender,
+        microchipId: formData.microchipId.trim() || undefined,
         ownerNotes: formData.ownerNotes.trim() || undefined,
         createdAt: new Date(),
         updatedAt: new Date(),
+        // Add physical characteristics if coat type is specified
+        physicalCharacteristics: formData.coatType !== CoatType.SHORT ? {
+          coatType: formData.coatType,
+        } : undefined,
       };
 
       await addPet(newPet);
@@ -101,8 +139,36 @@ export default function AddPetScreen() {
     navigation.goBack();
   };
 
-  const updateFormData = (field: keyof PetFormData, value: string | PetType) => {
+  const updateFormData = (field: keyof PetFormData, value: string | PetType | PetGender | CoatType) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleDatePress = () => {
+    // If there's already a date entered, use it as the initial value
+    if (formData.dateOfBirth) {
+      const parsedDate = parseDateDDMMYYYY(formData.dateOfBirth);
+      if (parsedDate) {
+        setSelectedDate(parsedDate);
+      }
+    }
+    setShowDatePicker(true);
+  };
+
+  const handleDateChange = (event: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+
+    if (date) {
+      setSelectedDate(date);
+      // Format the date for display (dd-mm-yyyy)
+      const formattedDate = formatDateDDMMYYYY(date);
+      updateFormData('dateOfBirth', formattedDate);
+    }
+  };
+
+  const handleDatePickerClose = () => {
+    setShowDatePicker(false);
   };
 
   return (
@@ -174,22 +240,47 @@ export default function AddPetScreen() {
           />
         </View>
 
-        {/* Age */}
+        {/* Date of Birth */}
         <View style={styles.section}>
-          <Text style={styles.label}>Age (years)</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.age}
-            onChangeText={value => updateFormData('age', value)}
-            placeholder="Enter age in years"
-            placeholderTextColor={COLORS.textLight}
-            keyboardType="numeric"
-          />
+          <Text style={styles.label}>Date of Birth</Text>
+          <Text style={styles.hint}>
+            If this is a rescue pet or you're unsure, that's okay! A guess will help us out.
+          </Text>
+          <TouchableOpacity style={styles.dateInput} onPress={handleDatePress}>
+            <Text style={[styles.dateInputText, !formData.dateOfBirth && styles.placeholderText]}>
+              {formData.dateOfBirth || 'DD-MM-YYYY (tap to select)'}
+            </Text>
+            <Ionicons name="calendar" size={20} color={COLORS.textSecondary} />
+          </TouchableOpacity>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={handleDateChange}
+              maximumDate={new Date()} // Can't select future dates
+              minimumDate={new Date(1990, 0, 1)} // Reasonable minimum date
+            />
+          )}
+
+          {Platform.OS === 'ios' && showDatePicker && (
+            <View style={styles.datePickerButtons}>
+              <TouchableOpacity style={styles.datePickerButton} onPress={handleDatePickerClose}>
+                <Text style={styles.datePickerButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.datePickerButton} onPress={handleDatePickerClose}>
+                <Text style={[styles.datePickerButtonText, styles.datePickerConfirmText]}>
+                  Done
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Weight */}
         <View style={styles.section}>
-          <Text style={styles.label}>Weight (lbs)</Text>
+          <Text style={styles.label}>Weight (kg)</Text>
           <TextInput
             style={styles.input}
             value={formData.weight}
@@ -197,6 +288,81 @@ export default function AddPetScreen() {
             placeholder="Enter current weight"
             placeholderTextColor={COLORS.textLight}
             keyboardType="decimal-pad"
+          />
+        </View>
+
+        {/* Color */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Color</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.color}
+            onChangeText={value => updateFormData('color', value)}
+            placeholder="Enter pet's color (e.g., Brown, Golden, Black & White)"
+            placeholderTextColor={COLORS.textLight}
+          />
+        </View>
+
+        {/* Gender */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Gender</Text>
+          <View style={styles.typeGrid}>
+            {GENDER_OPTIONS.map(option => (
+              <TouchableOpacity
+                key={option.key}
+                style={[styles.typeOption, formData.gender === option.key && styles.typeOptionSelected]}
+                onPress={() => updateFormData('gender', option.key)}
+              >
+                <Ionicons
+                  name={option.icon as keyof typeof Ionicons.glyphMap}
+                  size={20}
+                  color={formData.gender === option.key ? COLORS.surface : COLORS.text}
+                />
+                <Text
+                  style={[
+                    styles.typeOptionText,
+                    formData.gender === option.key && styles.typeOptionTextSelected,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Coat Type */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Coat Type</Text>
+          <View style={styles.coatTypeGrid}>
+            {COAT_TYPES.map(coat => (
+              <TouchableOpacity
+                key={coat.key}
+                style={[styles.coatTypeOption, formData.coatType === coat.key && styles.coatTypeOptionSelected]}
+                onPress={() => updateFormData('coatType', coat.key)}
+              >
+                <Text
+                  style={[
+                    styles.coatTypeOptionText,
+                    formData.coatType === coat.key && styles.coatTypeOptionTextSelected,
+                  ]}
+                >
+                  {coat.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Microchip ID */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Microchip ID</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.microchipId}
+            onChangeText={value => updateFormData('microchipId', value)}
+            placeholder="Enter microchip number (if available)"
+            placeholderTextColor={COLORS.textLight}
           />
         </View>
 
@@ -263,6 +429,12 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
+  hint: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    marginBottom: SPACING.xs,
+    fontStyle: 'italic',
+  },
   input: {
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -303,6 +475,69 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   typeOptionTextSelected: {
+    color: COLORS.surface,
+  },
+  dateInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    minHeight: 48,
+  },
+  dateInputText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.text,
+    flex: 1,
+  },
+  placeholderText: {
+    color: COLORS.textLight,
+  },
+  datePickerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: SPACING.sm,
+  },
+  datePickerButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  datePickerButtonText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.primary,
+  },
+  datePickerConfirmText: {
+    fontWeight: '600',
+  },
+  coatTypeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  coatTypeOption: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.surface,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  coatTypeOptionSelected: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  coatTypeOptionText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.text,
+  },
+  coatTypeOptionTextSelected: {
     color: COLORS.surface,
   },
 });

@@ -4,6 +4,7 @@ import {
   CalorieTarget as _CalorieTarget,
   DailyNutritionSummary,
   MealType,
+  FoodType,
 } from '../types';
 import { generateId, formatDate } from '../utils';
 import { info as _info, warn as _warn, error as _error, debug as _debug } from '../utils/logger';
@@ -116,6 +117,7 @@ export class NutritionService {
       carbs,
       date: new Date(),
       mealType,
+      foodType: FoodType.DRY_KIBBLE, // Default food type, could be parameterized later
     };
 
     _info('Food entry created successfully', {
@@ -132,7 +134,8 @@ export class NutritionService {
   static calculateDailySummary(
     foodEntries: FoodEntry[],
     date: Date,
-    calorieGoal: number
+    calorieGoal: number,
+    petId: string
   ): DailyNutritionSummary {
     const dateStr = formatDate(date);
     const dayEntries = foodEntries.filter(entry => formatDate(entry.date) === dateStr);
@@ -147,8 +150,12 @@ export class NutritionService {
       { calories: 0, protein: 0, fat: 0, carbs: 0 }
     );
 
+    // Count treats
+    const treatCount = dayEntries.filter(entry => entry.mealType === MealType.TREAT).length;
+
     return {
       date,
+      petId,
       totalCalories: totals.calories,
       totalProtein: totals.protein,
       totalFat: totals.fat,
@@ -156,6 +163,7 @@ export class NutritionService {
       calorieGoal,
       remainingCalories: calorieGoal - totals.calories,
       foodEntries: dayEntries,
+      treatCount,
     };
   }
 

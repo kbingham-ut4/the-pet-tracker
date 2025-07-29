@@ -3,12 +3,16 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
 import { Pet } from '../../types';
+import { calculateAgeInYears } from '../../utils';
 
 interface PetHeaderProps {
   pet: Pet;
 }
 
 const PetHeader: React.FC<PetHeaderProps> = ({ pet }) => {
+  // Calculate age from date of birth if available, otherwise use the age field
+  const calculatedAge = calculateAgeInYears(pet.dateOfBirth) || pet.age;
+
   return (
     <View style={styles.petHeader}>
       <View
@@ -22,7 +26,7 @@ const PetHeader: React.FC<PetHeaderProps> = ({ pet }) => {
       <View style={styles.petHeaderInfo}>
         <Text style={styles.petName}>{pet.name}</Text>
         <Text style={styles.petDetails}>
-          {pet.breed} • {pet.age ? `${pet.age} years old` : 'Age unknown'}
+          {pet.breed} • {calculatedAge ? `${calculatedAge} years old` : 'Age unknown'}
         </Text>
         <Text style={styles.petType}>{pet.type}</Text>
       </View>

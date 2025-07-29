@@ -3,7 +3,11 @@ import {
   generateId,
   formatDate,
   formatDateTime,
+  formatDateDDMMYYYY,
+  formatDateYYYYMMDD,
+  parseDateDDMMYYYY,
   calculateAge,
+  calculateAgeInYears,
   getPetTypeDisplayName,
 } from '../helpers';
 import { PetType } from '../../types';
@@ -81,6 +85,58 @@ describe('helpers', () => {
     });
   });
 
+  describe('formatDateDDMMYYYY', () => {
+    it('should format date in dd-mm-yyyy format', () => {
+      const date = new Date('2024-01-15');
+      const formatted = formatDateDDMMYYYY(date);
+      expect(formatted).toBe('15-01-2024');
+    });
+
+    it('should pad single digits with zeros', () => {
+      const date = new Date('2024-03-05');
+      const formatted = formatDateDDMMYYYY(date);
+      expect(formatted).toBe('05-03-2024');
+    });
+  });
+
+  describe('formatDateYYYYMMDD', () => {
+    it('should format date in yyyy-mm-dd format', () => {
+      const date = new Date('2024-01-15');
+      const formatted = formatDateYYYYMMDD(date);
+      expect(formatted).toBe('2024-01-15');
+    });
+
+    it('should pad single digits with zeros', () => {
+      const date = new Date('2024-03-05');
+      const formatted = formatDateYYYYMMDD(date);
+      expect(formatted).toBe('2024-03-05');
+    });
+  });
+
+  describe('parseDateDDMMYYYY', () => {
+    it('should parse valid dd-mm-yyyy date string', () => {
+      const dateString = '15-01-2024';
+      const date = parseDateDDMMYYYY(dateString);
+      expect(date).toBeInstanceOf(Date);
+      expect(date?.getDate()).toBe(15);
+      expect(date?.getMonth()).toBe(0); // January is 0
+      expect(date?.getFullYear()).toBe(2024);
+    });
+
+    it('should return null for invalid date string', () => {
+      expect(parseDateDDMMYYYY('invalid')).toBeNull();
+      expect(parseDateDDMMYYYY('32-01-2024')).toBeNull(); // Invalid day
+      expect(parseDateDDMMYYYY('15-13-2024')).toBeNull(); // Invalid month
+      expect(parseDateDDMMYYYY('29-02-2023')).toBeNull(); // Invalid leap year date
+    });
+
+    it('should return null for empty or malformed strings', () => {
+      expect(parseDateDDMMYYYY('')).toBeNull();
+      expect(parseDateDDMMYYYY('15-01')).toBeNull();
+      expect(parseDateDDMMYYYY('15/01/2024')).toBeNull();
+    });
+  });
+
   describe('calculateAge', () => {
     it('should calculate age in years for older pets', () => {
       const twoYearsAgo = new Date();
@@ -120,6 +176,49 @@ describe('helpers', () => {
 
       const age = calculateAge(fiveDaysAgo);
       expect(age).toBe('5 days old');
+    });
+  });
+
+  describe('calculateAgeInYears', () => {
+    it('should return undefined for undefined input', () => {
+      const age = calculateAgeInYears(undefined);
+      expect(age).toBeUndefined();
+    });
+
+    it('should calculate correct age in years for adult pet', () => {
+      const threeYearsAgo = new Date();
+      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+
+      const age = calculateAgeInYears(threeYearsAgo);
+      expect(age).toBe(3);
+    });
+
+    it('should handle birthday not yet occurred this year', () => {
+      const dateOfBirth = new Date();
+      dateOfBirth.setFullYear(dateOfBirth.getFullYear() - 2);
+      dateOfBirth.setMonth(11); // December
+      dateOfBirth.setDate(25); // Christmas
+
+      // If current date is before the birthday this year, age should be 1 less
+      const currentDate = new Date();
+      if (
+        currentDate.getMonth() < 11 ||
+        (currentDate.getMonth() === 11 && currentDate.getDate() < 25)
+      ) {
+        const age = calculateAgeInYears(dateOfBirth);
+        expect(age).toBe(1); // Birthday hasn't occurred yet this year
+      } else {
+        const age = calculateAgeInYears(dateOfBirth);
+        expect(age).toBe(2); // Birthday has occurred this year
+      }
+    });
+
+    it('should handle newborn pets (less than 1 year)', () => {
+      const twoMonthsAgo = new Date();
+      twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+      const age = calculateAgeInYears(twoMonthsAgo);
+      expect(age).toBe(0);
     });
   });
 
