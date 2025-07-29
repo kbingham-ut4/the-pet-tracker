@@ -1,102 +1,155 @@
-import React, { useState, useRef, useCallback } from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-  ScrollView,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from 'react-native';
+import React, { useRef, useCallback, useMemo, lazy, Suspense } from 'react';
+import { View, StyleSheet, FlatList, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { COLORS, SPACING } from '../constants';
 import { usePets } from '../contexts';
 import { Pet } from '../types';
 import { RootStackNavigationProp } from '../types/Navigation';
-import { info, error } from '../utils/logger';
-import { PetCard } from '../components/PetCard';
-import { ScrollIndicator, EmptyState } from '../components';
+import { info, error, debug } from '../utils/logger';
+import { EmptyState, PetListHeader, LoadingOverlay, PetList } from '../components';
+import { usePetScreenNavigation, usePetScrolling } from '../hooks';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// Lazy load components for better performance
+const ScrollIndicator = lazy(() =>
+  import('../components').then(module => ({ default: module.ScrollIndicator }))
+);
 
+/**
+ * Enhanced PetsScreen with improved component separation and readability
+ * Uses custom hooks for navigation and scrolling logic
+ * Components are extracted for better maintainability
+ */
 export default function PetsScreen() {
   const { pets, loadPetsFromStorage, refreshPet, getPetLoadingState, loading } = usePets();
   const navigation = useNavigation<RootStackNavigationProp>();
-  const [currentPetIndex, setCurrentPetIndex] = useState(0);
-  const flatListRef = useRef<FlatList<Pet>>(null);
-  const scrollViewRefs = useRef<{ [key: string]: ScrollView | null }>({});
 
-  // Log screen view
+  // Custom hooks for separated concerns
+  const { handleNavigateToWeight, handleNavigateToFoodLog, handleNavigateToAddPet } =
+    usePetScreenNavigation(pets);
+
+  const {
+    currentPetIndex,
+    isScrolling,
+    setCurrentPetIndex,
+    handleScrollBegin,
+    handleHorizontalScroll,
+    handleScrollEnd,
+    scrollToPet,
+  } = usePetScrolling(pets);
+
+  // Refs for component management
+  const flatListRef = useRef<FlatList<Pet> | null>(null);
+  const scrollViewRefs = useRef<{ [key: string]: ScrollView | null }>({});
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasTriedLoadingRef = useRef(false);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Memoized current pet for performance
+  const currentPet = useMemo(() => {
+    return currentPetIndex >= 0 && currentPetIndex < pets.length ? pets[currentPetIndex] : null;
+  }, [pets, currentPetIndex]);
+
+  // Reset loading flag when pets are successfully loaded
   React.useEffect(() => {
-    info('Pets screen viewed', {
-      context: {
-        screen: 'PetsScreen',
-        petCount: pets.length,
-        timestamp: new Date().toISOString(),
-      },
-    });
+    if (pets.length > 0) {
+      hasTriedLoadingRef.current = false;
+    }
   }, [pets.length]);
 
-  // Reset scroll position to top when switching between pets
-  React.useEffect(() => {
-    if (pets.length > 0 && pets[currentPetIndex]) {
-      const currentPetId = pets[currentPetIndex].id;
-      const scrollViewRef = scrollViewRefs.current[currentPetId];
+  // Screen focus effect for data refresh
+  useFocusEffect(
+    useCallback(() => {
+      info('Pets screen focused', {
+        context: {
+          screen: 'PetsScreen',
+          petCount: pets.length,
+          currentPetIndex,
+          hasTriedLoading: hasTriedLoadingRef.current,
+          isLoading: loading,
+          timestamp: new Date().toISOString(),
+        },
+      });
 
-      if (scrollViewRef) {
-        // Small delay to ensure the card is fully rendered
-        setTimeout(() => {
-          scrollViewRef.scrollTo({ y: 0, animated: true });
+      // Only refresh if we have no pets and haven't tried loading yet
+      if (pets.length === 0 && !hasTriedLoadingRef.current && !loading) {
+        hasTriedLoadingRef.current = true;
+
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+        }
+
+        loadingTimeoutRef.current = setTimeout(() => {
+          loadPetsFromStorage().catch(err => {
+            error('Failed to load pets from storage', {
+              error: err instanceof Error ? err.message : String(err),
+            });
+            hasTriedLoadingRef.current = false;
+          });
         }, 100);
       }
-    }
-  }, [currentPetIndex, pets]);
-
-  const _handleRefreshPets = async () => {
-    try {
-      info('Refreshing pets from storage');
-      await loadPetsFromStorage();
-      info('Pets refreshed successfully');
-    } catch (err) {
-      error('Failed to refresh pets', { error: err instanceof Error ? err.message : String(err) });
-    }
-  };
-
-  const handleNavigateToWeight = useCallback(
-    (petId: string) => {
-      info('Navigation to Weight Management', {
-        context: {
-          screen: 'PetsScreen',
-          targetScreen: 'WeightManagement',
-          petId,
-        },
-      });
-      navigation.navigate('WeightManagement', { petId });
-    },
-    [navigation]
+    }, [pets.length, loading, currentPetIndex])
   );
 
-  const handleNavigateToFoodLog = useCallback(
-    (petId: string) => {
-      info('Navigation to Food Log', {
+  // Enhanced cleanup for better memory management
+  React.useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+      scrollViewRefs.current = {};
+      hasTriedLoadingRef.current = false;
+
+      debug('PetsScreen cleanup completed', {
         context: {
           screen: 'PetsScreen',
-          targetScreen: 'FoodLog',
-          petId,
+          timestamp: new Date().toISOString(),
         },
       });
-      navigation.navigate('FoodLog', { petId });
-    },
-    [navigation]
-  );
+    };
+  }, []);
 
-  // Smart refresh function that only refreshes the currently visible pet
+  // Pet index validation when pets array changes
+  React.useEffect(() => {
+    const currentLength = pets.length;
+
+    if (currentLength === 0 && currentPetIndex !== -1) {
+      setCurrentPetIndex(-1);
+    } else if (currentLength > 0 && currentPetIndex === -1) {
+      setCurrentPetIndex(0);
+    } else if (currentLength > 0 && currentPetIndex >= currentLength) {
+      setCurrentPetIndex(Math.max(0, currentLength - 1));
+    }
+  }, [pets.length, currentPetIndex, setCurrentPetIndex]);
+
+  // Enhanced scroll position reset with debouncing
+  React.useEffect(() => {
+    if (currentPet && !isScrolling && currentPetIndex >= 0) {
+      const scrollViewRef = scrollViewRefs.current[currentPet.id];
+      if (scrollViewRef) {
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+
+        scrollTimeoutRef.current = setTimeout(() => {
+          scrollViewRef.scrollTo({ y: 0, animated: true });
+        }, 150);
+      }
+    }
+
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [currentPet, isScrolling, currentPetIndex]);
+
+  // Optimized smart refresh function
   const handleRefreshPet = useCallback(
     async (petId: string) => {
-      // Only refresh the pet if it's currently visible to avoid unnecessary renders
       const petIndex = pets.findIndex(pet => pet.id === petId);
       const isCurrentlyVisible = petIndex === currentPetIndex;
 
@@ -122,170 +175,77 @@ export default function PetsScreen() {
         });
       }
     },
-    [pets, currentPetIndex, refreshPet]
+    [pets, refreshPet, currentPetIndex]
   );
 
-  // Set header options with add button only
+  // Set header options with add button
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => {
-            info('Navigation to Add Pet', {
-              context: {
-                screen: 'PetsScreen',
-                targetScreen: 'AddPet',
-              },
-            });
-            navigation.navigate('AddPet');
-          }}
-          disabled={loading}
-        >
-          <View style={styles.addButtonCircle}>
-            <Ionicons name="add" size={24} color={COLORS.primary} />
-          </View>
-        </TouchableOpacity>
-      ),
+      headerRight: () => <PetListHeader onAddPet={handleNavigateToAddPet} loading={loading} />,
     });
-  }, [navigation, loading]);
+  }, [navigation, loading, handleNavigateToAddPet]);
 
-  // Handle scroll to specific pet (no auto-refresh, only on user interaction)
-  const scrollToPet = (index: number) => {
-    if (flatListRef.current && pets.length > 0) {
-      flatListRef.current.scrollToIndex({ index, animated: true });
-      setCurrentPetIndex(index);
+  // Enhanced scroll to pet with improved animation
+  const handleScrollToPet = useCallback(
+    (index: number) => {
+      if (flatListRef.current) {
+        scrollToPet(index, flatListRef as React.RefObject<FlatList<Pet>>);
 
-      // Reset the scroll position of the target pet card to top
-      const targetPetId = pets[index]?.id;
-      if (targetPetId) {
-        const scrollViewRef = scrollViewRefs.current[targetPetId];
-        if (scrollViewRef) {
-          // Small delay to ensure the horizontal scroll completes first
-          setTimeout(() => {
-            scrollViewRef.scrollTo({ y: 0, animated: true });
-          }, 200);
+        // Reset the scroll position of the target pet card to top
+        const targetPetId = pets[index]?.id;
+        if (targetPetId) {
+          const scrollViewRef = scrollViewRefs.current[targetPetId];
+          if (scrollViewRef) {
+            setTimeout(() => {
+              scrollViewRef.scrollTo({ y: 0, animated: true });
+            }, 450);
+          }
         }
       }
-    }
-  };
-
-  // Handle scroll events for horizontal navigation (no auto-refresh)
-  const handleHorizontalScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const contentOffsetX = event.nativeEvent.contentOffset.x;
-      const index = Math.round(contentOffsetX / SCREEN_WIDTH);
-      if (index !== currentPetIndex && index >= 0 && index < pets.length) {
-        const previousIndex = currentPetIndex;
-        setCurrentPetIndex(index);
-
-        info('Pet card scroll detected', {
-          context: {
-            screen: 'PetsScreen',
-            previousPetIndex: previousIndex,
-            newPetIndex: index,
-            petId: pets[index]?.id,
-            petName: pets[index]?.name,
-          },
-        });
-      }
     },
-    [currentPetIndex, pets]
+    [scrollToPet, pets]
   );
 
-  // Optimized render function with detailed logging
-  const renderPetCard = useCallback(
-    ({ item, index }: { item: Pet; index: number }) => {
-      const petLoading = getPetLoadingState(item.id);
-
-      // Log only when development mode for debugging
-      if (__DEV__) {
-        info('Rendering pet card', {
-          context: {
-            screen: 'PetsScreen',
-            petId: item.id,
-            petName: item.name,
-            index,
-            currentPetIndex,
-            isCurrentCard: index === currentPetIndex,
-          },
-        });
-      }
-
-      return (
-        <PetCard
-          ref={ref => {
-            scrollViewRefs.current[item.id] = ref;
-          }}
-          pet={item}
-          loading={petLoading}
-          onRefresh={handleRefreshPet}
-          onNavigateToWeight={handleNavigateToWeight}
-          onNavigateToFoodLog={handleNavigateToFoodLog}
-        />
-      );
-    },
-    [
-      currentPetIndex,
-      getPetLoadingState,
-      handleRefreshPet,
-      handleNavigateToWeight,
-      handleNavigateToFoodLog,
-    ]
-  );
-
-  const keyExtractor = useCallback((item: Pet) => item.id, []);
-
-  if (pets.length === 0) {
-    return (
-      <SafeAreaView style={styles.container} edges={[]}>
-        <EmptyState />
-      </SafeAreaView>
-    );
-  }
-
+  // Main render with performance optimizations
   return (
     <SafeAreaView style={styles.container} edges={[]}>
-      <FlatList
-        ref={flatListRef}
-        data={pets}
-        renderItem={renderPetCard}
-        keyExtractor={keyExtractor}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleHorizontalScroll}
-        scrollEventThrottle={100}
-        getItemLayout={(_, index) => ({
-          length: SCREEN_WIDTH,
-          offset: SCREEN_WIDTH * index,
-          index,
-        })}
-        // Ultra-optimized settings for single-card rendering
-        initialNumToRender={1}
-        maxToRenderPerBatch={1}
-        windowSize={1}
-        removeClippedSubviews={true}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 100,
-          minimumViewTime: 300,
-        }}
-        // Prevent over-scrolling and momentum
-        bounces={false}
-        scrollEnabled={!loading}
-        disableIntervalMomentum={true}
-        decelerationRate="fast"
-        snapToInterval={SCREEN_WIDTH}
-        snapToAlignment="start"
-        // Optimize rendering
-        legacyImplementation={false}
-        updateCellsBatchingPeriod={150}
-      />
-      <ScrollIndicator
-        totalItems={pets.length}
-        currentIndex={currentPetIndex}
-        onDotPress={scrollToPet}
-      />
+      {pets.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <EmptyState />
+          <LoadingOverlay message="Loading your pets..." visible={loading} />
+        </View>
+      ) : (
+        <>
+          <PetList
+            ref={flatListRef}
+            pets={pets}
+            currentPetIndex={Math.max(0, currentPetIndex)}
+            loading={loading}
+            onScroll={handleHorizontalScroll}
+            onScrollBegin={handleScrollBegin}
+            onScrollEnd={handleScrollEnd}
+            onRefreshPet={handleRefreshPet}
+            onNavigateToWeight={handleNavigateToWeight}
+            onNavigateToFoodLog={handleNavigateToFoodLog}
+            getPetLoadingState={getPetLoadingState}
+            scrollViewRefs={scrollViewRefs}
+          />
+
+          {/* Enhanced Scroll Indicator with loading state */}
+          {pets.length > 0 && (
+            <Suspense fallback={<ActivityIndicator size="small" color={COLORS.primary} />}>
+              <ScrollIndicator
+                totalItems={pets.length}
+                currentIndex={Math.max(0, currentPetIndex)}
+                onDotPress={handleScrollToPet}
+              />
+            </Suspense>
+          )}
+
+          {/* Loading overlay for refresh operations */}
+          <LoadingOverlay message="Refreshing..." isGlobal visible={loading && pets.length > 0} />
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -295,24 +255,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  headerButton: {
-    marginRight: SPACING.md,
-    padding: SPACING.xs,
-  },
-  addButtonCircle: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.round,
-    width: 36,
-    height: 36,
+  emptyContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    padding: SPACING.md,
   },
 });

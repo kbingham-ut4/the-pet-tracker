@@ -12,6 +12,7 @@ docs/
 ├── getting-started/      # Setup and installation guides
 ├── introduction/         # What is Pet Tracker
 ├── development/          # Development guides
+│   ├── id-management.md  # UUID implementation
 │   ├── logging.md        # Logging system
 │   ├── storage.md        # Storage system
 │   └── testing.md        # Testing guide

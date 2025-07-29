@@ -16,6 +16,7 @@ import {
   type PetStorageService as _PetStorageService,
 } from '../storage/services';
 import { info, error, debug } from '../utils/logger';
+import { generateId } from '../utils';
 
 interface PetState {
   pets: Pet[];
@@ -251,7 +252,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
   const addVetVisit = (vetVisitData: Omit<VetVisit, 'id'>) => {
     const newVetVisit: VetVisit = {
       ...vetVisitData,
-      id: Date.now().toString(),
+      id: generateId(),
     };
     dispatch({ type: 'ADD_VET_VISIT', payload: newVetVisit });
   };
@@ -259,7 +260,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
   const addVaccination = (vaccinationData: Omit<Vaccination, 'id'>) => {
     const newVaccination: Vaccination = {
       ...vaccinationData,
-      id: Date.now().toString(),
+      id: generateId(),
     };
     dispatch({ type: 'ADD_VACCINATION', payload: newVaccination });
   };
@@ -267,7 +268,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
   const addActivity = (activityData: Omit<Activity, 'id'>) => {
     const newActivity: Activity = {
       ...activityData,
-      id: Date.now().toString(),
+      id: generateId(),
     };
     dispatch({ type: 'ADD_ACTIVITY', payload: newActivity });
   };
@@ -275,7 +276,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
   const addWeightRecord = (weightRecordData: Omit<WeightRecord, 'id'>) => {
     const newWeightRecord: WeightRecord = {
       ...weightRecordData,
-      id: Date.now().toString(),
+      id: generateId(),
     };
     dispatch({ type: 'ADD_WEIGHT_RECORD', payload: newWeightRecord });
   };
@@ -283,7 +284,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
   const addFoodEntry = (foodEntryData: Omit<FoodEntry, 'id'>) => {
     const newFoodEntry: FoodEntry = {
       ...foodEntryData,
-      id: Date.now().toString(),
+      id: generateId(),
     };
     dispatch({ type: 'ADD_FOOD_ENTRY', payload: newFoodEntry });
   };

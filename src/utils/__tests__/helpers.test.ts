@@ -17,14 +17,25 @@ describe('helpers', () => {
       expect(typeof id1).toBe('string');
       expect(typeof id2).toBe('string');
       expect(id1).not.toBe(id2);
-      expect(id1.length).toBeGreaterThan(0);
+      expect(id1.length).toEqual(36); // UUID v4 length
     });
 
-    it('should generate IDs with consistent format', () => {
+    it('should generate IDs in UUID v4 format', () => {
       const id = generateId();
 
-      // Should be alphanumeric
-      expect(id).toMatch(/^[a-z0-9]+$/);
+      // UUID v4 format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+      expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    });
+
+    it('should generate globally unique identifiers', () => {
+      const ids = new Set();
+      const count = 1000;
+
+      for (let i = 0; i < count; i++) {
+        ids.add(generateId());
+      }
+
+      expect(ids.size).toBe(count); // All should be unique
     });
   });
 

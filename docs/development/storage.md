@@ -185,6 +185,13 @@ const keys = ['pet_1', 'pet_2', 'pet_3'];
 const results = await storage.getMultiple(keys);
 ```
 
+### ID Management
+
+- All entities use UUID v4 identifiers through the `generateId()` utility
+- Cross-device compatibility with globally unique IDs
+- Safe for distributed operation without central coordination
+- See [ID Management](./id-management) for detailed information
+
 ### Memory Management
 
 - Automatic cleanup of old data based on `MAX_OFFLINE_DAYS`
