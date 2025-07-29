@@ -219,11 +219,15 @@ When suggesting new dependencies:
 
 ## Documentation
 
+**IMPORTANT**: All project documentation must be placed in the `/docs` folder following VitePress structure and conventions.
+
 - Update relevant documentation when adding new features
 - Include code examples in JSDoc comments
 - Update the VitePress documentation for user-facing features
-- Add README files for complex modules
-- Keep the changelog updated with significant changes
+- Place all `.md` files in appropriate `/docs` subdirectories (development/, features/, api/, etc.)
+- Follow VitePress frontmatter and markdown conventions
+- Add README files for complex modules only when they don't belong in the main docs
+- Keep the changelog updated with significant changes in `/docs/changelog.md`
 
 ## Commit Message Guidelines
 
