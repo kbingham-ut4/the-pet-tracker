@@ -4,7 +4,7 @@ import { CalorieCalculatorFactory } from '../services/CalorieCalculatorFactory';
 import { DogCalorieCalculator } from '../services/CalorieCalculator';
 import { NutritionService } from '../services/NutritionService';
 import { DailyNutritionSummary, WeightGoal, ActivityLevel, MealType, PetType } from '../types';
-import { generateId, calculateAgeInYears } from '../utils';
+import { generateId } from '../utils';
 
 export function useNutrition(petId: string) {
   const {
@@ -44,13 +44,13 @@ export function useNutrition(petId: string) {
 
   // Calculate recommended calories when pet data changes
   useEffect(() => {
-    const age = calculateAgeInYears(pet?.dateOfBirth) || pet?.age;
-    if (pet && pet.type && age && pet.weight && nutritionProfile) {
+    const ageInYears = pet?.age?.years;
+    if (pet && pet.type && ageInYears !== undefined && pet.weight && nutritionProfile) {
       try {
         const calculator = CalorieCalculatorFactory.createCalculator(pet.type);
         const maintenanceCalories = calculator.calculateMaintenanceCalories(
           pet.weight,
-          age,
+          ageInYears,
           nutritionProfile.activityLevel,
           nutritionProfile.spayedNeutered
         );
@@ -125,7 +125,7 @@ export function useNutrition(petId: string) {
   };
 
   const calculateWeightLossPlan = (targetWeight: number, weeks: number = 16) => {
-    if (!pet || !pet.age || !pet.weight || !nutritionProfile) {
+    if (!pet || !pet.age?.years || !pet.weight || !nutritionProfile) {
       return null;
     }
 
@@ -135,7 +135,7 @@ export function useNutrition(petId: string) {
         return calculator.calculateWeightLossCalories(
           pet.weight,
           targetWeight,
-          pet.age,
+          pet.age.years,
           nutritionProfile.activityLevel,
           nutritionProfile.spayedNeutered,
           weeks

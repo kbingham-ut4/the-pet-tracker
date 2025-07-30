@@ -1,4 +1,5 @@
 import { PetType } from '../types';
+import { IPetAge } from '../interfaces';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../logger';
 
@@ -142,6 +143,42 @@ export function calculateAge(birthDate: Date): string {
 }
 
 /**
+ * Calculates the detailed age with years and months from a date of birth
+ *
+ * @param dateOfBirth - The pet's date of birth
+ * @returns The age with years and months, or undefined if no date provided
+ */
+export function calculateDetailedAge(dateOfBirth: Date | undefined): IPetAge | undefined {
+  if (!dateOfBirth) {
+    return undefined;
+  }
+
+  const today = new Date();
+  let years = today.getFullYear() - dateOfBirth.getFullYear();
+  let months = today.getMonth() - dateOfBirth.getMonth();
+
+  // Adjust if birthday hasn't occurred this year yet
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  } else if (months === 0 && today.getDate() < dateOfBirth.getDate()) {
+    years -= 1;
+    months = 11;
+  } else if (today.getDate() < dateOfBirth.getDate()) {
+    months -= 1;
+    if (months < 0) {
+      years -= 1;
+      months = 11;
+    }
+  }
+
+  return {
+    years: Math.max(0, years),
+    months: Math.max(0, months),
+  };
+}
+
+/**
  * Calculates the numeric age in years from a date of birth
  * Used for calculations like calorie requirements
  *
@@ -149,20 +186,8 @@ export function calculateAge(birthDate: Date): string {
  * @returns The age in years as a number, or undefined if no date provided
  */
 export function calculateAgeInYears(dateOfBirth: Date | undefined): number | undefined {
-  if (!dateOfBirth) {
-    return undefined;
-  }
-
-  const today = new Date();
-  const age = today.getFullYear() - dateOfBirth.getFullYear();
-  const monthDiff = today.getMonth() - dateOfBirth.getMonth();
-
-  // Adjust if birthday hasn't occurred this year yet
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate())) {
-    return age - 1;
-  }
-
-  return age;
+  const detailedAge = calculateDetailedAge(dateOfBirth);
+  return detailedAge?.years;
 }
 
 export function getPetTypeDisplayName(type: PetType): string {

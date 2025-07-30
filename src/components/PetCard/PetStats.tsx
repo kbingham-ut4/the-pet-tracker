@@ -2,16 +2,33 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
-import { Pet } from '../../types';
-import { calculateAgeInYears, formatDateDDMMYYYY } from '../../utils';
+import { IPet } from '../../interfaces';
+import { formatDateDDMMYYYY } from '../../utils';
 
 interface PetStatsProps {
-  pet: Pet;
+  pet: IPet;
 }
 
+/**
+ * Formats pet age for display
+ * Shows only years when pet is 1 year or older for better text fitting
+ */
+const formatPetAge = (age: IPet['age']): string => {
+  if (!age) {
+    return 'Age unknown';
+  }
+
+  if (age.years === 0) {
+    return age.months === 1 ? '1 month' : `${age.months} months`;
+  } else {
+    // For pets 1 year or older, only show years
+    return age.years === 1 ? '1 year' : `${age.years} years`;
+  }
+};
+
 const PetStats: React.FC<PetStatsProps> = ({ pet }) => {
-  // Calculate age from date of birth if available, otherwise use the age field
-  const calculatedAge = calculateAgeInYears(pet.dateOfBirth) || pet.age;
+  // Use the age from storage (already calculated by PetStorageService)
+  const ageText = formatPetAge(pet.age);
 
   return (
     <View style={styles.statsSection}>
@@ -26,10 +43,10 @@ const PetStats: React.FC<PetStatsProps> = ({ pet }) => {
           </View>
         )}
 
-        {calculatedAge && (
+        {pet.age && (
           <View style={styles.statCard}>
             <Ionicons name="calendar" size={20} color={COLORS.secondary} />
-            <Text style={styles.statValue}>{calculatedAge} years</Text>
+            <Text style={styles.statValue}>{ageText}</Text>
             <Text style={styles.statLabel}>Age</Text>
           </View>
         )}
@@ -53,7 +70,7 @@ const PetStats: React.FC<PetStatsProps> = ({ pet }) => {
         {pet.gender && (
           <View style={styles.statCard}>
             <Ionicons
-              name={pet.gender === 'male' ? 'male' : pet.gender === 'female' ? 'female' : 'help'}
+              name={pet.gender === 'male' ? 'man' : pet.gender === 'female' ? 'woman' : 'help'}
               size={20}
               color={COLORS.textSecondary}
             />

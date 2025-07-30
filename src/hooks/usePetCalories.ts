@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Pet, PetType, ActivityLevel } from '../types';
 import { usePets } from '../contexts';
 import { CalorieCalculatorFactory } from '../services/CalorieCalculatorFactory';
-import { calculateAgeInYears } from '../utils';
 import { error } from '../utils/logger';
 
 interface PetCalorieData {
@@ -35,13 +34,13 @@ export const usePetCalories = (pet: Pet): PetCalorieData => {
     if (pet.type === PetType.DOG && pet.weight) {
       try {
         const calculator = CalorieCalculatorFactory.createCalculator(pet.type);
-        const age = calculateAgeInYears(pet.dateOfBirth) || pet.age || 3; // Use dateOfBirth first, then fallback to age or default
+        const ageInYears = pet.age?.years || 3; // Extract years from age object or default
         const activityLevel = ActivityLevel.MODERATELY_ACTIVE; // Default activity level
         const isSpayedNeutered = true; // Default assumption
 
         const maintenanceCalories = calculator.calculateMaintenanceCalories(
           pet.weight,
-          age,
+          ageInYears,
           activityLevel,
           isSpayedNeutered
         );

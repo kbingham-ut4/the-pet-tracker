@@ -10,20 +10,50 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
-import { Pet, PetType } from '../../types';
-import { calculateAgeInYears, formatDateDDMMYYYY } from '../../utils';
+import { IPet, PetType } from '../../interfaces';
+import { formatDateDDMMYYYY } from '../../utils';
 import { debug } from '../../utils/logger';
 import { usePetCalories } from '../../hooks';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+/**
+ * Formats pet age for display
+ * Shows only years when pet is 1 year or older for better text fitting
+ */
+const formatPetAge = (age: IPet['age']): string => {
+  if (!age) {
+    return 'Age unknown';
+  }
+
+  if (age.years === 0) {
+    return age.months === 1 ? '1 month old' : `${age.months} months old`;
+  } else {
+    // For pets 1 year or older, only show years
+    return age.years === 1 ? '1 year old' : `${age.years} years old`;
+  }
+};
+
 interface PetCardProps {
-  pet: Pet;
+  pet: IPet;
   loading: boolean;
   onRefresh: (_petId: string) => Promise<void>;
   onNavigateToWeight: (_petId: string) => void;
   onNavigateToFoodLog: (_petId: string) => void;
 }
+
+/**
+ * Compares two age objects for equality
+ */
+const areAgesEqual = (age1: IPet['age'], age2: IPet['age']): boolean => {
+  if (!age1 && !age2) {
+    return true;
+  }
+  if (!age1 || !age2) {
+    return false;
+  }
+  return age1.years === age2.years && age1.months === age2.months;
+};
 
 const PetCard = React.memo(
   forwardRef<ScrollView, PetCardProps>(
@@ -33,8 +63,9 @@ const PetCard = React.memo(
         debug('Rendering pet card', { context: { petId: pet.id, petName: pet.name } });
       }
 
-      // Calculate age from date of birth if available, otherwise use the age field
-      const calculatedAge = calculateAgeInYears(pet.dateOfBirth) || pet.age;
+      // Use the age from storage (already calculated by PetStorageService)
+      const petAge = pet.age;
+      const ageText = formatPetAge(petAge);
 
       // Memoize calorie calculations to prevent unnecessary recalculations
       const { todaysCalories, targetCalories } = usePetCalories(pet);
@@ -67,16 +98,19 @@ const PetCard = React.memo(
               <View
                 style={[
                   styles.petTypeIcon,
-                  { backgroundColor: COLORS.petColors[pet.type] || COLORS.petColors.other },
+                  {
+                    backgroundColor:
+                      COLORS.petColors[pet.type as keyof typeof COLORS.petColors] ||
+                      COLORS.petColors.other,
+                  },
                 ]}
               >
                 <Ionicons name="paw" size={32} color={COLORS.surface} />
               </View>
               <View style={styles.petHeaderInfo}>
                 <Text style={styles.petName}>{pet.name}</Text>
-                <Text style={styles.petDetails}>
-                  {pet.breed} • {calculatedAge ? `${calculatedAge} years old` : 'Age unknown'}
-                </Text>
+                <Text style={styles.petDetails}>{pet.breed}</Text>
+                <Text style={styles.petDetails}>{ageText}</Text>
                 <Text style={styles.petType}>{pet.type}</Text>
               </View>
             </View>
@@ -132,10 +166,10 @@ const PetCard = React.memo(
                   </View>
                 )}
 
-                {calculatedAge && (
+                {petAge && (
                   <View style={styles.statCard}>
                     <Ionicons name="calendar" size={20} color={COLORS.secondary} />
-                    <Text style={styles.statValue}>{calculatedAge} years</Text>
+                    <Text style={styles.statValue}>{ageText}</Text>
                     <Text style={styles.statLabel}>Age</Text>
                   </View>
                 )}
@@ -215,7 +249,7 @@ const PetCard = React.memo(
       prevProps.pet.id === nextProps.pet.id &&
       prevProps.pet.name === nextProps.pet.name &&
       prevProps.pet.weight === nextProps.pet.weight &&
-      prevProps.pet.age === nextProps.pet.age &&
+      areAgesEqual(prevProps.pet.age, nextProps.pet.age) &&
       prevProps.pet.dateOfBirth?.getTime() === nextProps.pet.dateOfBirth?.getTime() &&
       prevProps.pet.color === nextProps.pet.color &&
       prevProps.pet.breed === nextProps.pet.breed &&
@@ -436,7 +470,7 @@ const arePropsEqual = (prevProps: PetCardProps, nextProps: PetCardProps) => {
     prevProps.pet.id !== nextProps.pet.id ||
     prevProps.pet.name !== nextProps.pet.name ||
     prevProps.pet.weight !== nextProps.pet.weight ||
-    prevProps.pet.age !== nextProps.pet.age ||
+    !areAgesEqual(prevProps.pet.age, nextProps.pet.age) ||
     prevProps.pet.breed !== nextProps.pet.breed ||
     prevProps.pet.type !== nextProps.pet.type ||
     prevProps.pet.ownerNotes !== nextProps.pet.ownerNotes ||

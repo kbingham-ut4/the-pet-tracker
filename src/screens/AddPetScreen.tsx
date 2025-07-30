@@ -34,13 +34,13 @@ interface PetFormData {
 }
 
 const PET_TYPES = [
-  { key: PetType.DOG, label: 'Dog', icon: 'bone' as const },
-  { key: PetType.CAT, label: 'Cat', icon: 'moon' as const },
+  { key: PetType.DOG, label: 'Dog', icon: 'paw' as const },
+  { key: PetType.CAT, label: 'Cat', icon: 'paw' as const },
 ];
 
 const GENDER_OPTIONS = [
-  { key: PetGender.MALE, label: 'Male', icon: 'male' as const },
-  { key: PetGender.FEMALE, label: 'Female', icon: 'female' as const },
+  { key: PetGender.MALE, label: 'Male', icon: 'man' as const },
+  { key: PetGender.FEMALE, label: 'Female', icon: 'woman' as const },
   { key: PetGender.UNKNOWN, label: 'Unknown', icon: 'help' as const },
 ];
 
@@ -107,9 +107,12 @@ export default function AddPetScreen() {
         createdAt: new Date(),
         updatedAt: new Date(),
         // Add physical characteristics if coat type is specified
-        physicalCharacteristics: formData.coatType !== CoatType.SHORT ? {
-          coatType: formData.coatType,
-        } : undefined,
+        physicalCharacteristics:
+          formData.coatType !== CoatType.SHORT
+            ? {
+                coatType: formData.coatType,
+              }
+            : undefined,
       };
 
       await addPet(newPet);
@@ -139,7 +142,10 @@ export default function AddPetScreen() {
     navigation.goBack();
   };
 
-  const updateFormData = (field: keyof PetFormData, value: string | PetType | PetGender | CoatType) => {
+  const updateFormData = (
+    field: keyof PetFormData,
+    value: string | PetType | PetGender | CoatType
+  ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -310,7 +316,10 @@ export default function AddPetScreen() {
             {GENDER_OPTIONS.map(option => (
               <TouchableOpacity
                 key={option.key}
-                style={[styles.typeOption, formData.gender === option.key && styles.typeOptionSelected]}
+                style={[
+                  styles.typeOption,
+                  formData.gender === option.key && styles.typeOptionSelected,
+                ]}
                 onPress={() => updateFormData('gender', option.key)}
               >
                 <Ionicons
@@ -338,7 +347,10 @@ export default function AddPetScreen() {
             {COAT_TYPES.map(coat => (
               <TouchableOpacity
                 key={coat.key}
-                style={[styles.coatTypeOption, formData.coatType === coat.key && styles.coatTypeOptionSelected]}
+                style={[
+                  styles.coatTypeOption,
+                  formData.coatType === coat.key && styles.coatTypeOptionSelected,
+                ]}
                 onPress={() => updateFormData('coatType', coat.key)}
               >
                 <Text

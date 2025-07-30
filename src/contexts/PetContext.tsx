@@ -359,23 +359,23 @@ export function PetProvider({ children }: { children: ReactNode }) {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     const currentDay = now.getDate();
-    
+
     // Calculate birth year
     const birthYear = currentYear - ageInYears;
-    
+
     // Generate random month (0-11) and day
     const birthMonth = Math.floor(Math.random() * 12);
     const daysInMonth = new Date(birthYear, birthMonth + 1, 0).getDate();
     const birthDay = Math.floor(Math.random() * daysInMonth) + 1;
-    
+
     // Create the date of birth
     let dateOfBirth = new Date(birthYear, birthMonth, birthDay);
-    
+
     // Ensure the pet isn't older than specified age (adjust if birthday hasn't occurred this year)
     if (birthMonth > currentMonth || (birthMonth === currentMonth && birthDay > currentDay)) {
       dateOfBirth = new Date(birthYear - 1, birthMonth, birthDay);
     }
-    
+
     return dateOfBirth;
   };
 

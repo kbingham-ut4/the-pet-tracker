@@ -1,13 +1,25 @@
 /**
  * Pet Interface Definitions
- * 
+ *
  * Comprehensive interfaces for the Pet Tracker application
  * providing type safety and structure for all pet-related data.
  */
 
+/* eslint-disable no-unused-vars */
+
 // ============================================================================
 // CORE INTERFACES
 // ============================================================================
+
+/**
+ * Age representation with years and months
+ */
+export interface IPetAge {
+  /** Age in full years */
+  years: number;
+  /** Additional months (0-11) */
+  months: number;
+}
 
 /**
  * Core Pet interface representing the main pet entity
@@ -15,61 +27,61 @@
 export interface IPet {
   /** Unique identifier for the pet */
   id: string;
-  
+
   /** Pet's name */
   name: string;
-  
+
   /** Type of pet (dog, cat, etc.) */
   type: PetType;
-  
+
   /** Pet's breed (optional) */
   breed?: string;
-  
-  /** Pet's age in years (legacy field, use dateOfBirth when available) */
-  age?: number;
-  
+
   /** Pet's date of birth for accurate age calculation */
   dateOfBirth?: Date;
-  
+
+  /** Pet's age with years and months (computed from dateOfBirth) */
+  readonly age?: IPetAge;
+
   /** Pet's current weight in kilograms */
   weight?: number;
-  
+
   /** Pet's color or coat description */
   color?: string;
-  
+
   /** Pet's gender */
   gender?: PetGender;
-  
+
   /** Microchip identification number */
   microchipId?: string;
-  
+
   /** URI to pet's photo */
   photoUri?: string;
-  
+
   /** Owner's personal notes about the pet */
   ownerNotes?: string;
-  
+
   /** ID of the user who owns this pet */
   ownerId?: string;
-  
+
   /** When the pet record was created */
   createdAt: Date;
-  
+
   /** When the pet record was last updated */
   updatedAt: Date;
-  
+
   /** Pet's physical characteristics */
   physicalCharacteristics?: IPhysicalCharacteristics;
-  
+
   /** Pet's behavioral traits */
   behavioralTraits?: IBehavioralTraits;
-  
+
   /** Emergency contact information */
   emergencyContact?: IEmergencyContact;
-  
+
   /** Insurance information */
   insurance?: IPetInsurance;
-  
+
   /** Current health status */
   healthStatus?: IHealthStatus;
 }
@@ -103,22 +115,22 @@ export enum PetGender {
 export interface IPhysicalCharacteristics {
   /** Height in centimeters */
   height?: number;
-  
+
   /** Length in centimeters */
   length?: number;
-  
+
   /** Eye color */
   eyeColor?: string;
-  
+
   /** Distinctive markings or features */
   markings?: string[];
-  
+
   /** Coat type (for furry pets) */
   coatType?: CoatType;
-  
+
   /** Tail type */
   tailType?: TailType;
-  
+
   /** Ear type */
   earType?: EarType;
 }
@@ -153,25 +165,25 @@ export enum EarType {
 export interface IBehavioralTraits {
   /** Energy level (1-10 scale) */
   energyLevel?: number;
-  
+
   /** Friendliness with humans (1-10 scale) */
   humanFriendliness?: number;
-  
+
   /** Friendliness with other pets (1-10 scale) */
   petFriendliness?: number;
-  
+
   /** Trainability (1-10 scale) */
   trainability?: number;
-  
+
   /** Special behaviors or quirks */
   specialBehaviors?: string[];
-  
+
   /** Known fears or phobias */
   fears?: string[];
-  
+
   /** Favorite activities */
   favoriteActivities?: string[];
-  
+
   /** Training status */
   trainingStatus?: ITrainingStatus;
 }
@@ -179,13 +191,13 @@ export interface IBehavioralTraits {
 export interface ITrainingStatus {
   /** Is house trained */
   houseTrained: boolean;
-  
+
   /** Known commands */
   knownCommands?: string[];
-  
+
   /** Training notes */
   trainingNotes?: string;
-  
+
   /** Last training session date */
   lastTrainingDate?: Date;
 }
@@ -196,16 +208,16 @@ export interface ITrainingStatus {
 export interface IEmergencyContact {
   /** Contact person's name */
   name: string;
-  
+
   /** Phone number */
   phone: string;
-  
+
   /** Email address */
   email?: string;
-  
+
   /** Relationship to pet owner */
   relationship: string;
-  
+
   /** Additional notes */
   notes?: string;
 }
@@ -216,28 +228,28 @@ export interface IEmergencyContact {
 export interface IPetInsurance {
   /** Insurance provider name */
   provider: string;
-  
+
   /** Policy number */
   policyNumber: string;
-  
+
   /** Coverage type */
   coverageType: InsuranceCoverageType;
-  
+
   /** Annual deductible */
   deductible?: number;
-  
+
   /** Coverage percentage */
   coveragePercentage?: number;
-  
+
   /** Annual limit */
   annualLimit?: number;
-  
+
   /** Policy start date */
   startDate: Date;
-  
+
   /** Policy end date */
   endDate?: Date;
-  
+
   /** Is policy active */
   isActive: boolean;
 }
@@ -255,25 +267,25 @@ export enum InsuranceCoverageType {
 export interface IHealthStatus {
   /** Overall health rating (1-10) */
   overallHealth: number;
-  
+
   /** Current health conditions */
   conditions?: IHealthCondition[];
-  
+
   /** Current medications */
   medications?: IMedication[];
-  
+
   /** Known allergies */
   allergies?: IAllergy[];
-  
+
   /** Last vet visit date */
   lastVetVisit?: Date;
-  
+
   /** Next scheduled visit */
   nextVetVisit?: Date;
-  
+
   /** Is spayed/neutered */
   spayedNeutered?: boolean;
-  
+
   /** Spay/neuter date */
   spayNeuterDate?: Date;
 }
@@ -281,22 +293,22 @@ export interface IHealthStatus {
 export interface IHealthCondition {
   /** Condition ID */
   id: string;
-  
+
   /** Condition name */
   name: string;
-  
+
   /** Severity level */
   severity: HealthSeverity;
-  
+
   /** Date diagnosed */
   diagnosedDate: Date;
-  
+
   /** Is condition chronic */
   isChronic: boolean;
-  
+
   /** Treatment notes */
   treatmentNotes?: string;
-  
+
   /** Is currently active */
   isActive: boolean;
 }
@@ -311,28 +323,28 @@ export enum HealthSeverity {
 export interface IMedication {
   /** Medication ID */
   id: string;
-  
+
   /** Medication name */
   name: string;
-  
+
   /** Dosage */
   dosage: string;
-  
+
   /** Frequency */
   frequency: string;
-  
+
   /** Start date */
   startDate: Date;
-  
+
   /** End date */
   endDate?: Date;
-  
+
   /** Administration instructions */
   instructions?: string;
-  
+
   /** Prescribing veterinarian */
   veterinarian?: string;
-  
+
   /** Is currently active */
   isActive: boolean;
 }
@@ -340,22 +352,22 @@ export interface IMedication {
 export interface IAllergy {
   /** Allergy ID */
   id: string;
-  
+
   /** Allergen name */
   allergen: string;
-  
+
   /** Allergy type */
   type: AllergyType;
-  
+
   /** Severity level */
   severity: HealthSeverity;
-  
+
   /** Symptoms */
   symptoms?: string[];
-  
+
   /** Treatment notes */
   treatmentNotes?: string;
-  
+
   /** Date discovered */
   discoveredDate?: Date;
 }
@@ -378,46 +390,46 @@ export enum AllergyType {
 export interface IVetVisit {
   /** Visit ID */
   id: string;
-  
+
   /** Pet ID */
   petId: string;
-  
+
   /** Visit date */
   visitDate: Date;
-  
+
   /** Veterinarian name */
   veterinarian: string;
-  
+
   /** Clinic name */
   clinic: string;
-  
+
   /** Reason for visit */
   reason: string;
-  
+
   /** Diagnosis */
   diagnosis?: string;
-  
+
   /** Treatment provided */
   treatment?: string;
-  
+
   /** Medications prescribed */
   medications?: IMedication[];
-  
+
   /** Next visit date */
   nextVisitDate?: Date;
-  
+
   /** Visit cost */
   cost?: number;
-  
+
   /** Additional notes */
   notes?: string;
-  
+
   /** Visit type */
   visitType: VetVisitType;
-  
+
   /** Procedures performed */
   procedures?: IProcedure[];
-  
+
   /** Test results */
   testResults?: ITestResult[];
 }
@@ -437,19 +449,19 @@ export enum VetVisitType {
 export interface IProcedure {
   /** Procedure ID */
   id: string;
-  
+
   /** Procedure name */
   name: string;
-  
+
   /** Procedure type */
   type: ProcedureType;
-  
+
   /** Cost */
   cost?: number;
-  
+
   /** Duration in minutes */
   duration?: number;
-  
+
   /** Notes */
   notes?: string;
 }
@@ -468,25 +480,25 @@ export enum ProcedureType {
 export interface ITestResult {
   /** Test ID */
   id: string;
-  
+
   /** Test name */
   testName: string;
-  
+
   /** Test type */
   testType: TestType;
-  
+
   /** Result value */
   result: string;
-  
+
   /** Normal range */
   normalRange?: string;
-  
+
   /** Is result abnormal */
   isAbnormal: boolean;
-  
+
   /** Test date */
   testDate: Date;
-  
+
   /** Notes */
   notes?: string;
 }
@@ -507,43 +519,43 @@ export enum TestType {
 export interface IVaccination {
   /** Vaccination ID */
   id: string;
-  
+
   /** Pet ID */
   petId: string;
-  
+
   /** Vaccine name */
   vaccineName: string;
-  
+
   /** Date administered */
   dateAdministered: Date;
-  
+
   /** Next due date */
   nextDueDate?: Date;
-  
+
   /** Administering veterinarian */
   veterinarian: string;
-  
+
   /** Vaccine batch number */
   batchNumber?: string;
-  
+
   /** Manufacturer */
   manufacturer?: string;
-  
+
   /** Lot number */
   lotNumber?: string;
-  
+
   /** Expiration date */
   expirationDate?: Date;
-  
+
   /** Injection site */
   injectionSite?: string;
-  
+
   /** Adverse reactions */
   adverseReactions?: string[];
-  
+
   /** Notes */
   notes?: string;
-  
+
   /** Vaccine type */
   vaccineType: VaccineType;
 }
@@ -565,37 +577,37 @@ export enum VaccineType {
 export interface IActivity {
   /** Activity ID */
   id: string;
-  
+
   /** Pet ID */
   petId: string;
-  
+
   /** Activity type */
   type: ActivityType;
-  
+
   /** Activity date */
   date: Date;
-  
+
   /** Duration in minutes */
   duration?: number;
-  
+
   /** Distance in kilometers */
   distance?: number;
-  
+
   /** Location */
   location?: string;
-  
+
   /** Calories burned */
   caloriesBurned?: number;
-  
+
   /** Intensity level */
   intensity?: ActivityIntensity;
-  
+
   /** Weather conditions */
   weather?: IWeatherConditions;
-  
+
   /** Notes */
   notes?: string;
-  
+
   /** Activity companions */
   companions?: string[];
 }
@@ -623,13 +635,13 @@ export enum ActivityIntensity {
 export interface IWeatherConditions {
   /** Temperature in Celsius */
   temperature?: number;
-  
+
   /** Weather description */
   description?: string;
-  
+
   /** Humidity percentage */
   humidity?: number;
-  
+
   /** Wind speed */
   windSpeed?: number;
 }
@@ -640,25 +652,25 @@ export interface IWeatherConditions {
 export interface IWeightRecord {
   /** Record ID */
   id: string;
-  
+
   /** Pet ID */
   petId: string;
-  
+
   /** Weight in kilograms */
   weight: number;
-  
+
   /** Date recorded */
   date: Date;
-  
+
   /** Body condition score (1-9) */
   bodyConditionScore?: number;
-  
+
   /** Measurement method */
   measurementMethod?: WeightMeasurementMethod;
-  
+
   /** Notes */
   notes?: string;
-  
+
   /** Recorded by (person or device) */
   recordedBy?: string;
 }
@@ -676,49 +688,49 @@ export enum WeightMeasurementMethod {
 export interface IFoodEntry {
   /** Entry ID */
   id: string;
-  
+
   /** Pet ID */
   petId: string;
-  
+
   /** Food name */
   foodName: string;
-  
+
   /** Brand name */
   brand?: string;
-  
+
   /** Quantity in grams */
   quantity: number;
-  
+
   /** Calories */
   calories: number;
-  
+
   /** Protein in grams */
   protein?: number;
-  
+
   /** Fat in grams */
   fat?: number;
-  
+
   /** Carbohydrates in grams */
   carbs?: number;
-  
+
   /** Fiber in grams */
   fiber?: number;
-  
+
   /** Sodium in milligrams */
   sodium?: number;
-  
+
   /** Date and time */
   date: Date;
-  
+
   /** Meal type */
   mealType: MealType;
-  
+
   /** Food type */
   foodType: FoodType;
-  
+
   /** Feeding method */
   feedingMethod?: FeedingMethod;
-  
+
   /** Notes */
   notes?: string;
 }
@@ -756,28 +768,28 @@ export enum FeedingMethod {
 export interface ICalorieTarget {
   /** Target ID */
   id: string;
-  
+
   /** Pet ID */
   petId: string;
-  
+
   /** Daily calorie goal */
   dailyCalorieGoal: number;
-  
+
   /** Target weight */
   targetWeight?: number;
-  
+
   /** Weight goal */
   weightGoal: WeightGoal;
-  
+
   /** Activity level */
   activityLevel: ActivityLevel;
-  
+
   /** Created date */
   createdAt: Date;
-  
+
   /** Updated date */
   updatedAt: Date;
-  
+
   /** Is currently active */
   isActive: boolean;
 }
@@ -802,34 +814,34 @@ export enum ActivityLevel {
 export interface IDailyNutritionSummary {
   /** Summary date */
   date: Date;
-  
+
   /** Pet ID */
   petId: string;
-  
+
   /** Total calories consumed */
   totalCalories: number;
-  
+
   /** Total protein consumed */
   totalProtein: number;
-  
+
   /** Total fat consumed */
   totalFat: number;
-  
+
   /** Total carbohydrates consumed */
   totalCarbs: number;
-  
+
   /** Calorie goal for the day */
   calorieGoal: number;
-  
+
   /** Remaining calories */
   remainingCalories: number;
-  
+
   /** Food entries for the day */
   foodEntries: IFoodEntry[];
-  
+
   /** Water intake in milliliters */
   waterIntake?: number;
-  
+
   /** Treat count */
   treatCount: number;
 }
@@ -840,28 +852,28 @@ export interface IDailyNutritionSummary {
 export interface IPetNutritionProfile {
   /** Pet ID */
   petId: string;
-  
+
   /** Activity level */
   activityLevel: ActivityLevel;
-  
+
   /** Is spayed/neutered */
   spayedNeutered: boolean;
-  
+
   /** Health conditions affecting nutrition */
   healthConditions?: string[];
-  
+
   /** Dietary restrictions */
   dietaryRestrictions?: IDietaryRestriction[];
-  
+
   /** Preferred foods */
   preferredFoods?: string[];
-  
+
   /** Foods to avoid */
   foodsToAvoid?: string[];
-  
+
   /** Feeding schedule */
   feedingSchedule?: IFeedingSchedule[];
-  
+
   /** Last updated */
   lastUpdated: Date;
 }
@@ -869,13 +881,13 @@ export interface IPetNutritionProfile {
 export interface IDietaryRestriction {
   /** Restriction type */
   type: DietaryRestrictionType;
-  
+
   /** Description */
   description: string;
-  
+
   /** Severity */
   severity: HealthSeverity;
-  
+
   /** Notes */
   notes?: string;
 }
@@ -891,16 +903,16 @@ export enum DietaryRestrictionType {
 export interface IFeedingSchedule {
   /** Time of feeding */
   time: string; // Format: "HH:MM"
-  
+
   /** Meal type */
   mealType: MealType;
-  
+
   /** Portion size in grams */
   portionSize: number;
-  
+
   /** Food type */
   foodType: FoodType;
-  
+
   /** Is active */
   isActive: boolean;
 }
@@ -915,34 +927,34 @@ export interface IFeedingSchedule {
 export interface IPetSearchCriteria {
   /** Search by name */
   name?: string;
-  
+
   /** Search by type */
   type?: PetType;
-  
+
   /** Search by breed */
   breed?: string;
-  
+
   /** Search by age range */
   ageRange?: {
     min: number;
     max: number;
   };
-  
+
   /** Search by weight range */
   weightRange?: {
     min: number;
     max: number;
   };
-  
+
   /** Search by gender */
   gender?: PetGender;
-  
+
   /** Search by owner ID */
   ownerId?: string;
-  
+
   /** Search by health conditions */
   healthConditions?: string[];
-  
+
   /** Search by location */
   location?: string;
 }
@@ -953,28 +965,28 @@ export interface IPetSearchCriteria {
 export interface IPetStatistics {
   /** Pet ID */
   petId: string;
-  
+
   /** Total vet visits */
   totalVetVisits: number;
-  
+
   /** Total activities */
   totalActivities: number;
-  
+
   /** Average daily calories */
   averageDailyCalories: number;
-  
+
   /** Weight trend */
   weightTrend: WeightTrend;
-  
+
   /** Health score (1-10) */
   healthScore: number;
-  
+
   /** Activity score (1-10) */
   activityScore: number;
-  
+
   /** Nutrition score (1-10) */
   nutritionScore: number;
-  
+
   /** Last calculation date */
   lastCalculated: Date;
 }
@@ -992,19 +1004,19 @@ export enum WeightTrend {
 export interface IPetCollection {
   /** All pets */
   pets: IPet[];
-  
+
   /** Total count */
   totalCount: number;
-  
+
   /** Filtered count (after search/filter) */
   filteredCount: number;
-  
+
   /** Search criteria applied */
   searchCriteria?: IPetSearchCriteria;
-  
+
   /** Sort order */
   sortOrder?: PetSortOrder;
-  
+
   /** Page information for pagination */
   pagination?: IPagination;
 }
@@ -1023,16 +1035,16 @@ export enum PetSortOrder {
 export interface IPagination {
   /** Current page */
   currentPage: number;
-  
+
   /** Items per page */
   itemsPerPage: number;
-  
+
   /** Total pages */
   totalPages: number;
-  
+
   /** Has next page */
   hasNext: boolean;
-  
+
   /** Has previous page */
   hasPrevious: boolean;
 }
@@ -1047,19 +1059,19 @@ export interface IPagination {
 export interface IPetApiResponse<T = unknown> {
   /** Success status */
   success: boolean;
-  
+
   /** Response data */
   data?: T;
-  
+
   /** Error message */
   error?: string;
-  
+
   /** Error code */
   errorCode?: string;
-  
+
   /** Response timestamp */
   timestamp: Date;
-  
+
   /** Request ID for tracking */
   requestId?: string;
 }

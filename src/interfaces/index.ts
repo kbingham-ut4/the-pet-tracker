@@ -1,6 +1,6 @@
 /**
  * Pet Tracker Interfaces
- * 
+ *
  * Central export point for all interface definitions
  */
 
@@ -10,6 +10,7 @@ export * from './Pet.interface';
 // Re-export commonly used types for convenience
 export type {
   Pet,
+  IPetAge as PetAge,
   VetVisit,
   Vaccination,
   Activity,

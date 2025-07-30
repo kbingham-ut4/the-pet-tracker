@@ -23,7 +23,7 @@ describe('PetContext', () => {
     id: 'test-pet-1',
     name: 'Buddy',
     type: PetType.DOG,
-    age: 3,
+    age: { years: 3, months: 0 },
     weight: 25,
   });
 
@@ -31,7 +31,7 @@ describe('PetContext', () => {
     id: 'test-pet-2',
     name: 'Whiskers',
     type: PetType.CAT,
-    age: 2,
+    age: { years: 2, months: 0 },
     weight: 8,
   });
 
@@ -136,14 +136,14 @@ describe('PetContext', () => {
         name: 'Test Pet',
         type: PetType.CAT,
         breed: 'Siamese',
-        age: 5,
+        age: { years: 5, months: 0 },
         weight: 4.5,
         color: 'White',
         gender: PetGender.FEMALE,
       });
 
       expect(testPet.breed).toBe('Siamese');
-      expect(testPet.age).toBe(5);
+      expect(testPet.age).toEqual({ years: 5, months: 0 });
       expect(testPet.weight).toBe(4.5);
       expect(testPet.color).toBe('White');
       expect(testPet.gender).toBe(PetGender.FEMALE);

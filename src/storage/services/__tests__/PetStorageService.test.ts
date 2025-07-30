@@ -119,6 +119,7 @@ describe('PetStorageService', () => {
       };
 
       // Mock the getStorageManager method to return our mock
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.spyOn(service as any, 'getStorageManager').mockResolvedValue(mockStorageManager);
 
       const pets = await service.getAllPets();
@@ -145,7 +146,7 @@ describe('PetStorageService', () => {
         id: 'test-pet',
         name: 'Test Pet',
         type: 'dog',
-        age: 3, // Has age instead of dateOfBirth
+        // No dateOfBirth or age field
         createdAt: '2023-01-01T12:00:00.000Z',
         updatedAt: '2023-01-02T12:00:00.000Z',
       };
@@ -154,6 +155,7 @@ describe('PetStorageService', () => {
         get: vi.fn().mockResolvedValue([mockPetWithoutDOB]),
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.spyOn(service as any, 'getStorageManager').mockResolvedValue(mockStorageManager);
 
       const pets = await service.getAllPets();
@@ -161,9 +163,9 @@ describe('PetStorageService', () => {
       expect(pets).toHaveLength(1);
       const pet = pets[0];
 
-      // Verify that dateOfBirth is undefined when not present
+      // Verify that both dateOfBirth and age are undefined when dateOfBirth is not present
       expect(pet.dateOfBirth).toBeUndefined();
-      expect(pet.age).toBe(3);
+      expect(pet.age).toBeUndefined();
       expect(pet.createdAt).toBeInstanceOf(Date);
       expect(pet.updatedAt).toBeInstanceOf(Date);
     });

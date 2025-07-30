@@ -9,7 +9,7 @@ describe('NutritionService', () => {
     name: 'Buddy',
     type: PetType.DOG,
     weight: 25,
-    age: 3,
+    age: { years: 3, months: 0 },
     breed: 'Golden Retriever',
   });
 
@@ -131,7 +131,12 @@ describe('NutritionService', () => {
       const calorieGoal = 1200;
       const date = new Date('2024-01-01');
 
-      const summary = NutritionService.calculateDailySummary(sampleFoodEntries, date, calorieGoal, mockPet.id);
+      const summary = NutritionService.calculateDailySummary(
+        sampleFoodEntries,
+        date,
+        calorieGoal,
+        mockPet.id
+      );
 
       expect(summary.totalCalories).toBe(525); // 350 + 175
       expect(summary.totalProtein).toBe(32); // 25 + 7

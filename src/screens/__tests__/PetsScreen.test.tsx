@@ -327,7 +327,7 @@ describe('PetsScreen', () => {
       const testPet = createMockPet({
         name: 'Test Pet',
         breed: 'Test Breed',
-        age: 5,
+        age: { years: 5, months: 0 },
         type: PetType.DOG,
       });
       mockPetContext.pets = [testPet];
@@ -336,7 +336,7 @@ describe('PetsScreen', () => {
       const petWithDisplayInfo = {
         ...testPet,
         displayName: testPet.name,
-        displayDetails: `${testPet.breed} • ${testPet.age} years old`,
+        displayDetails: `${testPet.breed} • ${testPet.age?.years || 0} years old`,
         displayType: testPet.type.toLowerCase(),
         showActions: testPet.type === PetType.DOG,
       };
@@ -504,7 +504,7 @@ describe('PetsScreen', () => {
       const testPet = createMockPet({
         name: 'Comprehensive Pet',
         breed: 'Test Breed',
-        age: 4,
+        age: { years: 4, months: 0 },
         weight: 20,
         color: 'Brown',
         gender: PetGender.MALE,
@@ -516,7 +516,7 @@ describe('PetsScreen', () => {
       // Verify all pet information is available
       expect(testPet.name).toBe('Comprehensive Pet');
       expect(testPet.breed).toBe('Test Breed');
-      expect(testPet.age).toBe(4);
+      expect(testPet.age).toEqual({ years: 4, months: 0 });
       expect(testPet.weight).toBe(20);
       expect(testPet.color).toBe('Brown');
       expect(testPet.gender).toBe('male');

@@ -1,6 +1,6 @@
 /**
  * Pet Types - Backward Compatible Interface Exports
- * 
+ *
  * This file re-exports the comprehensive interfaces as the main types
  * for backward compatibility while leveraging the new interface definitions.
  */
@@ -97,34 +97,29 @@ export type PetNutritionProfile = IPetNutritionProfile;
 // ============================================================================
 
 /**
- * Pet type enumeration
+ * Pet type enumeration - using namespace pattern to avoid redeclaration
  */
-export const PetType = InterfacePetType;
-export type PetType = InterfacePetType;
+export import PetType = InterfacePetType;
 
 /**
- * Activity type enumeration
+ * Activity type enumeration - using namespace pattern to avoid redeclaration
  */
-export const ActivityType = InterfaceActivityType;
-export type ActivityType = InterfaceActivityType;
+export import ActivityType = InterfaceActivityType;
 
 /**
- * Activity level enumeration
+ * Activity level enumeration - using namespace pattern to avoid redeclaration
  */
-export const ActivityLevel = InterfaceActivityLevel;
-export type ActivityLevel = InterfaceActivityLevel;
+export import ActivityLevel = InterfaceActivityLevel;
 
 /**
- * Meal type enumeration
+ * Meal type enumeration - using namespace pattern to avoid redeclaration
  */
-export const MealType = InterfaceMealType;
-export type MealType = InterfaceMealType;
+export import MealType = InterfaceMealType;
 
 /**
- * Weight goal enumeration
+ * Weight goal enumeration - using namespace pattern to avoid redeclaration
  */
-export const WeightGoal = InterfaceWeightGoal;
-export type WeightGoal = InterfaceWeightGoal;
+export import WeightGoal = InterfaceWeightGoal;
 
 // ============================================================================
 // ENHANCED ENUMS FROM NEW INTERFACES

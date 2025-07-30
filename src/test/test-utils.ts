@@ -5,7 +5,6 @@ export const mockPet: Pet = {
   name: 'Buddy',
   type: PetType.DOG,
   breed: 'Golden Retriever',
-  age: 3,
   weight: 30,
   color: 'Golden',
   gender: PetGender.MALE,
@@ -15,7 +14,7 @@ export const mockPet: Pet = {
   ownerId: 'test-owner-id',
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
-  dateOfBirth: new Date('2021-03-15'), // Makes pet approximately 3 years old
+  dateOfBirth: new Date('2021-03-15'), // Will be used to calculate age
 };
 
 export const mockCat: Pet = {
@@ -23,13 +22,12 @@ export const mockCat: Pet = {
   name: 'Whiskers',
   type: PetType.CAT,
   breed: 'Siamese',
-  age: 2,
   weight: 8,
   color: 'Cream',
   gender: PetGender.FEMALE,
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
-  dateOfBirth: new Date('2022-07-22'), // Makes cat approximately 2 years old
+  dateOfBirth: new Date('2022-07-22'), // Will be used to calculate age
 };
 
 export const createMockPet = (overrides: Partial<Pet> = {}): Pet => ({
@@ -37,13 +35,12 @@ export const createMockPet = (overrides: Partial<Pet> = {}): Pet => ({
   name: 'Test Pet',
   type: PetType.DOG,
   breed: 'Test Breed',
-  age: 1,
   weight: 10,
   color: 'Brown',
   gender: PetGender.MALE,
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
-  dateOfBirth: new Date('2023-01-01'), // Makes pet approximately 1 year old
+  dateOfBirth: new Date('2023-01-01'), // Will be used to calculate age
   ...overrides,
 });
 

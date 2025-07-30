@@ -140,6 +140,7 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
 
       debug('Item stored successfully', {
         context: { key, version: metadata.version, syncStatus: metadata.syncStatus },
+        data,
       });
     } catch (err) {
       this.emitEvent({
@@ -158,6 +159,10 @@ export class PetTrackerStorageManager implements OfflineStorageManager {
 
     try {
       const item = await this.localProvider.getItem<T>(key);
+      debug('Item fetched successfully', {
+        context: { key, syncStatus: item?.metadata.syncStatus },
+        data: item?.data,
+      });
       return item ? item.data : null;
     } catch (err) {
       error('Failed to get item', {

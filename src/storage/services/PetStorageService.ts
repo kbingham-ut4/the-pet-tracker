@@ -4,10 +4,10 @@
  * High-level service for managing pet data with offline storage and cloud sync
  */
 
-import { Pet, PetType as _PetType } from '../../types';
+import { IPet as Pet, PetType as _PetType } from '../../interfaces';
 import { StorageFactory } from '../index';
 import { info, warn, error, debug } from '../../utils/logger';
-import { generateId } from '../../utils';
+import { generateId, calculateDetailedAge } from '../../utils';
 
 // Basic interfaces for related data
 interface BaseRecord {
@@ -324,16 +324,31 @@ export class OfflinePetStorageService implements PetStorageService {
 
   /**
    * Normalizes pet data from storage by converting date strings to Date objects
+   * and calculating the current age from dateOfBirth
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private normalizePetData(pet: any): Pet {
+    const normalizedDateOfBirth = pet.dateOfBirth
+      ? typeof pet.dateOfBirth === 'string'
+        ? new Date(pet.dateOfBirth)
+        : pet.dateOfBirth
+      : undefined;
+
+    const calculatedAge = calculateDetailedAge(normalizedDateOfBirth);
+
+    debug('Normalizing pet data', {
+      context: {
+        petName: pet.name,
+        originalAge: pet.age,
+        dateOfBirth: normalizedDateOfBirth,
+        calculatedAge,
+      },
+    });
+
     return {
       ...pet,
-      dateOfBirth: pet.dateOfBirth
-        ? typeof pet.dateOfBirth === 'string'
-          ? new Date(pet.dateOfBirth)
-          : pet.dateOfBirth
-        : undefined,
+      dateOfBirth: normalizedDateOfBirth,
+      age: calculatedAge,
       createdAt: typeof pet.createdAt === 'string' ? new Date(pet.createdAt) : pet.createdAt,
       updatedAt: typeof pet.updatedAt === 'string' ? new Date(pet.updatedAt) : pet.updatedAt,
     };

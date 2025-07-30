@@ -8,6 +8,7 @@ import {
   parseDateDDMMYYYY,
   calculateAge,
   calculateAgeInYears,
+  calculateDetailedAge,
   getPetTypeDisplayName,
 } from '../helpers';
 import { PetType } from '../../types';
@@ -219,6 +220,75 @@ describe('helpers', () => {
 
       const age = calculateAgeInYears(twoMonthsAgo);
       expect(age).toBe(0);
+    });
+  });
+
+  describe('calculateDetailedAge', () => {
+    it('should return undefined for undefined input', () => {
+      const age = calculateDetailedAge(undefined);
+      expect(age).toBeUndefined();
+    });
+
+    it('should calculate correct age for newborn (Arthur example)', () => {
+      // Arthur born March 8, 2025, testing on July 30, 2025
+      const arthurBirthday = new Date('2025-03-08T00:00:00.000Z');
+      const age = calculateDetailedAge(arthurBirthday);
+
+      expect(age).toEqual({
+        years: 0,
+        months: 4, // March to July = 4 months
+      });
+    });
+
+    it('should calculate correct age for adult pet', () => {
+      const threeYearsAgo = new Date();
+      threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+      threeYearsAgo.setMonth(threeYearsAgo.getMonth() - 6); // 6 months ago
+
+      const age = calculateDetailedAge(threeYearsAgo);
+      expect(age?.years).toBe(3);
+      expect(age?.months).toBe(6);
+    });
+
+    it('should handle exact year boundary', () => {
+      const exactlyTwoYearsAgo = new Date();
+      exactlyTwoYearsAgo.setFullYear(exactlyTwoYearsAgo.getFullYear() - 2);
+
+      const age = calculateDetailedAge(exactlyTwoYearsAgo);
+      expect(age).toEqual({
+        years: 2,
+        months: 0,
+      });
+    });
+
+    it('should handle birthday not yet occurred this year', () => {
+      const dateOfBirth = new Date();
+      dateOfBirth.setFullYear(dateOfBirth.getFullYear() - 2);
+      dateOfBirth.setMonth(11); // December
+      dateOfBirth.setDate(25); // Christmas
+
+      const age = calculateDetailedAge(dateOfBirth);
+
+      // If current date is before December 25, should be 1 year and some months
+      // If current date is after December 25, should be 2 years and some months
+      const currentDate = new Date();
+      if (
+        currentDate.getMonth() < 11 ||
+        (currentDate.getMonth() === 11 && currentDate.getDate() < 25)
+      ) {
+        expect(age?.years).toBe(1);
+      } else {
+        expect(age?.years).toBe(2);
+      }
+    });
+
+    it('should never return negative values', () => {
+      const futureDate = new Date();
+      futureDate.setFullYear(futureDate.getFullYear() + 1);
+
+      const age = calculateDetailedAge(futureDate);
+      expect(age?.years).toBeGreaterThanOrEqual(0);
+      expect(age?.months).toBeGreaterThanOrEqual(0);
     });
   });
 
