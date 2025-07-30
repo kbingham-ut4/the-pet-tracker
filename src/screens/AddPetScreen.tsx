@@ -46,7 +46,7 @@ export default function AddPetScreen() {
     dateOfBirth: '',
     weight: '',
     color: '',
-    gender: PetGender.UNKNOWN,
+    gender: PetGender.MALE,
     coatType: CoatType.SHORT,
     microchipId: '',
     ownerNotes: '',
@@ -155,7 +155,6 @@ export default function AddPetScreen() {
   const GENDER_OPTIONS = [
     { key: PetGender.MALE, label: 'Male', icon: 'man' },
     { key: PetGender.FEMALE, label: 'Female', icon: 'woman' },
-    { key: PetGender.UNKNOWN, label: 'Unknown', icon: 'help' },
   ];
 
   const COAT_TYPES = [
