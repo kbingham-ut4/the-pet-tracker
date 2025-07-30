@@ -11,7 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
 import { IPet, PetType } from '../../interfaces';
-import { formatDateDDMMYYYY } from '../../utils';
+import { formatDateDDMMYYYY, capitalizeFirst } from '../../utils';
 import { debug } from '../../utils/logger';
 import { usePetCalories } from '../../hooks';
 
@@ -199,7 +199,7 @@ const PetCard = React.memo(
                       size={20}
                       color={COLORS.textSecondary}
                     />
-                    <Text style={styles.statValue}>{pet.gender}</Text>
+                    <Text style={styles.statValue}>{capitalizeFirst(pet.gender)}</Text>
                     <Text style={styles.statLabel}>Gender</Text>
                   </View>
                 )}

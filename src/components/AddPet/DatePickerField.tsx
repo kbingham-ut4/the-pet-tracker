@@ -25,7 +25,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
     <View>
       <TouchableOpacity style={styles.dateInput} onPress={onPress}>
         <Text style={[styles.dateInputText, !value && styles.placeholderText]}>
-          {value || 'DD-MM-YYYY (tap to select)'}
+          {value || '15-03-2020 (tap to select)'}
         </Text>
         <Ionicons name="calendar" size={20} color={COLORS.textSecondary} />
       </TouchableOpacity>

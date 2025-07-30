@@ -16,6 +16,8 @@ import {
   SelectionGrid,
   CoatTypeSelector,
   DatePickerField,
+  FormCard,
+  SaveButton,
 } from '../components/AddPet';
 
 interface PetFormData {
@@ -66,6 +68,21 @@ export default function AddPetScreen() {
       return;
     }
 
+    if (!formData.dateOfBirth) {
+      Alert.alert('Validation Error', 'Date of birth is required.');
+      return;
+    }
+
+    if (!formData.weight.trim()) {
+      Alert.alert('Validation Error', 'Weight is required.');
+      return;
+    }
+
+    if (formData.weight && isNaN(parseFloat(formData.weight))) {
+      Alert.alert('Validation Error', 'Please enter a valid weight.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -73,10 +90,8 @@ export default function AddPetScreen() {
         name: formData.name.trim(),
         type: formData.type,
         breed: formData.breed.trim(),
-        dateOfBirth: formData.dateOfBirth
-          ? parseDateDDMMYYYY(formData.dateOfBirth) || undefined
-          : undefined,
-        weight: formData.weight ? parseFloat(formData.weight) : undefined,
+        dateOfBirth: parseDateDDMMYYYY(formData.dateOfBirth)!,
+        weight: parseFloat(formData.weight),
         color: formData.color.trim() || undefined,
         gender: formData.gender,
         microchipId: formData.microchipId.trim() || undefined,
@@ -154,97 +169,106 @@ export default function AddPetScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <AddPetHeader onCancel={handleCancel} onSave={handleSave} loading={loading} />
+      <AddPetHeader onCancel={handleCancel} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <FormSection label="Pet Name" required>
-          <TextInputField
-            value={formData.name}
-            onChangeText={value => updateFormData('name', value)}
-            placeholder="Enter your pet's name"
-          />
-        </FormSection>
+        <FormCard title="Basic Information">
+          <FormSection label="Pet Name" required hint="Enter your pet's name">
+            <TextInputField
+              value={formData.name}
+              onChangeText={value => updateFormData('name', value)}
+              placeholder="e.g., Buddy"
+            />
+          </FormSection>
 
-        <FormSection label="Pet Type">
-          <SelectionGrid
-            options={PET_TYPES}
-            selectedValue={formData.type}
-            onSelect={value => updateFormData('type', value as PetType)}
-          />
-        </FormSection>
+          <FormSection label="Pet Type" required>
+            <SelectionGrid
+              options={PET_TYPES}
+              selectedValue={formData.type}
+              onSelect={value => updateFormData('type', value as PetType)}
+            />
+          </FormSection>
 
-        <FormSection label="Breed" required>
-          <TextInputField
-            value={formData.breed}
-            onChangeText={value => updateFormData('breed', value)}
-            placeholder="Enter breed (e.g., Golden Retriever, Persian)"
-          />
-        </FormSection>
+          <FormSection label="Breed" required hint="Enter breed (e.g., Golden Retriever, Persian)">
+            <TextInputField
+              value={formData.breed}
+              onChangeText={value => updateFormData('breed', value)}
+              placeholder="e.g., Labrador Retriever"
+            />
+          </FormSection>
 
-        <FormSection
-          label="Date of Birth"
-          hint="If this is a rescue pet or you're unsure, that's okay! A guess will help us out."
-        >
-          <DatePickerField
-            value={formData.dateOfBirth}
-            selectedDate={selectedDate}
-            showPicker={showDatePicker}
-            onPress={handleDatePickerPress}
-            onDateChange={handleDateChange}
-            onClose={handleDatePickerClose}
-          />
-        </FormSection>
+          <FormSection label="Gender" required>
+            <SelectionGrid
+              options={GENDER_OPTIONS}
+              selectedValue={formData.gender}
+              onSelect={value => updateFormData('gender', value as PetGender)}
+            />
+          </FormSection>
+        </FormCard>
 
-        <FormSection label="Weight (kg)">
-          <TextInputField
-            value={formData.weight}
-            onChangeText={value => updateFormData('weight', value)}
-            placeholder="Enter current weight"
-            keyboardType="decimal-pad"
-          />
-        </FormSection>
+        <FormCard title="Physical Characteristics">
+          <FormSection
+            label="Date of Birth"
+            required
+            hint="If this is a rescue pet or you're unsure, that's okay! A guess will help us out."
+          >
+            <DatePickerField
+              value={formData.dateOfBirth}
+              selectedDate={selectedDate}
+              showPicker={showDatePicker}
+              onPress={handleDatePickerPress}
+              onDateChange={handleDateChange}
+              onClose={handleDatePickerClose}
+            />
+          </FormSection>
 
-        <FormSection label="Color">
-          <TextInputField
-            value={formData.color}
-            onChangeText={value => updateFormData('color', value)}
-            placeholder="Enter pet's color (e.g., Brown, Golden, Black & White)"
-          />
-        </FormSection>
+          <FormSection label="Weight (kg)" required hint="Enter current weight">
+            <TextInputField
+              value={formData.weight}
+              onChangeText={value => updateFormData('weight', value)}
+              placeholder="e.g., 25.5"
+              keyboardType="decimal-pad"
+            />
+          </FormSection>
 
-        <FormSection label="Gender">
-          <SelectionGrid
-            options={GENDER_OPTIONS}
-            selectedValue={formData.gender}
-            onSelect={value => updateFormData('gender', value as PetGender)}
-          />
-        </FormSection>
+          <FormSection label="Color" hint="Enter pet's color (e.g., Brown, Golden, Black & White)">
+            <TextInputField
+              value={formData.color}
+              onChangeText={value => updateFormData('color', value)}
+              placeholder="e.g., Golden Brown"
+            />
+          </FormSection>
 
-        <FormSection label="Coat Type">
-          <CoatTypeSelector
-            options={COAT_TYPES}
-            selectedValue={formData.coatType}
-            onSelect={value => updateFormData('coatType', value as CoatType)}
-          />
-        </FormSection>
+          <FormSection label="Coat Type">
+            <CoatTypeSelector
+              options={COAT_TYPES}
+              selectedValue={formData.coatType}
+              onSelect={value => updateFormData('coatType', value as CoatType)}
+            />
+          </FormSection>
+        </FormCard>
 
-        <FormSection label="Microchip ID">
-          <TextInputField
-            value={formData.microchipId}
-            onChangeText={value => updateFormData('microchipId', value)}
-            placeholder="Enter microchip number (if available)"
-          />
-        </FormSection>
+        <FormCard title="Additional Information">
+          <FormSection label="Microchip ID" hint="Enter microchip number (if available)">
+            <TextInputField
+              value={formData.microchipId}
+              onChangeText={value => updateFormData('microchipId', value)}
+              placeholder="e.g., 982000000123456"
+            />
+          </FormSection>
 
-        <FormSection label="Notes">
-          <TextInputField
-            value={formData.ownerNotes}
-            onChangeText={value => updateFormData('ownerNotes', value)}
-            placeholder="Any additional notes about your pet..."
-            isTextArea
-          />
-        </FormSection>
+          <FormSection label="Notes" hint="Any additional notes about your pet...">
+            <TextInputField
+              value={formData.ownerNotes}
+              onChangeText={value => updateFormData('ownerNotes', value)}
+              placeholder="e.g., Loves playing fetch, allergic to chicken"
+              isTextArea
+            />
+          </FormSection>
+        </FormCard>
       </ScrollView>
+
+      <SaveButton onPress={handleSave} loading={loading} />
     </SafeAreaView>
   );
 }
@@ -257,5 +281,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
   },
 });

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../../constants';
 import { IPet } from '../../interfaces';
-import { formatDateDDMMYYYY } from '../../utils';
+import { formatDateDDMMYYYY, capitalizeFirst } from '../../utils';
 
 interface PetStatsProps {
   pet: IPet;
@@ -74,7 +74,7 @@ const PetStats: React.FC<PetStatsProps> = ({ pet }) => {
               size={20}
               color={COLORS.textSecondary}
             />
-            <Text style={styles.statValue}>{pet.gender}</Text>
+            <Text style={styles.statValue}>{capitalizeFirst(pet.gender)}</Text>
             <Text style={styles.statLabel}>Gender</Text>
           </View>
         )}
