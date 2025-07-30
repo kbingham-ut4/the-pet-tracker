@@ -18,11 +18,11 @@ import type {
 } from '../interfaces';
 
 import {
-  PetType as InterfacePetType,
-  ActivityType as InterfaceActivityType,
-  ActivityLevel as InterfaceActivityLevel,
-  MealType as InterfaceMealType,
-  WeightGoal as InterfaceWeightGoal,
+  PetType,
+  ActivityType,
+  ActivityLevel,
+  MealType,
+  WeightGoal,
   PetGender,
   CoatType,
   TailType,
@@ -97,29 +97,29 @@ export type PetNutritionProfile = IPetNutritionProfile;
 // ============================================================================
 
 /**
- * Pet type enumeration - using namespace pattern to avoid redeclaration
+ * Pet type enumeration - direct re-export for runtime compatibility
  */
-export import PetType = InterfacePetType;
+export { PetType } from '../interfaces';
 
 /**
- * Activity type enumeration - using namespace pattern to avoid redeclaration
+ * Activity type enumeration - direct re-export for runtime compatibility
  */
-export import ActivityType = InterfaceActivityType;
+export { ActivityType } from '../interfaces';
 
 /**
- * Activity level enumeration - using namespace pattern to avoid redeclaration
+ * Activity level enumeration - direct re-export for runtime compatibility
  */
-export import ActivityLevel = InterfaceActivityLevel;
+export { ActivityLevel } from '../interfaces';
 
 /**
- * Meal type enumeration - using namespace pattern to avoid redeclaration
+ * Meal type enumeration - direct re-export for runtime compatibility
  */
-export import MealType = InterfaceMealType;
+export { MealType } from '../interfaces';
 
 /**
- * Weight goal enumeration - using namespace pattern to avoid redeclaration
+ * Weight goal enumeration - direct re-export for runtime compatibility
  */
-export import WeightGoal = InterfaceWeightGoal;
+export { WeightGoal } from '../interfaces';
 
 // ============================================================================
 // ENHANCED ENUMS FROM NEW INTERFACES
