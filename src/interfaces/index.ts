@@ -27,7 +27,7 @@ export type {
 // Export all enums for easy access
 export {
   PetType,
-  PetGender,
+  PetSex,
   CoatType,
   TailType,
   EarType,

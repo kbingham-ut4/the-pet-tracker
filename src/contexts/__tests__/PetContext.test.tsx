@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PetType, PetGender } from '../../types';
+import { PetType, PetSex } from '../../types';
 import { createMockPet } from '../../test/test-utils';
 
 // Mock the storage service
@@ -139,14 +139,14 @@ describe('PetContext', () => {
         age: { years: 5, months: 0 },
         weight: 4.5,
         color: 'White',
-        gender: PetGender.FEMALE,
+        sex: PetSex.FEMALE,
       });
 
       expect(testPet.breed).toBe('Siamese');
       expect(testPet.age).toEqual({ years: 5, months: 0 });
       expect(testPet.weight).toBe(4.5);
       expect(testPet.color).toBe('White');
-      expect(testPet.gender).toBe(PetGender.FEMALE);
+      expect(testPet.sex).toBe(PetSex.FEMALE);
     });
   });
 

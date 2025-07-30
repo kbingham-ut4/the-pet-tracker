@@ -67,15 +67,15 @@ const PetStats: React.FC<PetStatsProps> = ({ pet }) => {
           </View>
         )}
 
-        {pet.gender && (
+        {pet.sex && (
           <View style={styles.statCard}>
             <Ionicons
-              name={pet.gender === 'male' ? 'man' : pet.gender === 'female' ? 'woman' : 'help'}
+              name={pet.sex === 'male' ? 'man' : pet.sex === 'female' ? 'woman' : 'help'}
               size={20}
               color={COLORS.textSecondary}
             />
-            <Text style={styles.statValue}>{capitalizeFirst(pet.gender)}</Text>
-            <Text style={styles.statLabel}>Gender</Text>
+            <Text style={styles.statValue}>{capitalizeFirst(pet.sex)}</Text>
+            <Text style={styles.statLabel}>Sex</Text>
           </View>
         )}
       </View>

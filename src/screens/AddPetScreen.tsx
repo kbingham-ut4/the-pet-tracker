@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { COLORS, SPACING } from '../constants';
 import { usePets } from '../contexts';
-import { Pet, PetType, PetGender, CoatType } from '../types';
+import { Pet, PetType, PetSex, CoatType } from '../types';
 import { RootStackNavigationProp } from '../types/Navigation';
 import { parseDateDDMMYYYY } from '../utils';
 import { info, error } from '../logger';
@@ -27,7 +27,7 @@ interface PetFormData {
   dateOfBirth: string;
   weight: string;
   color: string;
-  gender: PetGender;
+  sex: PetSex;
   coatType: CoatType;
   microchipId: string;
   ownerNotes: string;
@@ -46,7 +46,7 @@ export default function AddPetScreen() {
     dateOfBirth: '',
     weight: '',
     color: '',
-    gender: PetGender.MALE,
+    sex: PetSex.MALE,
     coatType: CoatType.SHORT,
     microchipId: '',
     ownerNotes: '',
@@ -93,7 +93,7 @@ export default function AddPetScreen() {
         dateOfBirth: parseDateDDMMYYYY(formData.dateOfBirth)!,
         weight: parseFloat(formData.weight),
         color: formData.color.trim() || undefined,
-        gender: formData.gender,
+        sex: formData.sex,
         microchipId: formData.microchipId.trim() || undefined,
         ownerNotes: formData.ownerNotes.trim() || undefined,
         physicalCharacteristics: {
@@ -119,7 +119,7 @@ export default function AddPetScreen() {
 
   const updateFormData = (
     field: keyof PetFormData,
-    value: string | PetType | PetGender | CoatType
+    value: string | PetType | PetSex | CoatType
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -152,9 +152,9 @@ export default function AddPetScreen() {
     { key: PetType.CAT, label: 'Cat', icon: 'paw' },
   ];
 
-  const GENDER_OPTIONS = [
-    { key: PetGender.MALE, label: 'Male', icon: 'man' },
-    { key: PetGender.FEMALE, label: 'Female', icon: 'woman' },
+  const SEX_OPTIONS = [
+    { key: PetSex.MALE, label: 'Male', icon: 'man' },
+    { key: PetSex.FEMALE, label: 'Female', icon: 'woman' },
   ];
 
   const COAT_TYPES = [
@@ -196,11 +196,11 @@ export default function AddPetScreen() {
             />
           </FormSection>
 
-          <FormSection label="Gender" required>
+          <FormSection label="Sex" required>
             <SelectionGrid
-              options={GENDER_OPTIONS}
-              selectedValue={formData.gender}
-              onSelect={value => updateFormData('gender', value as PetGender)}
+              options={SEX_OPTIONS}
+              selectedValue={formData.sex}
+              onSelect={value => updateFormData('sex', value as PetSex)}
             />
           </FormSection>
         </FormCard>

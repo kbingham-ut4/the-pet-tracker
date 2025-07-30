@@ -23,7 +23,7 @@ import {
   ActivityLevel,
   MealType,
   WeightGoal,
-  PetGender,
+  PetSex,
   CoatType,
   TailType,
   EarType,
@@ -127,7 +127,7 @@ export { WeightGoal } from '../interfaces';
 
 // Export new enums not present in the original interface
 export {
-  PetGender,
+  PetSex,
   CoatType,
   TailType,
   EarType,

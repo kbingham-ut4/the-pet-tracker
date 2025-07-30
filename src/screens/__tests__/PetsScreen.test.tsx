@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mockPet, mockCat, createMockPet } from '../../test/test-utils';
-import { PetType, Pet, FoodEntry, MealType, FoodType, PetGender } from '../../types';
+import { PetType, Pet, FoodEntry, MealType, FoodType, PetSex } from '../../types';
 
 // Mock the PetContext
 const mockPetContext = {
@@ -507,7 +507,7 @@ describe('PetsScreen', () => {
         age: { years: 4, months: 0 },
         weight: 20,
         color: 'Brown',
-        gender: PetGender.MALE,
+        sex: PetSex.MALE,
         ownerNotes: 'Very friendly dog',
         type: PetType.DOG,
       });
@@ -519,7 +519,7 @@ describe('PetsScreen', () => {
       expect(testPet.age).toEqual({ years: 4, months: 0 });
       expect(testPet.weight).toBe(20);
       expect(testPet.color).toBe('Brown');
-      expect(testPet.gender).toBe('male');
+      expect(testPet.sex).toBe('male');
       expect(testPet.ownerNotes).toBe('Very friendly dog');
     });
 
@@ -531,7 +531,7 @@ describe('PetsScreen', () => {
         weight: undefined,
         age: undefined,
         color: undefined,
-        gender: undefined,
+        sex: undefined,
         ownerNotes: undefined,
       });
       mockPetContext.pets = [testPet];
@@ -541,7 +541,7 @@ describe('PetsScreen', () => {
       expect(testPet.weight).toBeUndefined();
       expect(testPet.age).toBeUndefined();
       expect(testPet.color).toBeUndefined();
-      expect(testPet.gender).toBeUndefined();
+      expect(testPet.sex).toBeUndefined();
       expect(testPet.ownerNotes).toBeUndefined();
     });
 

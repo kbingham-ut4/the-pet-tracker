@@ -10,7 +10,7 @@ import {
   PetNutritionProfile,
   PetType,
   ActivityLevel,
-  PetGender,
+  PetSex,
   CoatType,
 } from '../types';
 import {
@@ -387,7 +387,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
         type: PetType.DOG,
         breed: 'Golden Retriever',
         weight: 28.5,
-        gender: PetGender.MALE,
+        sex: PetSex.MALE,
         color: 'Golden',
         ownerId: 'current-user', // TODO: Get from auth context
         dateOfBirth: generateRandomDateOfBirth(3),
@@ -414,7 +414,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
         type: PetType.DOG,
         breed: 'Border Collie',
         weight: 18.2,
-        gender: PetGender.FEMALE,
+        sex: PetSex.FEMALE,
         color: 'Black and White',
         ownerId: 'current-user', // TODO: Get from auth context
         dateOfBirth: generateRandomDateOfBirth(2),
@@ -442,7 +442,7 @@ export function PetProvider({ children }: { children: ReactNode }) {
         type: PetType.CAT,
         breed: 'Maine Coon',
         weight: 6.8,
-        gender: PetGender.MALE,
+        sex: PetSex.MALE,
         color: 'Tabby',
         ownerId: 'current-user', // TODO: Get from auth context
         dateOfBirth: generateRandomDateOfBirth(5),

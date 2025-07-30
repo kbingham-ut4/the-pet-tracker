@@ -49,8 +49,8 @@ export interface IPet {
   /** Pet's color or coat description */
   color?: string;
 
-  /** Pet's gender */
-  gender?: PetGender;
+  /** Pet's sex */
+  sex?: PetSex;
 
   /** Microchip identification number */
   microchipId?: string;
@@ -101,9 +101,9 @@ export enum PetType {
 }
 
 /**
- * Pet gender enumeration
+ * Pet sex enumeration
  */
-export enum PetGender {
+export enum PetSex {
   MALE = 'male',
   FEMALE = 'female',
   UNKNOWN = 'unknown',
@@ -946,8 +946,8 @@ export interface IPetSearchCriteria {
     max: number;
   };
 
-  /** Search by gender */
-  gender?: PetGender;
+  /** Search by sex */
+  sex?: PetSex;
 
   /** Search by owner ID */
   ownerId?: string;

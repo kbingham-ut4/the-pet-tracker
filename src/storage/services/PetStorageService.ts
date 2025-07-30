@@ -143,7 +143,8 @@ export class OfflinePetStorageService implements PetStorageService {
         },
       });
 
-      return newPet;
+      // Normalize the pet data to calculate age before returning
+      return this.normalizePetData(newPet);
     } catch (err) {
       error('Failed to add pet', {
         error: err instanceof Error ? err : new Error('Unknown error'),
@@ -184,7 +185,8 @@ export class OfflinePetStorageService implements PetStorageService {
         },
       });
 
-      return updatedPet;
+      // Normalize the pet data to recalculate age if dateOfBirth was updated
+      return this.normalizePetData(updatedPet);
     } catch (err) {
       error('Failed to update pet', {
         error: err instanceof Error ? err : new Error('Unknown error'),

@@ -14,7 +14,7 @@ import {
   PetTrackerStorageManager as _PetTrackerStorageManager,
 } from './index';
 import { OfflinePetStorageService } from './services';
-import { Pet, PetType, PetGender } from '../types';
+import { Pet, PetType, PetSex } from '../types';
 import { info, error } from '../utils/logger';
 
 /**
@@ -64,7 +64,7 @@ export const petStorageExamples = async () => {
     breed: 'Golden Retriever',
     weight: 30,
     color: 'Golden',
-    gender: PetGender.MALE,
+    sex: PetSex.MALE,
     ownerId: 'user_123',
     createdAt: new Date(),
     updatedAt: new Date(),

@@ -31,7 +31,7 @@ export type {
 } from '../interfaces';
 
 export {
-  PetGender,
+  PetSex,
   CoatType,
   TailType,
   EarType,

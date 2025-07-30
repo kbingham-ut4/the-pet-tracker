@@ -1,4 +1,4 @@
-import { Pet, PetType, ActivityLevel, PetGender } from '../types';
+import { Pet, PetType, ActivityLevel, PetSex } from '../types';
 
 export const mockPet: Pet = {
   id: 'test-pet-id',
@@ -7,7 +7,7 @@ export const mockPet: Pet = {
   breed: 'Golden Retriever',
   weight: 30,
   color: 'Golden',
-  gender: PetGender.MALE,
+  sex: PetSex.MALE,
   microchipId: '123456789',
   photoUri: 'file://test-photo.jpg',
   ownerNotes: 'Very friendly and energetic',
@@ -24,7 +24,7 @@ export const mockCat: Pet = {
   breed: 'Siamese',
   weight: 8,
   color: 'Cream',
-  gender: PetGender.FEMALE,
+  sex: PetSex.FEMALE,
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
   dateOfBirth: new Date('2022-07-22'), // Will be used to calculate age
@@ -37,7 +37,7 @@ export const createMockPet = (overrides: Partial<Pet> = {}): Pet => ({
   breed: 'Test Breed',
   weight: 10,
   color: 'Brown',
-  gender: PetGender.MALE,
+  sex: PetSex.MALE,
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
   dateOfBirth: new Date('2023-01-01'), // Will be used to calculate age

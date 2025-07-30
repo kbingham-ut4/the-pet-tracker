@@ -190,17 +190,15 @@ const PetCard = React.memo(
                   </View>
                 )}
 
-                {pet.gender && (
+                {pet.sex && (
                   <View style={styles.statCard}>
                     <Ionicons
-                      name={
-                        pet.gender === 'male' ? 'male' : pet.gender === 'female' ? 'female' : 'help'
-                      }
+                      name={pet.sex === 'male' ? 'male' : pet.sex === 'female' ? 'female' : 'help'}
                       size={20}
                       color={COLORS.textSecondary}
                     />
-                    <Text style={styles.statValue}>{capitalizeFirst(pet.gender)}</Text>
-                    <Text style={styles.statLabel}>Gender</Text>
+                    <Text style={styles.statValue}>{capitalizeFirst(pet.sex)}</Text>
+                    <Text style={styles.statLabel}>Sex</Text>
                   </View>
                 )}
               </View>
